@@ -1,69 +1,88 @@
-html,
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
 body {
-	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    height: 100%;
-}
-.navbar {
-  margin-bottom: 10px;
-  border-radius: 0px;
-}
-.navbar-brand {
-  float: none;
-}
-.navbar-nav .nav-item {
-  float: none;
-}
-.navbar-divider,
-.navbar-nav .nav-item+.nav-item,
-.navbar-nav .nav-link + .nav-link {
-  margin-left: 0;
-}
-@media (min-width: 34em) {
-  .navbar-brand {
-    float: left;
-  }
-  .navbar-nav .nav-item {
-    float: left;
-  }
-  .navbar-divider,
-  .navbar-nav .nav-item+.nav-item,
-  .navbar-nav .nav-link + .nav-link {
-    margin-left: 1rem;
-  }
-}
+  line-height: 1; }
 
-@-moz-keyframes three-quarters-loader {
-    0% {
-        -moz-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -moz-transform: rotate(360deg);
-        transform: rotate(360deg);
-    }
-}
-@-webkit-keyframes three-quarters-loader {
-    0% {
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(360deg);
-        transform: rotate(360deg);
-    }
-}
-@keyframes three-quarters-loader {
-    0% {
-        -moz-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        transform: rotate(0deg);
-    }
-    100% {
-        -moz-transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        transform: rotate(360deg);
-    }
-}
+ol, ul {
+  list-style: none; }
 
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+
+/**
+ * Bootstrap v3 Breakpoints for Custom Media Queries
+ */
+/**
+ * Colors by Name
+ */
+/**
+ * Colors by Function
+ */
+/**
+ * Accessibility Variables
+ */
+/**
+ * Borders
+ */
+/**
+ * Breakpoints Based on Bootstrap v3
+ */
+@media (max-width: 767px) {
+  .col-xs-0 {
+    display: none; } }
+
+@media (min-width: 768px) {
+  .col-sm-0 {
+    display: none; } }
+
+@media (min-width: 992px) {
+  .col-md-0 {
+    display: none; } }
+
+@media (min-width: 1200px) {
+  .col-lg-0 {
+    display: none; } }
+
+.custom-form {
+  margin-top: 25%;
+  padding: 25px;
+  padding-bottom: 0px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  box-shadow: 2px 2px 5px 3px #ddd;
+  text-align: center; }
+
+.form-submit-btn {
+  position: relative;
+  margin-top: 15px; }
