@@ -7,6 +7,7 @@
             [markdown.core :refer [md->html]]
             [ajax.core :refer [GET POST]]
             [certification-db.ajax :refer [load-interceptors!]]
+            [certification-db.forms :as forms]
             [certification-db.handlers]
             [certification-db.subscriptions])
   (:import goog.History))
@@ -20,33 +21,33 @@
        :on-click #(reset! collapsed? true)} title]]))
 
 (defn navbar []
-  (r/with-let [collapsed? (r/atom true)]
-    [:nav.navbar.navbar-dark.bg-primary
-     [:button.navbar-toggler.hidden-sm-up
-      {:on-click #(swap! collapsed? not)} "☰"]
-     [:div.collapse.navbar-toggleable-xs
-      (when-not @collapsed? {:class "in"})
-      [:a.navbar-brand {:href "#/"} "certification-db"]
-      [:ul.nav.navbar-nav
-       [nav-link "#/" "Home" :home collapsed?]
-       [nav-link "#/about" "About" :about collapsed?]]]]))
+  [:nav.navbar.navbar-light.bg-faded
+   [:div      
+    [:a.navbar-brand {:href "#/"} "CNMI BOE Certification DB"]]])
 
-(defn about-page []
-  [:div.container
+(defn login-page []
+  [:main.container
    [:div.row
-    [:div.col-md-12
-     [:img {:src (str js/context "/img/warning_clojure.png")}]]]])
+    [:div.col-xs-12.col-sm-8.offset-sm-2.col-md-6.offset-md-3
+     [forms/login-form]]]])
 
-(defn home-page []
-  [:div.container
-   (when-let [docs @(rf/subscribe [:docs])]
-     [:div.row>div.col-sm-12
-      [:div {:dangerouslySetInnerHTML
-             {:__html (md->html docs)}}]])])
+(defn user-page []
+  [:main.container
+   [:div.row
+    [:div.col-xs-12.col-sm-8.offset-sm-2.col-md-6.offset-md-3
+     [forms/upload-form]]]])
+
+(defn admin-page []
+  [:main.container
+   [:div.row
+    [:div.col-xs-12.col-sm-8.offset-sm-2.col-md-6.offset-md-3
+     [forms/upload-form]
+     [forms/backup-form]]]])
 
 (def pages
-  {:home #'home-page
-   :about #'about-page})
+  {:home #'login-page
+   :user #'user-page
+   :admin #'admin-page})
 
 (defn page []
   [:div
@@ -60,8 +61,11 @@
 (secretary/defroute "/" []
   (rf/dispatch [:set-active-page :home]))
 
-(secretary/defroute "/about" []
-  (rf/dispatch [:set-active-page :about]))
+(secretary/defroute "/user" []
+  (rf/dispatch [:set-active-page :user]))
+
+(secretary/defroute "/admin" []
+  (rf/dispatch [:set-active-page :admin]))
 
 ;; -------------------------
 ;; History
