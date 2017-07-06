@@ -74,3 +74,12 @@ table {
 @media (min-width: 1200px) {
   .col-lg-0 {
     display: none; } }
+
+form {
+  margin-top: 10%;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 15px;
+  box-shadow: 0px 2px 2px 2px #ddd; }
+  form label {
+    margin-bottom: 15px; }
