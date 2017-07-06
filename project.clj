@@ -5,7 +5,9 @@
 
   :dependencies [[cider/cider-nrepl "0.14.0"]
                  [clj-time "0.13.0"]
+                 [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
+                 [com.cemerick/url "0.1.1"]
                  [compojure "1.6.0"]
                  [cprop "0.1.10"]
                  [funcool/struct "1.0.0"]
@@ -16,7 +18,7 @@
                  [metosin/muuntaja "0.3.1"]
                  [metosin/ring-http-response "0.9.0"]
                  [mount "0.1.11"]
-                 [org.clojure/clojure "1.8.0"]
+                 [org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/clojurescript "1.9.671" :scope "provided"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.logging "0.4.0"]
@@ -30,7 +32,8 @@
                  [ring/ring-core "1.6.1"]
                  [ring/ring-defaults "0.3.0"]
                  [secretary "1.2.3"]
-                 [selmer "1.10.8"]]
+                 [selmer "1.10.8"]
+                 [stuarth/clj-oauth2 "0.3.2"]]
 
   :min-lein-version "2.0.0"
 

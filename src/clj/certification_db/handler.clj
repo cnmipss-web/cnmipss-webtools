@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [routes wrap-routes]]
             [certification-db.layout :refer [error-page]]
             [certification-db.routes.home :refer [home-routes]]
+            [certification-db.routes.oauth :refer [oauth-routes]]
             [compojure.route :as route]
             [certification-db.env :refer [defaults]]
             [mount.core :as mount]
@@ -16,6 +17,7 @@
     (-> #'home-routes
         (wrap-routes middleware/wrap-csrf)
         (wrap-routes middleware/wrap-formats))
+    #'oauth-routes
     (route/not-found
       (:body
         (error-page {:status 404
