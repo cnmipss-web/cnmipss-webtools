@@ -27,17 +27,17 @@
 
 (defn login-page []
   [:main.container
-   [:div.row>div.col-xs-12.col-sm-8.offset-sm-2.col-md-6.offset-md-3
+   [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
     [forms/login-form]]])
 
 (defn user-page []
   [:main.container
-   [:div.row>div.col-xs-12.col-sm-8.offset-sm-2.col-md-6.offset-md-3
+   [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
     [forms/upload-form]]])
 
 (defn admin-page []
   [:main.container
-   [:div.row>div.col-xs-12.col-sm-8.offset-sm-2.col-md-6.offset-md-3
+   [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
     [forms/upload-form]
     [forms/revert-backup-form]]])
 

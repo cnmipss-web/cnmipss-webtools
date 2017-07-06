@@ -1,7 +1,7 @@
 (ns certification-db.components.forms)
 
 (defn login-form []
-  [:form#login-form
+  [:form#login-form {:action "/oauth/oauth-init" :method "get"}
    [:div.form-group
     [:label {:for "oauth-button"} "Login with your CNMI PSS Email"]
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
