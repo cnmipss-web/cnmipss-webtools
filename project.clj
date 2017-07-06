@@ -6,10 +6,11 @@
   :dependencies [[clj-oauth "1.5.4"]
                  [clj-time "0.13.0"]
                  [cljs-ajax "0.6.0"]
-                 [com.datomic/datomic-free "0.9.5561" :exclusions [org.slf4j/log4j-over-slf4j org.slf4j/slf4j-nop]]
+                 [com.datomic/datomic-pro "0.9.5561.50" :exclusions [org.slf4j/log4j-over-slf4j org.slf4j/slf4j-nop]]
                  [com.google.guava/guava "21.0"]
                  [compojure "1.6.0"]
                  [cprop "0.1.10"]
+                 [environ "1.1.0"]
                  [funcool/struct "1.0.0"]
                  [luminus-immutant "0.2.3"]
                  [luminus-nrepl "0.1.4"]
@@ -32,7 +33,11 @@
                  [ring/ring-core "1.6.1"]
                  [ring/ring-defaults "0.3.0"]
                  [secretary "1.2.3"]
-                 [selmer "1.10.7"]]
+                 [selmer "1.10.7"]
+                 [stuarth/clj-oauth2 "0.3.2"]]
+
+  :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
+                                 :creds :gpg}}
 
   :min-lein-version "2.0.0"
 
@@ -47,9 +52,10 @@
             [lein-cljsbuild "1.1.5"]
             [lein-immutant "2.1.0"]
             [lein-sassc "0.10.4"]
-            [lein-auto "0.1.2"]]
+            [lein-auto "0.1.2"]
+            [lein-environ "1.1.0"]]
    :sassc
-   [{:src "resources/scss/screen.scss"
+   [{:src "resources/scss/main.scss"
      :output-to "resources/public/css/screen.css"
      :style "nested"
      :import-path "resources/scss"}] 

@@ -1,11 +1,12 @@
-(ns certification-db.forms)
+(ns certification-db.forms
+  (:require [certification-db.auth :as auth]))
 
 (defn login-form
   []
-  [:form.custom-form {:on-submit #(do (js/alert "Login!") (.preventDefault %))}
+  [:form.custom-form {:action "/oauth/oauth-init"}
    [:div.form-group
     [:label {:for "login"} "Login With Your CNMI PSS Email"]
-    [:button#login.btn.form-submit-btn.btn-primary.form-control {:type "submit"} "Login"]]])
+    [:button#login.btn.form-submit-btn.btn-primary.form-control {:type "submit" } "Login"]]])
 
 (defn upload-form
   []
