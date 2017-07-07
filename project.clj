@@ -1,6 +1,6 @@
 (defproject certification-db "0.1.0-SNAPSHOT"
 
-  :description "FIXME: write description"
+  :description "Internal Web Application for Managing CNMI BOE Certification DB"
   :url "http://example.com/FIXME"
 
   :dependencies [[binaryage/devtools "0.9.4"]
@@ -9,8 +9,13 @@
                  [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
                  [com.cemerick/url "0.1.1"]
+                 [com.datomic/datomic-pro "0.9.5561.50" :exclusions [[org.slf4j/log4j-over-slf4j]
+                                                                     [org.slf4j/slf4j-nop]
+                                                                     [com.google.guava/guava]]]
+                 ;[com.datomic/clj-client "0.8.606" :exclusions [org.clojure/core.async]]
                  [compojure "1.6.0"]
                  [cprop "0.1.10"]
+                 [datomic-schema "1.3.0"]
                  [funcool/struct "1.0.0"]
                  [luminus-immutant "0.2.3"]
                  [luminus-nrepl "0.1.4"]
@@ -35,6 +40,9 @@
                  [secretary "1.2.3"]
                  [selmer "1.10.8"]
                  [stuarth/clj-oauth2 "0.3.2"]]
+
+  :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
+                                 :creds :gpg}}
 
   :min-lein-version "2.0.0"
 
@@ -101,7 +109,8 @@
                                  [binaryage/devtools "0.9.4"]
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.7"]
-                                 [figwheel-sidecar "0.5.11"]]
+                                 [figwheel-sidecar "0.5.11"]
+                                 ]
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.7"]
                                  [lein-figwheel "0.5.11"]
@@ -126,7 +135,8 @@
                   :doo {:build "test"}
                   :source-paths ["env/dev/clj"]
                   :resource-paths ["env/dev/resources"]
-                  :repl-options {:init-ns user}
+                  :repl-options {:init-ns user
+                                 :timeout 120000}
                   :injections [(require 'pjstadig.humane-test-output)
                                (pjstadig.humane-test-output/activate!)]}
    :project/test {:resource-paths ["env/test/resources"]

@@ -3,6 +3,7 @@
             [luminus.repl-server :as repl]
             [luminus.http-server :as http]
             [certification-db.config :refer [env]]
+            [certification-db.db :as db]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]

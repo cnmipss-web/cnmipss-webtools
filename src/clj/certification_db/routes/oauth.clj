@@ -1,7 +1,8 @@
 (ns certification-db.routes.oauth
   (:require [certification-db.layout :as layout]
             [certification-db.auth :as auth]
-            [clj-http.client :refer [get]]
+            [certification-db.db :as db]
+            [clj-http.client :as http]
             [cemerick.url :refer [url-decode]]
             [clj-oauth2.client :as oauth2]
             [clojure.data.json :as json]
@@ -19,12 +20,14 @@
        (respond/found (auth/request-auth-url oauth-config)))
   (GET "/oauth/oauth-callback" request
        (let [code (get-in request [:params :code])
-             token (auth/get-tokens oauth-config code)
-             acc-info (json/read-str (:body (get (str "https://www.googleapis.com/oauth2/v1/userinfo?"
+             token ((auth/get-tokens oauth-config code) :access_token)
+             acc-info (json/read-str (:body (http/get (str "https://www.googleapis.com/oauth2/v1/userinfo?"
                               "fields=email%2Cname&access_token="
-                              (:access_token token)))))
+                              token))))
              email (get-in acc-info ["email"])]
          (if (re-seq #"cnmipss.org$" email)
-           (respond/found (str "/#/users?account=" (:access_token token)
-                               "&email=" email))
-           (respond/unauthorized)))))
+           (do
+             (db/set-user-token email token)
+             (respond/found (str "/#/users?token=" token
+                                 "&email=" email)))
+           (respond/found "/#/?login_failed=true")))))
