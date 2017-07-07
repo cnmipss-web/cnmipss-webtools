@@ -3,7 +3,8 @@
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
 
-  :dependencies [[cider/cider-nrepl "0.14.0"]
+  :dependencies [[binaryage/devtools "0.9.4"]
+                 [cider/cider-nrepl "0.14.0"]
                  [clj-time "0.13.0"]
                  [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
@@ -111,7 +112,8 @@
                     {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
                      :figwheel {:on-jsload "certification-db.core/mount-components"}
                      :compiler
-                     {:main "certification-db.app"
+                     {:preloads [devtools.preload]
+                      :main "certification-db.app"
                       :asset-path "/js/out"
                       :output-to "target/cljsbuild/public/js/app.js"
                       :output-dir "target/cljsbuild/public/js/out"

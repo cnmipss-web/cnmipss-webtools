@@ -58,8 +58,15 @@
 (secretary/defroute "/" []
   (rf/dispatch [:set-active-page :home]))
 
-(secretary/defroute "/user" []
-  (rf/dispatch [:set-active-page :user]))
+(secretary/defroute "/users" []
+  (if-let [matches (re-seq #"users\?account=(.*)\&email=(.*)$" (.-hash js/location))]
+    (do
+      (rf/dispatch [:set-session {:account (get matches 1)
+                                  :email (get matches 2)}])
+      (rf/dispatch [:set-active-page :user]))
+    (do
+      (rf/dispatch [:bad-login])
+      (set! (.-href js/location) "#/"))))
 
 (secretary/defroute "/admin" []
   (rf/dispatch [:set-active-page :admin]))
@@ -77,9 +84,6 @@
 
 ;; -------------------------
 ;; Initialize app
-(defn fetch-docs! []
-  (GET "/docs" {:handler #(rf/dispatch [:set-docs %])}))
-
 (defn mount-components []
   (rf/clear-subscription-cache!)
   (r/render [#'page] (.getElementById js/document "app")))
@@ -87,6 +91,5 @@
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
   (load-interceptors!)
-  (fetch-docs!)
   (hook-browser-navigation!)
   (mount-components))

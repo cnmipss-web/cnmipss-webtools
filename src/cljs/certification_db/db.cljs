@@ -1,4 +1,6 @@
 (ns certification-db.db)
 
 (def default-db
-  {:page :home})
+  {:page :home
+   :session {}
+   :bad-login false})
