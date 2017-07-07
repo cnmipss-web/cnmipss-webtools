@@ -10,3 +10,8 @@
  :bad-login
  (fn [db _]
    (:bad-login db)))
+
+(reg-sub
+ :session
+ (fn [db _]
+   (:session db)))

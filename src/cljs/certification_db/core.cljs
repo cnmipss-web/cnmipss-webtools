@@ -23,7 +23,9 @@
 (defn navbar []
   [:nav.navbar.navbar-light.bg-faded
    [:div.navbar-header
-    [:a.navbar-brand {:href "#/"} "BOE Certification DB"]]])
+    [:a.navbar-brand {:href "#/"} "BOE Certification DB"]
+    [:ul.navbar-nav.mr-auto>li.nav-item>p.nav-link
+     (str " " (:email @(rf/subscribe [:session])))]]])
 
 (defn login-page []
   [:main.container
@@ -56,13 +58,15 @@
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
+  (if-let [matches (re-seq #"login_failed=true" (.-hash js/location))]
+    (rf/dispatch [:bad-login]))
   (rf/dispatch [:set-active-page :home]))
 
 (secretary/defroute "/users" []
   (if-let [matches (re-seq #"users\?account=(.*)\&email=(.*)$" (.-hash js/location))]
     (do
-      (rf/dispatch [:set-session {:account (get matches 1)
-                                  :email (get matches 2)}])
+      (rf/dispatch [:set-session {:account (get (first matches) 1)
+                                  :email (get (first matches) 2)}])
       (rf/dispatch [:set-active-page :user]))
     (do
       (rf/dispatch [:bad-login])
