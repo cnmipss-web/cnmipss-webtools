@@ -44,7 +44,8 @@
                  [stuarth/clj-oauth2 "0.3.2"]]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                 :creds :gpg}}
+                                   :username ~(System/getenv "DATOMIC_EMAIL")
+                                   :password ~(System/getenv "DATOMIC_KEY")}}
 
   :min-lein-version "2.0.0"
 
