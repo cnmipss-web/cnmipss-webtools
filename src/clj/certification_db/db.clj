@@ -29,7 +29,7 @@
                                      [mi :string]
                                      [type :string :indexed]
                                      [cert-no :string :indexed :unique-value]
-                                     [effect-date :string]
+                                     [start-date :string]
                                      [expiry-date :string]))])
 
 (defn- init-schema
@@ -44,10 +44,33 @@
 (def ^:private email->id '[:find ?e :in $ ?email :where [?e :user/email ?email]])
 (def ^:private email->type '[:find ?type :in $ ?email :where [?e :user/email ?email] [?e :user/type ?type]])
 (def ^:private email->token '[:find ?token :in $ ?email :where [?e :user/email ?email] [?e :user/token ?token]])
-(def ^:private email->user '[:find ?e ?email ?type ?token :in $ ?email
+(def ^:private email->user '[:find ?e ?email ?name ?type :in $ ?email
                              :where [?e :user/email ?email]
-                             [?e :user/type ?type]
-                             [?e :user/token ?token]])
+                             [?e :user/name ?name]
+                             [?e :user/type ?type]])
+(def ^:private cert-no->cert '[:find ?ln ?fn ?mi ?type ?cert-no ?s-d ?e-d :in $ ?cert-no
+                               :where
+                               [?e :certification/cert-no ?cert-no]
+                               [?e :certification/last-name ?ln]
+                               [?e :certification/first-name ?fn]
+                               [?e :certification/mi ?mi]
+                               [?e :certification/type ?type]
+                               [?e :certification/start-date ?s-d]
+                               [?e :certification/expiry-date ?e-d]])
+(def ^:private all-certs '[:find ?ln ?fn ?mi ?type ?cert-no ?s-d ?e-d
+                               :where
+                               [?e :certification/cert-no ?cert-no]
+                               [?e :certification/last-name ?ln]
+                               [?e :certification/first-name ?fn]
+                               [?e :certification/mi ?mi]
+                               [?e :certification/type ?type]
+                               [?e :certification/start-date ?s-d]
+                               [?e :certification/expiry-date ?e-d]])
+
+(def ^:private match-admin '[:find ?e :in $ ?email
+                             :where
+                             [?e :user/type :user.type/admin]
+                             [?e :user/email ?email]])
 
 (defn set-user-token
   [email token]
@@ -62,6 +85,20 @@
   [email]
   (first (d/q email->user (d/db conn) email)))
 
-(defn user-type-q?
+(defn user-admin?
   [email]
-  )
+  (d/q match-admin (d/db conn) email))
+
+(defn post-cert
+  [certification]
+  (d/transact conn [certification]))
+
+(defn update-cert
+  [certification]
+  (first (d/transact conn [certification])))
+
+(defn get-cert [num]
+  (d/q cert-no->cert (d/db conn) num))
+
+(defn get-all-certs []
+  (d/q all-certs (d/db conn)))

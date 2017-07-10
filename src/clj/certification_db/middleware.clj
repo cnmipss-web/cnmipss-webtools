@@ -4,9 +4,11 @@
             [certification-db.layout :refer [*app-context* error-page]]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.webjars :refer [wrap-webjars]]
+            [ring.middleware.json :refer [wrap-json-body]]
             [muuntaja.middleware :refer [wrap-format wrap-params]]
             [certification-db.config :refer [env]]
             [ring.middleware.flash :refer [wrap-flash]]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [immutant.web.middleware :refer [wrap-session]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
   (:import [javax.servlet ServletContext]))
@@ -51,8 +53,14 @@
       ;; since they're not compatible with this middleware
       ((if (:websocket? request) handler wrapped) request))))
 
+(defn wrap-uploads [handler]
+  (-> handler
+      wrap-params
+      wrap-multipart-params))
+
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
+      (wrap-json-body {:keywords? true})
       wrap-webjars
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only false}})

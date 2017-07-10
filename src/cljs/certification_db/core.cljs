@@ -5,11 +5,12 @@
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
-            [ajax.core :refer [GET POST]]
+            [ajax.core :as ajax]
             [certification-db.ajax :refer [load-interceptors!]]
             [certification-db.handlers]
             [certification-db.subscriptions]
-            [certification-db.components.forms :as forms])
+            [certification-db.components.forms :as forms]
+            [certification-db.util :as util])
   (:import goog.History))
 
 (defn nav-link [uri title page collapsed?]
@@ -41,7 +42,8 @@
   [:main.container
    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
     [forms/upload-form]
-    [forms/revert-backup-form]]])
+    ;[forms/revert-backup-form]
+    ]])
 
 (def pages
   {:home #'login-page
@@ -55,6 +57,24 @@
 
 ;; -------------------------
 ;; Routes
+(defn redirect-bad-login []
+  (rf/dispatch [:bad-login])
+  (set! (.-href js/location) "#/"))
+
+(defn verified-token?
+  [email token]
+  (fn [[ok response]]
+    (let [admin (get-in response [:body "isAdmin"])]
+      (if ok
+        (do
+          (rf/dispatch [:set-session {:account token
+                                      :email email
+                                      :admin admin}])
+          (if admin
+            (rf/dispatch [:set-active-page :admin])
+            (rf/dispatch [:set-active-page :user])))
+        (redirect-bad-login)))))
+
 (secretary/set-config! :prefix "#")
 
 (secretary/defroute "/" []
@@ -63,14 +83,17 @@
   (rf/dispatch [:set-active-page :home]))
 
 (secretary/defroute "/users" []
-  (if-let [matches (re-seq #"users\?account=(.*)\&email=(.*)$" (.-hash js/location))]
-    (do
-      (rf/dispatch [:set-session {:account (get (first matches) 1)
-                                  :email (get (first matches) 2)}])
-      (rf/dispatch [:set-active-page :user]))
-    (do
-      (rf/dispatch [:bad-login])
-      (set! (.-href js/location) "#/"))))
+  (if-let [matches (re-seq #"users\?token=(.*)\&email=(.*)$" (.-hash js/location))]
+    (let [token (get (first matches) 1)
+          email (get (first matches) 2)]
+      (ajax/ajax-request {:uri "/api/verify-token"
+                          :method :post
+                          :format (ajax/json-request-format)
+                          :params  {:email email :token token}
+                          :response-format (util/full-response-format ajax/json-response-format)
+                          :handler (verified-token? email token)
+                          :error-handler #(.log js/console %)}))
+    (redirect-bad-login)))
 
 (secretary/defroute "/admin" []
   (rf/dispatch [:set-active-page :admin]))

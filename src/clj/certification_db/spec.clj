@@ -1,0 +1,1 @@
+(ns certification-db.spec)

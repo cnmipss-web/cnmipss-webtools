@@ -1,6 +1,5 @@
 (ns certification-db.routes.oauth
-  (:require [certification-db.layout :as layout]
-            [certification-db.auth :as auth]
+  (:require [certification-db.auth :as auth]
             [certification-db.db :as db]
             [clj-http.client :as http]
             [cemerick.url :refer [url-decode]]

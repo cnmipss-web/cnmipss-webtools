@@ -4,6 +4,7 @@
             [certification-db.routes.home :refer [home-routes]]
             [certification-db.routes.oauth :refer [oauth-routes]]
             [certification-db.routes.api :refer [api-routes]]
+            [certification-db.routes.upload :refer [upload-routes]]
             [compojure.route :as route]
             [certification-db.env :refer [defaults]]
             [mount.core :as mount]
@@ -20,6 +21,8 @@
         (wrap-routes middleware/wrap-formats))
     #'oauth-routes
     #'api-routes
+    (-> #'upload-routes
+        (wrap-routes middleware/wrap-uploads))
     (route/not-found
       (:body
         (error-page {:status 404

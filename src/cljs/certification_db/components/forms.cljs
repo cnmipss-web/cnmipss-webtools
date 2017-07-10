@@ -10,10 +10,12 @@
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
 
 (defn upload-form []
-  [:form#upload-form
+  [:form#upload-form {:action "/upload/certification-csv" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
     [:label {:for "upload-csv"} "Upload CSV File"]
-    [:input#upload-csv.form-control {:type "file"}]]])
+    [:input#upload-csv.form-control {:type "file" :name "file"}]]
+   [:div.form-group
+    [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
 
 (defn revert-backup-form []
   [:form#revert-form
