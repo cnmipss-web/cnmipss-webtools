@@ -59,7 +59,6 @@
   :plugins [[lein-cprop "1.0.3"]
             [lein-cljsbuild "1.1.5"]
             [lein-immutant "2.1.0"]
-            [lein-sassc "0.10.4"]
             [lein-auto "0.1.2"]]
    :sassc
    [{:src "resources/scss/screen.scss"
@@ -70,7 +69,7 @@
    :auto
    {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
   
-  :hooks []
+  :hooks [leiningen.sassc]
   :clean-targets ^{:protect false}
   [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
   :figwheel
@@ -117,7 +116,8 @@
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.7"]
                                  [lein-figwheel "0.5.11"]
-                                 [org.clojure/clojurescript "1.9.671"]]
+                                 [org.clojure/clojurescript "1.9.671"]
+                                 [lein-sassc "0.10.4"]]
                   :hooks [leiningen.sassc]
                   :cljsbuild
                   {:builds
