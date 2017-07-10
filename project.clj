@@ -60,16 +60,7 @@
             [lein-cljsbuild "1.1.5"]
             [lein-immutant "2.1.0"]
             [lein-auto "0.1.2"]]
-   :sassc
-   [{:src "resources/scss/screen.scss"
-     :output-to "resources/public/css/screen.css"
-     :style "nested"
-     :import-path "resources/scss"}] 
-  
-   :auto
-   {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
-  
-  :hooks [leiningen.sassc]
+   
   :clean-targets ^{:protect false}
   [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
   :figwheel
@@ -118,6 +109,16 @@
                                  [lein-figwheel "0.5.11"]
                                  [org.clojure/clojurescript "1.9.671"]
                                  [lein-sassc "0.10.4"]]
+
+                  :sassc
+                  [{:src "resources/scss/screen.scss"
+                    :output-to "resources/public/css/screen.css"
+                    :style "nested"
+                    :import-path "resources/scss"}] 
+                  
+                  :auto
+                  {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
+                  
                   :hooks [leiningen.sassc]
                   :cljsbuild
                   {:builds
