@@ -70,7 +70,7 @@
    :auto
    {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
   
-  :hooks [leiningen.sassc]
+  :hooks []
   :clean-targets ^{:protect false}
   [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
   :figwheel
@@ -118,6 +118,7 @@
                                  [lein-doo "0.1.7"]
                                  [lein-figwheel "0.5.11"]
                                  [org.clojure/clojurescript "1.9.671"]]
+                  :hooks [leiningen.sassc]
                   :cljsbuild
                   {:builds
                    {:app
