@@ -31,9 +31,8 @@
 (defroutes upload-routes
   (POST "/upload/certification-csv" request
         (let [file (:file (:params request))]
-          (println (:params request))
           (try
-            ;(process-file file)
+            (process-file file)
             (-> (response/found (str "/" (get-in request [:params :path]) "&success=true"))
                 (response/header "Content-Type" "application/json"))
             (catch Exception e

@@ -11,24 +11,28 @@
             [ring.util.http-response :as respond]
             [clojure.java.io :as io]))
 
+(defn config<-
+  [env]
+  (merge auth/default-config {:client-id (:google-client-id env)
+                              :client-secret (:google-secret-id env)
+                              :redirect-uri (:google-callback-uri env)}))
+
 (defroutes oauth-routes
   (GET "/oauth/oauth-init" []
-       (let [oauth-config (merge auth/default-config
-                                 {:client-id (:google-client-id env)
-                                  :client-secret (:google-secret-id env)
-                                  :redirect-uri (:google-callback-uri env)})]
-         (respond/found (auth/request-auth-url oauth-config))))
+       (-> (config<- env)
+           (auth/request-auth-url)
+           (respond/found)))
   (GET "/oauth/oauth-callback" request
-       (let [oauth-config (merge auth/default-config
-                                 {:client-id (:google-client-id env)
-                                  :client-secret (:google-secret-id env)
-                                  :redirect-uri (:google-callback-uri env)})
-             code (get-in request [:params :code])
-             token ((auth/get-tokens oauth-config code) :access_token)
-             acc-info (json/read-str (:body (http/get (str "https://www.googleapis.com/oauth2/v1/userinfo?"
-                              "fields=email%2Cname&access_token="
-                              token))))
-             email (get-in acc-info ["email"])
+       (let [token (-> (config<- env)
+                       (auth/get-tokens (get-in request [:params :code]))
+                       (get :access_token))
+             email (-> token
+                       (#(str "https://www.googleapis.com/oauth2/v1/userinfo?"
+                              "fields=email%2Cname&access_token=" %))
+                       (http/get)
+                       (get :body)
+                       (json/read-str)
+                       (get "email"))
              user (db/get-user-info (keyed [email]))]
          (if (re-seq #"cnmipss.org$" email)
            (do
@@ -36,7 +40,7 @@
                (db/set-user-token! (keyed [email token]))
                (let [admin false
                      id (java.util.UUID/randomUUID)]
-                   (db/create-user! (keyed [email token admin id]))))
+                 (db/create-user! (keyed [email token admin id]))))
              (-> (respond/found (str "/#/users?token=" token
                                      "&email=" email))
                  (respond/set-cookie "token" token)

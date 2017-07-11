@@ -15,8 +15,9 @@
             PreparedStatement]))
 
 (defstate ^:dynamic *db*
-           :start (conman/connect! {:jdbc-url (env :database-url)})
-           :stop (conman/disconnect! *db*))
+  :start (conman/connect! {:jdbc-url (str (env :database-url)
+                                          (env :database-sslmode))})
+  :stop (conman/disconnect! *db*))
 
 (conman/bind-connection *db*
                         "sql/user-queries.sql"
