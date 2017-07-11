@@ -16,7 +16,7 @@
        (let [oauth-config (merge auth/default-config
                                  {:client-id (:google-client-id env)
                                   :client-secret (:google-secret-id env)
-                                  :redirect-uri "http://localhost:3000/oauth/oauth-callback"})]
+                                  :redirect-uri (:google-callback-uri env)})]
          (respond/found (auth/request-auth-url oauth-config))))
   (GET "/oauth/oauth-callback" request
        (let [oauth-config (merge auth/default-config
