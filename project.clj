@@ -1,7 +1,7 @@
 (defproject certification-db "0.1.0-SNAPSHOT"
 
-  :description "Internal Web Application for Managing CNMI BOE Certification DB"
-  :url "http://example.com/FIXME"
+  :description "Internal Web Application for various CNMI PSS Webtools"
+  :url "http://cnmipss-webtools.herokuapp.com"
 
   :dependencies [[binaryage/devtools "0.9.4"]
                  [cider/cider-nrepl "0.14.0"]
@@ -9,15 +9,17 @@
                  [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
                  [com.cemerick/url "0.1.1"]
-                 [com.datomic/datomic-pro "0.9.5561.50" :exclusions [[org.slf4j/log4j-over-slf4j]
-                                                                     [org.slf4j/slf4j-nop]
-                                                                     [com.google.guava/guava]]]
+                 ;; [com.datomic/datomic-pro "0.9.5561.50" :exclusions [[org.slf4j/log4j-over-slf4j]
+                 ;;                                                     [org.slf4j/slf4j-nop]
+                 ;;                                                     [com.google.guava/guava]]]
                  ;[com.datomic/clj-client "0.8.606" :exclusions [org.clojure/core.async]]
                  [compojure "1.6.0"]
+                 [conman "0.6.4"]
                  [cprop "0.1.10"]
-                 [datomic-schema "1.3.0"]
+                 ;[datomic-schema "1.3.0"]
                  [funcool/struct "1.0.0"]
                  [luminus-immutant "0.2.3"]
+                 [luminus-migrations "0.3.9"]
                  [luminus-nrepl "0.1.4"]
                  [luminus/ring-ttl-session "0.3.2"]
                  [markdown-clj "0.9.99"]
@@ -29,6 +31,8 @@
                  [org.clojure/data.csv "0.1.4"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.logging "0.4.0"]
+                 [org.flatland/useful "0.11.5"]
+                 [org.postgresql/postgresql "42.0.0"]
                  [org.webjars.bower/tether "1.4.0"]
                  [org.webjars/bootstrap "4.0.0-alpha.5"]
                  [org.webjars/font-awesome "4.7.0"]
@@ -55,12 +59,26 @@
   :resource-paths ["resources" "target/cljsbuild"]
   :target-path "target/%s/"
   :main ^:skip-aot certification-db.core
-
-  :plugins [[lein-cprop "1.0.3"]
+  :migratus {:store :database :db ~(get (System/getenv) "DATABASE_URL")}
+  
+  :plugins [[lein-auto "0.1.2"]
             [lein-cljsbuild "1.1.5"]
+            [lein-cprop "1.0.3"]
             [lein-immutant "2.1.0"]
-            [lein-auto "0.1.2"]]
-   
+            [lein-sassc "0.10.4"]
+            [migratus-lein "0.4.9"]]
+
+  :sassc
+  [{:src "resources/scss/screen.scss"
+    :output-to "resources/public/css/screen.css"
+    :style "nested"
+    :import-path "resources/scss"}]
+  
+  :auto
+  {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
+  
+  :hooks [leiningen.sassc]
+  
   :clean-targets ^{:protect false}
   [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
   :figwheel
@@ -69,7 +87,6 @@
    :css-dirs ["resources/public/css"]
    :nrepl-middleware
    [cemerick.piggieback/wrap-cljs-repl cider.nrepl/cider-middleware]}
-  
 
   :profiles
   {:uberjar {:omit-source true
@@ -86,7 +103,6 @@
                  {:externs-validation :off :non-standard-jsdoc :off}
                  :externs ["react/externs/react.js"]}}}}
              
-             
              :aot :all
              :uberjar-name "certification-db.jar"
              :source-paths ["env/prod/clj"]
@@ -102,24 +118,12 @@
                                  [binaryage/devtools "0.9.4"]
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.7"]
-                                 [figwheel-sidecar "0.5.11"]
-                                 ]
+                                 [figwheel-sidecar "0.5.11"]]
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.7"]
                                  [lein-figwheel "0.5.11"]
-                                 [org.clojure/clojurescript "1.9.671"]
-                                 [lein-sassc "0.10.4"]]
-
-                  :sassc
-                  [{:src "resources/scss/screen.scss"
-                    :output-to "resources/public/css/screen.css"
-                    :style "nested"
-                    :import-path "resources/scss"}] 
+                                 [org.clojure/clojurescript "1.9.671"]]
                   
-                  :auto
-                  {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
-                  
-                  :hooks [leiningen.sassc]
                   :cljsbuild
                   {:builds
                    {:app
@@ -134,9 +138,7 @@
                       :source-map true
                       :optimizations :none
                       :pretty-print true}}}}
-                  
-                  
-                  
+                                    
                   :doo {:build "test"}
                   :source-paths ["env/dev/clj"]
                   :resource-paths ["env/dev/resources"]

@@ -1,12 +1,13 @@
 (ns certification-db.core
-  (:require [certification-db.handler :as handler]
-            [luminus.repl-server :as repl]
-            [luminus.http-server :as http]
-            [certification-db.config :refer [env]]
-            [certification-db.db :as db]
+  (:require [certification-db.config :refer [env]]
+            [certification-db.db.core :as db]
+            [certification-db.handler :as handler]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]
+            [luminus.repl-server :as repl]
+            [luminus.http-server :as http]
+            [luminus-migrations.core :as migrations]
             [mount.core :as mount])
   (:gen-class))
 
@@ -48,4 +49,16 @@
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-app)))
 
 (defn -main [& args]
-  (start-app args))
+  (cond
+    (some #{"init"} args)
+    (do
+      (mount/start #'certification-db.config/env)
+      (migrations/init (select-keys env [:database-url]))
+      (System/exit 0))
+    (some #{"migrate" "rollback"} args)
+    (do
+      (mount/start #'certification-db.config/env)
+      (migrations/migrate args (select-keys env [:database-url]))
+      (System/exit 0))
+    :else
+    (start-app args)))

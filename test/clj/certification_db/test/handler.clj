@@ -3,7 +3,7 @@
             [ring.mock.request :as mock]
             [certification-db.handler :refer :all]
             [certification-db.util :refer :all]
-            [certification-db.db :as db]))
+            [certification-db.db.core :as db]))
 
 (deftest test-app
   (testing "main route"
