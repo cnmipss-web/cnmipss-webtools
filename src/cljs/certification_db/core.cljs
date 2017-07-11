@@ -36,12 +36,17 @@
 (defn user-page []
   [:main.container
    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-    [forms/upload-form]]])
+    [forms/upload-form (.-hash js/location)]]
+   [:div.row>div.col-xs-8.offset-xs-2 {:style {:margin-top "15px" :text-align "center"}}
+    (let [success @(rf/subscribe [:success])]
+      (cond
+        (= success true) [:p "Your action was successful"]
+        (= success false) [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]])
 
 (defn admin-page []
   [:main.container
    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-    [forms/upload-form]
+    [forms/upload-form (.-hash js/location)]
     ;[forms/revert-backup-form]
     ]])
 
@@ -64,7 +69,7 @@
 (defn verified-token?
   [email token]
   (fn [[ok response]]
-    (let [admin (get-in response [:body "isAdmin"])]
+    (let [admin (get-in response [:body "is-admin"])]
       (if ok
         (do
           (rf/dispatch [:set-session {:account token
@@ -83,9 +88,13 @@
   (rf/dispatch [:set-active-page :home]))
 
 (secretary/defroute "/users" []
-  (if-let [matches (re-seq #"users\?token=(.*)\&email=(.*)$" (.-hash js/location))]
+  (if-let [matches (re-seq #"users\?token=(.*)\&email=(.*org)" (.-hash js/location))]
     (let [token (get (first matches) 1)
-          email (get (first matches) 2)]
+          email (get (first matches) 2)
+          success (get (first (re-seq #"success=(.*)" (.-hash js/location))) 1)]
+      (cond
+        (= success "true") (rf/dispatch [:action-success])
+        (= success "false") (rf/dispatch [:action-failed]))
       (ajax/ajax-request {:uri "/api/verify-token"
                           :method :post
                           :format (ajax/json-request-format)

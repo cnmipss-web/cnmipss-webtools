@@ -3,4 +3,5 @@
 (def default-db
   {:page :home
    :session {}
-   :bad-login false})
+   :bad-login false
+   :success nil})

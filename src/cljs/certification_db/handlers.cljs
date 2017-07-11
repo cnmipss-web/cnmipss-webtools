@@ -21,3 +21,13 @@
  :bad-login
  (fn [db [_ _]]
    (assoc db :bad-login true)))
+
+(reg-event-db
+ :action-success
+ (fn [db [_ _]]
+   (assoc db :success true)))
+
+(reg-event-db
+ :action-failed
+ (fn [db [_ _]]
+   (assoc db :success false)))

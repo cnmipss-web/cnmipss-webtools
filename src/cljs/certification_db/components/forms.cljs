@@ -9,12 +9,13 @@
       [:p.bad-login-text "Sorry, that login attempt failed.  Please try again or contact the Webmaster."])
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
 
-(defn upload-form []
+(defn upload-form [path]
   [:form#upload-form {:action "/upload/certification-csv" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
     [:label {:for "upload-csv"} "Upload CSV File"]
     [:input#upload-csv.form-control {:type "file" :name "file"}]]
    [:div.form-group
+    [:input {:style {:display "none"} :type "text" :name "path" :value path}  ]
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
 
 (defn revert-backup-form []
