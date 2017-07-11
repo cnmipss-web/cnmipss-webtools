@@ -22,7 +22,7 @@
        (let [oauth-config (merge auth/default-config
                                  {:client-id (:google-client-id env)
                                   :client-secret (:google-secret-id env)
-                                  :redirect-uri "http://localhost:3000/oauth/oauth-callback"})
+                                  :redirect-uri (:google-callback-uri env)})
              code (get-in request [:params :code])
              token ((auth/get-tokens oauth-config code) :access_token)
              acc-info (json/read-str (:body (http/get (str "https://www.googleapis.com/oauth2/v1/userinfo?"
