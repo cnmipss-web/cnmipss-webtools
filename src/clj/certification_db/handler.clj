@@ -20,7 +20,8 @@
         (wrap-routes middleware/wrap-csrf)
         (wrap-routes middleware/wrap-formats))
     #'oauth-routes
-    #'api-routes
+    (-> #'api-routes
+        (wrap-routes middleware/wrap-api))
     (-> #'upload-routes
         (wrap-routes middleware/wrap-uploads))
     (route/not-found

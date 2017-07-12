@@ -10,7 +10,8 @@
             [ring.middleware.flash :refer [wrap-flash]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [immutant.web.middleware :refer [wrap-session]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]])
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.cors :refer [wrap-cors]])
   (:import [javax.servlet ServletContext]))
 
 (defn wrap-context [handler]
@@ -57,6 +58,11 @@
   (-> handler
       wrap-params
       wrap-multipart-params))
+
+(defn wrap-api [handler]
+  (-> handler
+      (wrap-cors :access-control-allow-origin #"https?://(localhost.test|cnmipss).*"
+                 :access-control-allow-methods [:get])))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)

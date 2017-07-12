@@ -39,6 +39,7 @@
                  [re-frame "0.9.4"]
                  [reagent "0.7.0"]
                  [reagent-utils "0.2.1"]
+                 [ring-cors "0.1.11"]
                  [ring-webjars "0.2.0"]
                  [ring/ring-core "1.6.1"]
                  [ring/ring-defaults "0.3.0"]
