@@ -1,4 +1,4 @@
-(defproject cnmipss-webtools "0.1.0"
+(defproject cnmipss-webtools "0.1.1-SNAPSHOT"
 
   :description "Internal Web Application for various CNMI PSS Webtools"
   :url "http://cnmipss-webtools.herokuapp.com"
@@ -78,7 +78,7 @@
   :auto
   {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
   
-  :hooks [leiningen.sassc]
+  :hooks []
   
   :clean-targets ^{:protect false}
   [:target-path [:cljsbuild :builds :app :compiler :output-dir] [:cljsbuild :builds :app :compiler :output-to]]
