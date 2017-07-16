@@ -25,6 +25,17 @@ where email = :email
 select "admin" from users
 where email = :email
 
+-- :name get-user-roles :? :1
+-- :doc retrieve user's authorized roles
+select roles from users
+where email = :email
+
+-- :name set-user-roles! :! :1
+-- :doc set a user's authorized roles
+update users
+set roles = :roles
+where email = :email
+
 -- :name delete-user! :! :n
 -- :doc delete a user given the id
 DELETE FROM users
