@@ -41,8 +41,8 @@
                (let [admin false
                      id (java.util.UUID/randomUUID)]
                  (db/create-user! (keyed [email token admin id]))))
-             (-> (respond/found (str "/#/users?token=" token
+             (-> (respond/found (str "/webtools/#/users?token=" token
                                      "&email=" email))
                  (respond/set-cookie "token" token)
                  (respond/set-cookie "email" email)))
-           (respond/found "/#/?login_failed=true")))))
+           (respond/found "/webtools/#/?login_failed=true")))))

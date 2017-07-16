@@ -2,7 +2,7 @@
   (:require [re-frame.core :as rf]))
 
 (defn login-form []
-  [:form#login-form {:action "/oauth/oauth-init" :method "get"}
+  [:form#login-form {:action "/webtools/oauth/oauth-init" :method "get"}
    [:div.form-group
     [:label {:for "oauth-button"} "Login with your CNMI PSS Email"]
     (if-let [bad-login @(rf/subscribe [:bad-login])]
@@ -10,12 +10,12 @@
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
 
 (defn upload-form [path]
-  [:form#upload-form {:action "/upload/certification-csv" :method "post" :enc-type "multipart/form-data"}
+  [:form#upload-form {:action "/webtools/upload/certification-csv" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
     [:label {:for "upload-csv"} "Upload CSV File"]
     [:input#upload-csv.form-control {:type "file" :name "file"}]]
    [:div.form-group
-    [:input {:style {:display "none"} :type "text" :name "path" :value path}  ]
+    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
 
 (defn revert-backup-form []

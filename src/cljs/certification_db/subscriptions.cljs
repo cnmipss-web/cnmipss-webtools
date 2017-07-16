@@ -20,3 +20,8 @@
  :success
  (fn [db _]
    (:success db)))
+
+(reg-sub
+ :roles
+ (fn [db _]
+   (:roles db)))

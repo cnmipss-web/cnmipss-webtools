@@ -14,6 +14,11 @@
             [ring.middleware.cors :refer [wrap-cors]])
   (:import [javax.servlet ServletContext]))
 
+(defn wrap-webtools-path [handler]
+  (fn [request]
+    ;(println request)
+    (handler request)))
+
 (defn wrap-context [handler]
   (fn [request]
     (binding [*app-context*
@@ -66,6 +71,7 @@
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
+      wrap-webtools-path
       (wrap-json-body {:keywords? true})
       wrap-webjars
       wrap-flash

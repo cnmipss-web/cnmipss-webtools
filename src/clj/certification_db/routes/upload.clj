@@ -5,7 +5,8 @@
             [clojure.data.json :as json]
             [clojure.data.csv :as csv]
             [certification-db.db.core :as db]
-            [certification-db.util :refer :all]))
+            [certification-db.util :refer :all]
+            [certification-db.config :refer [env]]))
 
 (defn create-new-cert
   [current]
@@ -50,8 +51,8 @@
         (let [file (:file (:params request))]
           (try
             (process-file file)
-            (-> (response/found (str "/" (get-in request [:params :path]) "&success=true"))
+            (-> (response/found (str (env :server-uri) (get-in request [:params :path]) "&success=true"))
                 (response/header "Content-Type" "application/json"))
             (catch Exception e
-              (-> (response/found (str "/" (get-in request [:params :path]) "&success=false"))
+              (-> (response/found (str (env :server-uri) (get-in request [:params :path]) "&success=false"))
                     (response/header "Content-Type" "application/json")))))))

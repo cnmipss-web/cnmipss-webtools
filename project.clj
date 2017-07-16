@@ -133,7 +133,7 @@
                      :compiler
                      {:preloads [devtools.preload]
                       :main "certification-db.app"
-                      :asset-path "/js/out"
+                      :asset-path "/webtools/js/out"
                       :output-to "target/cljsbuild/public/js/app.js"
                       :output-dir "target/cljsbuild/public/js/out"
                       :source-map true

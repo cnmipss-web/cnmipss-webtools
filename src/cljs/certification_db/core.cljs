@@ -10,54 +10,49 @@
             [certification-db.handlers]
             [certification-db.subscriptions]
             [certification-db.components.forms :as forms]
+            [certification-db.components.nav :as nav]
             [certification-db.util :as util])
   (:import goog.History))
 
-(defn nav-link [uri title page collapsed?]
-  (let [selected-page (rf/subscribe [:page])]
-    [:li.nav-item
-     {:class (when (= page @selected-page) "active")}
-     [:a.nav-link
-      {:href uri
-       :on-click #(reset! collapsed? true)} title]]))
-
-(defn navbar []
-  [:nav.navbar.navbar-light.bg-faded
-   [:div.navbar-header
-    [:a.navbar-brand {:href "#/"} "BOE Certification DB"]
-    [:ul.navbar-nav.mr-auto>li.nav-item>p.nav-link
-     (str " " (:email @(rf/subscribe [:session])))]]])
+(defn main-view [& children]
+  [:main
+   [:div.container
+    (map-indexed #(with-meta %2 {:key (str "main-view-children-" %1)})  children)]])
 
 (defn login-page []
-  [:main.container
+  [main-view
    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
     [forms/login-form]]])
-
+ 
 (defn user-page []
-  [:main.container
-   [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-    [forms/upload-form (.-hash js/location)]]
-   [:div.row>div.col-xs-8.offset-xs-2 {:style {:margin-top "15px" :text-align "center"}}
-    (let [success @(rf/subscribe [:success])]
-      (cond
-        (= success true) [:p "Your action was successful"]
-        (= success false) [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]])
+  [:div
+   [nav/user-sidebar @(rf/subscribe [:roles])]
+   [:main.container
+    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
+     [forms/upload-form (.-hash js/location)]]
+    [:div.row>div.col-xs-8.offset-xs-2 {:style {:margin-top "15px" :text-align "center"}}
+     (let [success @(rf/subscribe [:success])]
+       (cond
+         (= success true) [:p "Your action was successful"]
+         (= success false) [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]]])
 
 (defn admin-page []
-  [:main.container
-   [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-    [forms/upload-form (.-hash js/location)]
-    ;[forms/revert-backup-form]
-    ]])
+  [:div
+   [nav/admin-sidebar]
+   [main-view
+    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
+     [forms/upload-form (.-hash js/location)]
+     ;[forms/revert-backup-form]
+     ]]])
 
 (def pages
   {:home #'login-page
    :user #'user-page
-   :admin #'admin-page})
+   :admin #'admin-page}) 
 
 (defn page []
   [:div
-   [navbar]
+   [nav/navbar]
    [(pages @(rf/subscribe [:page]))]])
 
 ;; -------------------------
@@ -80,7 +75,7 @@
             (rf/dispatch [:set-active-page :user])))
         (redirect-bad-login)))))
 
-(secretary/set-config! :prefix "#")
+(secretary/set-config! :prefix "/webtools/#")
 
 (secretary/defroute "/" []
   (if-let [matches (re-seq #"login_failed=true" (.-hash js/location))]
@@ -95,7 +90,7 @@
       (cond
         (= success "true") (rf/dispatch [:action-success])
         (= success "false") (rf/dispatch [:action-failed]))
-      (ajax/ajax-request {:uri "/api/verify-token"
+      (ajax/ajax-request {:uri "/webtools/api/verify-token"
                           :method :post
                           :format (ajax/json-request-format)
                           :params  {:email email :token token}

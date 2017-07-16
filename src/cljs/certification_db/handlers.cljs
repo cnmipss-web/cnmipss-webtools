@@ -31,3 +31,8 @@
  :action-failed
  (fn [db [_ _]]
    (assoc db :success false)))
+
+(reg-event-db
+ :set-roles
+ (fn [db [_ roles]]
+   (assoc db :roles roles)))
