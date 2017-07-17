@@ -29,3 +29,6 @@
    [:div.form-group
     [:label.sr-only {:for "submit-btn"} "Revert"]
     [:button#submit-btn.btn.btn-primary.form-control "Revert DB"]]])
+
+(defn edit-user-roles [user]
+  [:form.edit-user-roles])

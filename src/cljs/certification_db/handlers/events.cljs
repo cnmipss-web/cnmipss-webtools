@@ -1,4 +1,4 @@
-(ns certification-db.event-controllers
+(ns certification-db.handlers.events
   (:require [re-frame.core :as rf]))
 
 (defn set-active-role

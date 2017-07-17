@@ -1,4 +1,4 @@
-(ns certification-db.handlers
+(ns certification-db.handlers.reframe
   (:require [certification-db.db :as db]
             [re-frame.core :refer [dispatch reg-event-db]]))
 
@@ -41,3 +41,8 @@
  :set-active-role
  (fn [db [_ role]]
    (assoc db :active-role role)))
+
+(reg-event-db
+ :store-users
+ (fn [db [_ users]]
+   (assoc db :user-list users)))

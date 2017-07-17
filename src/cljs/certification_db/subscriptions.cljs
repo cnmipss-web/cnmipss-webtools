@@ -30,3 +30,8 @@
  :active-role
  (fn [db _]
    (:active-role db)))
+
+(reg-sub
+ :user-list
+ (fn [db _]
+   (:user-list db)))
