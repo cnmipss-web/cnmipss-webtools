@@ -1,12 +1,13 @@
 (ns certification-db.util
-  (:require [clojure.data.json :as json]
+  (:require ;[clojure.data.json :as json]
+            [cheshire.core :as json]
             [clojure.walk :as walk]))
 
 (def json->edn
-  (comp walk/keywordize-keys json/read-str))
+  (comp walk/keywordize-keys json/parse-string))
 
 (def edn->json
-  (comp json/write-str))
+  (comp json/generate-string))
 
 (let [transforms {:keys keyword
                   :strs str

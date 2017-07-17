@@ -20,7 +20,7 @@
   :stop (conman/disconnect! *db*))
 
 (conman/bind-connection *db*
-                        "sql/user-queries.sql"
+                        "sql/user-queries.sql" 
                         "sql/cert-queries.sql")
 
 (extend-protocol jdbc/IResultSetReadColumn
@@ -34,7 +34,7 @@
       (case type
         "json" (parse-string value true)
         "jsonb" (parse-string value true)
-        "citext" (str value)
+        "citext" (str value) 
         value))))
 
 (defn to-pg-json [value]
@@ -42,7 +42,7 @@
             (.setType "jsonb")
             (.setValue (generate-string value))))
 
-(extend-type clojure.lang.IPersistentVector
+(extend-type clojure.lang.IPersistentVector 
   jdbc/ISQLParameter
   (set-parameter [v ^java.sql.PreparedStatement stmt ^long idx]
     (let [conn      (.getConnection stmt)

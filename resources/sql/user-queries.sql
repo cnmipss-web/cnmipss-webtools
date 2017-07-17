@@ -15,6 +15,11 @@ where email = :email
 SELECT * FROM users
 WHERE email = :email
 
+-- :name get-all-users :? :*
+-- :doc retrieve all users
+select email, roles, admin from users
+where true
+
 -- :name get-user-token :? :1
 -- :doc retrieve a user's auth token given the email
 select token from users

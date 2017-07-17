@@ -4,6 +4,7 @@
   :url "http://cnmipss-webtools.herokuapp.com"
 
   :dependencies [[binaryage/devtools "0.9.4"]
+                 [cheshire "5.7.1"]
                  [cider/cider-nrepl "0.14.0"]
                  [clj-time "0.13.0"]
                  [clj-http "3.6.1"]

@@ -3,7 +3,8 @@
             [ring.util.http-response :as response]
             [clojure.data.json :as json]
             [certification-db.db.core :as db]
-            [certification-db.util :refer :all]))
+            [certification-db.util :refer :all]
+            [certification-db.layout :refer [error-page]]))
 
 (defn build-response
   [body]
@@ -23,6 +24,13 @@
                             :user user})
            (response/not-found))
          (response/bad-request)))
+  (GET "/api/all-users" request
+       (try
+         (build-response {:status 200
+                          :users (db/get-all-users)})
+         (catch Exception e
+             (build-response {:status 500
+                              :error e}))))
   (POST "/api/verify-token" request
         (let [{:keys [token email]} (request :body)
               user-email (keyed [email])
