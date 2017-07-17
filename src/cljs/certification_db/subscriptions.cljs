@@ -25,3 +25,8 @@
  :roles
  (fn [db _]
    (:roles db)))
+
+(reg-sub
+ :active-role
+ (fn [db _]
+   (:active-role db)))

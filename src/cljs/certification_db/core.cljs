@@ -11,11 +11,12 @@
             [certification-db.subscriptions]
             [certification-db.components.forms :as forms]
             [certification-db.components.nav :as nav]
+            [certification-db.components.roles :as roles]
             [certification-db.util :as util])
   (:import goog.History))
 
 (defn main-view [& children]
-  [:main
+  [:main.col-sm-9
    [:div.container
     (map-indexed #(with-meta %2 {:key (str "main-view-children-" %1)})  children)]])
 
@@ -25,25 +26,16 @@
     [forms/login-form]]])
  
 (defn user-page []
-  [:div
+  [:div.container-fluid>div.row.d-flex.flex-row
    [nav/user-sidebar @(rf/subscribe [:roles])]
-   [:main.container
-    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-     [forms/upload-form (.-hash js/location)]]
-    [:div.row>div.col-xs-8.offset-xs-2 {:style {:margin-top "15px" :text-align "center"}}
-     (let [success @(rf/subscribe [:success])]
-       (cond
-         (= success true) [:p "Your action was successful"]
-         (= success false) [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]]])
+   [main-view
+    (roles/display-role @(rf/subscribe [:active-role]))]])
 
 (defn admin-page []
-  [:div
+  [:div.container-fluid>div.row.d-flex.flex-row
    [nav/admin-sidebar]
    [main-view
-    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-     [forms/upload-form (.-hash js/location)]
-     ;[forms/revert-backup-form]
-     ]]])
+    (roles/display-role @(rf/subscribe [:active-role]))]])
 
 (def pages
   {:home #'login-page
@@ -64,7 +56,9 @@
 (defn verified-token?
   [email token]
   (fn [[ok response]]
-    (let [admin (get-in response [:body "is-admin"])]
+    (let [admin (get-in response [:body "is-admin"])
+          user (get-in response [:body "user"])
+          roles (get user "roles")]
       (if ok
         (do
           (rf/dispatch [:set-session {:account token
@@ -72,7 +66,10 @@
                                       :admin admin}])
           (if admin
             (rf/dispatch [:set-active-page :admin])
-            (rf/dispatch [:set-active-page :user])))
+            (do
+              (rf/dispatch [:set-roles (-> roles
+                                           (clojure.string/split #","))])
+              (rf/dispatch [:set-active-page :user]))))
         (redirect-bad-login)))))
 
 (secretary/set-config! :prefix "/webtools/#")

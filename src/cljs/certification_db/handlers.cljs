@@ -36,3 +36,8 @@
  :set-roles
  (fn [db [_ roles]]
    (assoc db :roles roles)))
+
+(reg-event-db
+ :set-active-role
+ (fn [db [_ role]]
+   (assoc db :active-role role)))
