@@ -81,6 +81,18 @@ table {
 .flex-row {
   flex-direction: row; }
 
+.align-items-center {
+  align-items: center; }
+
+.text-center {
+  text-align: center; }
+
+.text-left {
+  text-align: left; }
+
+.text-right {
+  text-align: right; }
+
 .sidebar {
   width: 20%;
   min-width: 300px;
@@ -128,3 +140,15 @@ header.navbar {
   border-radius: 0; }
   header.navbar a {
     color: white; }
+
+table.user-list {
+  margin-top: 15px;
+  width: 100%;
+  box-shadow: 0px 2px 2px 2px #ddd; }
+  table.user-list * {
+    border: 1px solid pink; }
+  table.user-list form {
+    box-shadow: none;
+    margin: 5px; }
+  table.user-list td {
+    height: 50px; }

@@ -3,6 +3,7 @@
 @import "base/mixins";
 @import "base/breakpoints";
 @import "base/flex";
+@import "base/util";
 
 @import "layout/sidebar";
 
@@ -10,3 +11,4 @@
 @import "modules/sidebar";
 @import "modules/forms";
 @import "modules/navbar";
+@import "modules/tables";
