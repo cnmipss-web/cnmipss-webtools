@@ -1,6 +1,6 @@
 CREATE TABLE users
        (id UUID PRIMARY KEY,
-        email VARCHAR(30),
-        admin BOOLEAN,
-        is_active BOOLEAN,
-        token TEXT);
+        email varchar(140) unique,
+        admin BOOLEAN not null default false,
+        roles varchar(140) default '',
+        token text default '');

@@ -1,8 +1,8 @@
 -- :name create-user! :! :n
 -- :doc creates a new user record
 INSERT INTO users
-(id, email, admin, token)
-VALUES (:id, :email, :admin, :token)
+(id, email, admin, roles)
+VALUES (:id, :email, :admin, :roles)
 
 -- :name set-user-token! :! :1
 -- :doc set a user's auth token from google
