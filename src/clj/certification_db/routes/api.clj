@@ -41,6 +41,28 @@
             (catch Exception e
               (build-response {:status 500
                                :error e})))))
+  (POST "/api/create-user" request
+        (let [{:keys [email roles]} (request :body)
+              admin (-> (get-in request [:body :admin])
+                        #{"true" true}
+                        some?)
+              id (java.util.UUID/randomUUID)]
+          (try
+            (db/create-user! (keyed [email admin roles id]))
+            (build-response {:status 200
+                             :users (db/get-all-users)})
+            (catch Exception e
+              (build-response {:status 500
+                               :error e})))))
+  (POST "/api/delete-user" request
+        (let [{:keys [email]} (request :body)]
+          (try
+            (db/delete-user! (keyed [email]))
+            (build-response {:status 200
+                             :users (db/get-all-users)})
+            (catch Exception e
+              (build-response {:status 500
+                               :error e})))))
   (POST "/api/verify-token" request
         (let [{:keys [token email]} (request :body)
               user-email (keyed [email])
