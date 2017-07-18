@@ -8,3 +8,8 @@
                         {:headers  (js->clj (.getResponseHeaders response-obj))
                          :body    (original-handler response-obj)
                          :status  (.getStatus response-obj)})))))
+
+(defn getElementById [id]
+  (.getElementById js/document id))
+
+(def jq js/jQuery)

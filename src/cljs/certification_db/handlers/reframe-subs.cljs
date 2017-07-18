@@ -1,4 +1,4 @@
-(ns certification-db.subscriptions
+(ns certification-db.handlers.reframe-subs
   (:require [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
@@ -35,3 +35,8 @@
  :user-list
  (fn [db _]
    (:user-list db)))
+
+(reg-sub
+ :admin-access
+ (fn [db _]
+   (get-in db [:session :admin])))

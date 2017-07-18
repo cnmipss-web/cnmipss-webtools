@@ -1,19 +1,20 @@
 (ns certification-db.core
-  (:require [reagent.core :as r]
-            [re-frame.core :as rf]
-            [secretary.core :as secretary]
-            [goog.events :as events]
-            [goog.history.EventType :as HistoryEventType]
-            [markdown.core :refer [md->html]]
-            [ajax.core :as ajax]
+  (:require [ajax.core :as ajax]
+            cljsjs.jquery
             [certification-db.ajax :refer [load-interceptors!]]
-            [certification-db.handlers.reframe]
-            [certification-db.subscriptions]
             [certification-db.handlers.api :as ajax-handlers]
             [certification-db.components.forms :as forms]
             [certification-db.components.nav :as nav]
+            [certification-db.handlers.reframe]
+            [certification-db.handlers.reframe-subs]
             [certification-db.components.roles :as roles]
-            [certification-db.util :as util])
+            [certification-db.util :as util]
+            [goog.events :as events]
+            [goog.history.EventType :as HistoryEventType]
+            [markdown.core :refer [md->html]]
+            [reagent.core :as r]
+            [re-frame.core :as rf]
+            [secretary.core :as secretary])
   (:import goog.History))
 
 (defn main-view [& children]

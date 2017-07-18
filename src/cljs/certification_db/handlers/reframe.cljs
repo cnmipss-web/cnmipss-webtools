@@ -1,6 +1,7 @@
 (ns certification-db.handlers.reframe
   (:require [certification-db.db :as db]
-            [re-frame.core :refer [dispatch reg-event-db]]))
+            [re-frame.core :refer [dispatch reg-event-db]]
+            [ajax.core :as ajax]))
 
 (reg-event-db
   :initialize-db
@@ -45,4 +46,9 @@
 (reg-event-db
  :store-users
  (fn [db [_ users]]
-   (assoc db :user-list users)))
+   (let [{:keys [email]} (db :session)
+         current-user (first (filter #(= email (:email %)) users))]
+     (-> db
+         (assoc :user-list users)
+         (assoc-in [:session :admin] (:admin current-user))
+         (assoc :roles (clojure.string/split (:roles current-user) #","))))))
