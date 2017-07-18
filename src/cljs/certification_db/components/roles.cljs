@@ -30,7 +30,9 @@
                       :response-format (util/full-response-format ajax/json-response-format)
                       :handler ajax-handlers/all-users})
   [:div.col-xs-12
-   [tables/user-table @(rf/subscribe [:user-list])]])
+   [tables/user-table @(rf/subscribe [:user-list])]]
+  [:div.col-xs-12
+   [forms/invite-users]])
 
 (defn- manage-db []
   [:div])

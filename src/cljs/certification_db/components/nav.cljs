@@ -15,9 +15,11 @@
                             :class (if active "active" "")} role])
 
 (defn sidebar [roles]
-   (let [active @(rf/subscribe [:active-role])]
+   (let [active @(rf/subscribe [:active-role])
+         admin @(rf/subscribe [:admin-access])]
      [:nav.sidebar.col-sm-3
      (for [role role-list]
        [:div.row>div.col-xs-12 {:key (str "role-" role)}
-        (if (some #{role} roles)
+        (if (or (some #{role} roles)
+                admin)
           (side-bar-btn role (= active role)))])]))

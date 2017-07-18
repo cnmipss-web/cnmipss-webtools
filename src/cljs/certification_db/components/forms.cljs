@@ -1,5 +1,8 @@
 (ns certification-db.components.forms
-  (:require [re-frame.core :as rf]))
+  (:require [re-frame.core :as rf]
+            [certification-db.constants :as const]
+            [certification-db.handlers.events :as event-handlers]
+            [certification-db.util :as util]))
 
 (defn login-form []
   [:form#login-form {:action "/webtools/oauth/oauth-init" :method "get"}
@@ -30,5 +33,32 @@
     [:label.sr-only {:for "submit-btn"} "Revert"]
     [:button#submit-btn.btn.btn-primary.form-control "Revert DB"]]])
 
-(defn edit-user-roles [user]
-  [:form.edit-user-roles])
+(defn edit-user-roles [{:keys [email roles admin]}]
+  (let [clean-email (->> email
+                         (re-seq #"[\w]")
+                         (apply str))
+        user-roles (clojure.string/split roles #",")]
+    [:form.edit-user-roles.form-inline {:id clean-email :on-submit (event-handlers/update-user email)}
+     [:fieldset.form-group
+      [:legend.sr-only "Roles"]
+      (for [role const/role-list]
+        (let [role-id (->> (re-seq #"\S" role)
+                           (apply str))
+              id (str role-id "-" clean-email)]
+          [:div.form-group {:key (str "form-group-" role-id)}
+           [:label.form-control {:for (keyword (str "role." role-id))} role]
+           [:input.form-control {:type "checkbox"
+                                 :id id
+                                 :value role
+                                 :default-checked (some #{role} user-roles)}]]))]
+     [:fieldset.form-group
+      [:label.form-control "Admin"]
+      [:input.form-control {:type "checkbox"
+                            :id (str "admin-" clean-email)
+                            :value "is admin"
+                            :default-checked admin}]]
+     [:button.btn.btn-primary {:type "submit"} "Save"]]))
+
+(defn invite-users []
+  [:div])
+ 

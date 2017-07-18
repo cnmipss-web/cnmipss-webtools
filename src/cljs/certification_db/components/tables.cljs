@@ -4,7 +4,7 @@
 
 (defn user-row [user]
   [:tr.row.user-list-row
-   [:td.col-xs-3.text-left.d-flex.align-items-center (get user "email")]
+   [:td.col-xs-3.text-left (user :email)]
    [:td.col-xs-9.text-left (forms/edit-user-roles user)]])
 
 (defn user-table [users]
@@ -15,5 +15,5 @@
      [:th.col-xs-3.text-center {:scope "col"} "Email"]
      [:th.col-xs-9.text-center {:scope "col"} "Roles"]]]
    [:tbody
-    (for [user users]
-      ^{:key (str "user-" (get user "email"))} [user-row user])]])
+    (for [user (sort-by :email users)]
+      ^{:key (str "user-" (user :email))} [user-row user])]])
