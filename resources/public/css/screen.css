@@ -57,6 +57,9 @@ table {
  * Borders
  */
 /**
+ * Misc
+ */
+/**
  * Breakpoints Based on Bootstrap v3
  */
 @media (max-width: 767px) {
@@ -93,6 +96,13 @@ table {
 .text-right {
   text-align: right; }
 
+#main-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 46px;
+  left: 0px; }
+
 .sidebar {
   width: 20%;
   min-width: 300px;
@@ -100,24 +110,39 @@ table {
   div > .sidebar {
     padding: 0px; }
 
+button.nav-link {
+  cursor: pointer;
+  border: none;
+  background: inherit;
+  color: inherit; }
+
 .sidebar {
-  border-right: 1px solid rgba(26, 65, 103, 0.15); }
+  position: fixed;
+  top: 46px;
+  left: 0px;
+  width: 300px;
+  border-right: 1px solid rgba(26, 65, 103, 0.15);
+  z-index: 1;
+  background: transparent;
+  transition-delay: 0s;
+  transition-timing-function: ease;
+  transition: left 0.5s; }
 
 .sidebar-btn {
   width: 100%;
   height: 100px;
   text-align: center;
   border-radius: 0px;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.85);
   color: #1a4167;
   transition-delay: 0s;
   transition-timing-function: ease;
   transition: background-color 0.65s; }
   .sidebar-btn:hover, .sidebar-btn:focus {
-    background-color: rgba(223, 194, 83, 0.25); }
+    background-color: rgba(243, 232, 191, 0.85); }
 
 .sidebar-btn.active {
-  background-color: #dfc253; }
+  background-color: rgba(223, 194, 83, 0.85); }
 
 form {
   margin-top: 10%;

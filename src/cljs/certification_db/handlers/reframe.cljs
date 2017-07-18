@@ -52,3 +52,13 @@
          (assoc :user-list users)
          (assoc-in [:session :admin] (:admin current-user))
          (assoc :roles (clojure.string/split (:roles current-user) #","))))))
+
+(reg-event-db
+ :toggle-roles
+ (fn [db [_ _]]
+   (assoc db :show-roles (not (:show-roles db)))))
+
+(reg-event-db
+ :hide-roles
+ (fn [db [_ _]]
+   (assoc db :show-roles false)))

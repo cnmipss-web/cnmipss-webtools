@@ -1,5 +1,13 @@
 .sidebar {
+    position: fixed;
+    top: 46px;
+    left: 0px;
+    width: 300px;
     border-right: 1px solid transparentize($blue, 0.85);
+    z-index: 1;
+    background: transparent;
+
+    @include custom-transition(left 0.5s, ease, 0s);
 }
 
 .sidebar-btn {
@@ -7,16 +15,16 @@
     height: 100px;
     text-align: center;
     border-radius: 0px;
-    background-color: white;
+    background-color: transparentize(white, $sidebar-transparency);
     color: $blue;
     @include custom-transition(background-color 0.65s, ease, 0s);
 
     &:hover, &:focus {
-        background-color: transparentize($light-gold, 0.75);
+        background-color: transparentize(lighten($light-gold, 25), $sidebar-transparency);
     }
 }
 
 .sidebar-btn.active {
-    background-color: $light-gold
+    background-color: transparentize($light-gold, $sidebar-transparency);
 }
 

@@ -40,3 +40,8 @@
  :admin-access
  (fn [db _]
    (get-in db [:session :admin])))
+
+(reg-sub
+ :show-roles?
+ (fn [db _]
+   (:show-roles db)))
