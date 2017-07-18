@@ -18,9 +18,14 @@
         [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]])
 
 (defn- hro []
+  (ajax/ajax-request {:uri "/webtools/api/all-jvas"
+                      :method :get
+                      :format (ajax/json-request-format)
+                      :response-format (util/full-response-format ajax/json-response-format)
+                      :handler ajax-handlers/all-jvas})
   [:div
    [:div.col-xs-12
-    [tables/jva-list]]
+    [tables/jva-list @(rf/subscribe [:jva-list])]]
    [:div.col-xs-12
     [forms/jva-upload]]])
 
@@ -34,8 +39,7 @@
                       :response-format (util/full-response-format ajax/json-response-format)
                       :handler ajax-handlers/all-users})
   [:div
-   [:div.col-xs-12
-    [tables/user-table @(rf/subscribe [:user-list])]]
+   [tables/user-table @(rf/subscribe [:user-list])]
    [:div.col-xs-12
     [forms/invite-users]]])
 

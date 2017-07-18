@@ -45,3 +45,8 @@
  :show-roles?
  (fn [db _]
    (:show-roles db)))
+
+(reg-sub
+ :jva-list
+ (fn [db _]
+   (:jva-list db)))

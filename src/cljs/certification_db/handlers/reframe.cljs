@@ -62,3 +62,8 @@
  :hide-roles
  (fn [db [_ _]]
    (assoc db :show-roles false)))
+
+(reg-event-db
+ :store-jvas
+ (fn [db [_ jvas]]
+   (assoc db :jva-list jvas)))

@@ -18,13 +18,16 @@
   (:import goog.History))
 
 (defn main-view [& children]
-  [:main#main-container.container {:on-click #(rf/dispatch [:hide-roles])}
-   (map-indexed #(with-meta %2 {:key (str "main-view-children-" %1)})  children)])
+  [:main#main-container {:on-click #(if @(rf/subscribe [:show-roles?])
+                                      (rf/dispatch [:hide-roles]))}
+   [:div.container 
+    (map-indexed #(with-meta %2 {:key (str "main-view-children-" %1)})  children)]])
 
 (defn login-page []
-  [:main#main-container.container
-   [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-    [forms/login-form]]])
+  [:main#main-container
+   [:div.container
+    [:div.row>div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
+     [forms/login-form]]]])
  
 (defn main-page []
   [:div

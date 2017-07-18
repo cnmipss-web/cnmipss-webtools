@@ -30,3 +30,8 @@
   (let [users (clojure.walk/keywordize-keys (get body "users"))]
     (rf/dispatch [:store-users users])))
 
+(defn all-jvas
+  [[ok {:keys [body]}]]
+  (let [jvas (clojure.walk/keywordize-keys (get body "jvas"))]
+    (rf/dispatch [:store-jvas] jvas)))
+

@@ -1,7 +1,7 @@
 table.user-list {
     margin-top: 15px;
     width: 100%;
-    box-shadow: 0px 2px 2px 2px #ddd;
+    box-shadow: $drop-shadow;
     form {
         box-shadow: none;
     }
@@ -21,6 +21,11 @@ tr.user-list-row {
     align-items: center;
     border-bottom: 1px solid #ddd;
     padding-bottom: 5px;
+}
+
+table.jva-list {
+    margin-top: 15px;
+    box-shadow: $drop-shadow;
 }
 
 
