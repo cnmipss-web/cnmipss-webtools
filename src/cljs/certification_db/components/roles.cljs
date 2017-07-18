@@ -18,7 +18,11 @@
         [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]])
 
 (defn- hro []
-  [:div])
+  [:div
+   [:div.col-xs-12
+    [tables/jva-list]]
+   [:div.col-xs-12
+    [forms/jva-upload]]])
 
 (defn- procurement []
   [:div])

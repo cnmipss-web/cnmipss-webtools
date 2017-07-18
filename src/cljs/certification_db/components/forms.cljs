@@ -79,4 +79,10 @@
     [:br]
     [roles-checklist "new-user"]]
    [:button.btn.btn-primary {:type "submit"} "Invite"]])
+
+(defn jva-upload []
+  [:form.jva-upload.col-md-6.offset-md-3 {:on-submit (fn [e] (.preventDefault e))}
+   [:div.form-group
+    [:label {:for "upload-jva"} "Upload New JVA"]
+    [:input#upload-jva.form-control {:type "file" :name "upload-jva" :accept "pdf"}]]])
  
