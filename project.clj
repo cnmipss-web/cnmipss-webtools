@@ -9,6 +9,7 @@
                  [clj-time "0.13.0"]
                  [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
+                 [cljsjs/jquery "3.2.1-0"]
                  [com.cemerick/url "0.1.1"]
                  ;; [com.datomic/datomic-pro "0.9.5561.50" :exclusions [[org.slf4j/log4j-over-slf4j]
                  ;;                                                     [org.slf4j/slf4j-nop]

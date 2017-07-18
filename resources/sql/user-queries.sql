@@ -41,6 +41,12 @@ update users
 set roles = :roles
 where email = :email
 
+-- :name set-user-admin! :! :1
+-- :doc set a user's admin status
+update users
+set admin = :admin
+where email = :email
+
 -- :name delete-user! :! :n
 -- :doc delete a user given the id
 DELETE FROM users

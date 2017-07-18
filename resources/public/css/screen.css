@@ -133,6 +133,27 @@ form {
   margin: 10px;
   margin-top: 0px; }
 
+.edit-user-roles {
+  margin: 0px !important;
+  padding: 0px;
+  border: none; }
+  .edit-user-roles input[type="checkbox"] {
+    margin: 0 auto; }
+  .edit-user-roles label {
+    margin: 0px;
+    border: none; }
+  .edit-user-roles fieldset {
+    margin: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start; }
+  .edit-user-roles .btn {
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 5px; }
+  .edit-user-roles > div.form-group {
+    padding-top: 20px; }
+
 header.navbar {
   background-color: #1a4167;
   color: white;
@@ -145,10 +166,19 @@ table.user-list {
   margin-top: 15px;
   width: 100%;
   box-shadow: 0px 2px 2px 2px #ddd; }
-  table.user-list * {
-    border: 1px solid pink; }
   table.user-list form {
-    box-shadow: none;
-    margin: 5px; }
-  table.user-list td {
-    height: 50px; }
+    box-shadow: none; }
+
+th {
+  padding: 10px 0px; }
+
+tr.user-list-row {
+  margin: 0;
+  padding: 0px;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px; }

@@ -31,6 +31,16 @@
          (catch Exception e
              (build-response {:status 500
                               :error e}))))
+  (POST "/api/update-user" request
+        (let [{:keys [email roles admin]} (request :body)]
+          (try
+            (db/set-user-roles! (keyed [email roles]))
+            (db/set-user-admin! (keyed [email admin]))
+            (build-response {:status 200
+                             :users (db/get-all-users)})
+            (catch Exception e
+              (build-response {:status 500
+                               :error e})))))
   (POST "/api/verify-token" request
         (let [{:keys [token email]} (request :body)
               user-email (keyed [email])
