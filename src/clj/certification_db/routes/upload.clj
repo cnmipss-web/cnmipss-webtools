@@ -34,7 +34,7 @@
 
 (defn process-file
   [{:keys [tempfile size filename]}]
-  (let [data (->> tempfile slurp csv/read-csv (drop 1))
+  (let [data (->> tempfile slurp csv/read-csv (drop 1) (sort-by #(get % 7)))
         existing-certs (db/get-all-certs)]
     (loop [current (first data) rem (next data)]
       (let [[_ last-name first-name mi _ _ type cert-no start expiry _] current
