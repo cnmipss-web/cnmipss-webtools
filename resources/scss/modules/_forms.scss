@@ -15,3 +15,33 @@ form {
     margin: 10px;
     margin-top: 0px;
 }
+
+.edit-user-roles {
+    margin: 0px !important;
+    padding: 0px;
+    border: none;
+
+    input[type="checkbox"] {
+        margin: 0 auto;
+    }
+
+    label {
+        margin: 0px;
+        border: none;
+    }
+
+    fieldset {
+        margin: 5px;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+    .btn {
+        margin-left: 20px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+    &>div.form-group {
+        padding-top: 20px;
+    }
+}
