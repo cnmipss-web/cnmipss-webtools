@@ -6,7 +6,7 @@
   :dependencies [[binaryage/devtools "0.9.4"]
                  [cheshire "5.7.1"]
                  [cider/cider-nrepl "0.14.0"]
-                 [clj-time "0.13.0"]
+                 [clj-time "0.14.0"]
                  [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
                  [cljsjs/jquery "3.2.1-0"]
@@ -28,6 +28,7 @@
                  [metosin/muuntaja "0.3.1"]
                  [metosin/ring-http-response "0.9.0"]
                  [mount "0.1.11"]
+                 [org.apache.pdfbox/pdfbox "2.0.6"]
                  [org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/clojurescript "1.9.671" :scope "provided"]
                  [org.clojure/data.csv "0.1.4"]
@@ -62,7 +63,8 @@
   :resource-paths ["resources" "target/cljsbuild"]
   :target-path "target/%s/"
   :main ^:skip-aot certification-db.core
-  :migratus {:store :database :db ~(get (System/getenv) "DATABASE_URL")}
+  :migratus {:store :database
+             :db ~(get (System/getenv) "DATABASE_URL")}
   
   :plugins [[lein-auto "0.1.2"]
             [lein-cljsbuild "1.1.5"]

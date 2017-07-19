@@ -1,11 +1,15 @@
 (ns certification-db.db.core
   (:require
-    [cheshire.core :refer [generate-string parse-string]]
-    [clj-time.jdbc]
-    [clojure.java.jdbc :as jdbc]
-    [conman.core :as conman]
-    [certification-db.config :refer [env]]
-    [mount.core :refer [defstate]])
+   [clojure.data.json :as json]
+   [cheshire.core :refer [generate-string parse-string]]
+   [cheshire.generate :refer [add-encoder encode-str encode-date]]
+   [clj-time.jdbc]
+   [clj-time.format :as f]
+   [clj-time.coerce :as c]
+   [clojure.java.jdbc :as jdbc]
+   [conman.core :as conman]
+   [certification-db.config :refer [env]]
+   [mount.core :refer [defstate]])
   (:import org.postgresql.util.PGobject
            java.sql.Array
            clojure.lang.IPersistentMap
@@ -25,6 +29,9 @@
                         "sql/cert-queries.sql")
 
 (extend-protocol jdbc/IResultSetReadColumn
+  java.sql.Date
+  (result-set-read-column [v _ _] (c/from-sql-date v))
+  
   Array
   (result-set-read-column [v _ _] (vec (.getArray v)))
 
@@ -52,6 +59,10 @@
       (if-let [elem-type (when (= (first type-name) \_) (apply str (rest type-name)))]
         (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
         (.setObject stmt idx (to-pg-json v))))))
+
+(add-encoder org.joda.time.DateTime
+             (fn [date jg]
+               (.writeString jg (f/unparse (f/formatter "dd MMM YYYY") date))))
 
 (extend-protocol jdbc/ISQLValue
   IPersistentMap

@@ -1,6 +1,6 @@
 create table jvas
        (id UUID primary key,
-       announce_no varchar(16) not null,
+       announce_no varchar(20) unique not null,
        position varchar(140) not null,
        status boolean default true,
        open_date date not null,

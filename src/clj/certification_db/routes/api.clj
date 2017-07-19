@@ -29,6 +29,7 @@
       ~@body
       (json-response resp/ok (~q))
       (catch Exception e#
+        (println e#)
         (json-response resp/internal-server-error e#)))))
 
 (defroutes api-routes
@@ -36,33 +37,7 @@
 
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
 
-  (GET "/api/user" request
-       (if-let [email (get-in request [:query-params "email"])]
-         (if-let [user (-> (db/get-user-info (keyed [email]))
-                           (dissoc :id))]
-           (json-response resp/ok {:user user})
-           (resp/not-found))
-         (resp/bad-request)))
 
-  (GET "/api/all-users" [] (query-route db/get-all-users))
-
-  (POST "/api/update-user" request
-        (let [{:keys [email roles admin]} (request :body)]
-          (query-route db/get-all-users
-                       (db/set-user-roles! (keyed [email roles]))
-                       (db/set-user-admin! (keyed [email admin])))))
-
-  (POST "/api/create-user" request
-        (let [{:keys [email roles]} (request :body)
-              admin (-> (get-in request [:body :admin]) truthy)
-              id (java.util.UUID/randomUUID)]
-          (query-route db/get-all-users
-                       (db/create-user! (keyed [email admin roles id])))))
-
-  (POST "/api/delete-user" request
-        (let [{:keys [email]} (request :body)]
-          (query-route db/get-all-users
-                       (db/delete-user! (keyed [email])))))
   
   (POST "/api/verify-token" request
         (let [{:keys [token email]} (request :body)
@@ -75,4 +50,31 @@
             (json-response resp/ok (keyed [user is-admin]))
             (resp/forbidden)))))
 
-(defroutes api-routes-with-auth)
+(defroutes api-routes-with-auth
+  (GET "/api/user" request
+       (if-let [email (get-in request [:query-params "email"])]
+         (if-let [user (-> (db/get-user-info (keyed [email]))
+                           (dissoc :id))]
+           (json-response resp/ok {:user user})
+           (resp/not-found))
+         (resp/bad-request)))
+  
+  (GET "/api/all-users" [] (query-route db/get-all-users))
+  
+  (POST "/api/update-user" request
+        (let [{:keys [email roles admin]} (request :body)]
+          (query-route db/get-all-users
+                       (db/set-user-roles! (keyed [email roles]))
+                       (db/set-user-admin! (keyed [email admin])))))
+  
+  (POST "/api/create-user" request
+        (let [{:keys [email roles]} (request :body)
+              admin (-> (get-in request [:body :admin]) truthy)
+              id (java.util.UUID/randomUUID)]
+          (query-route db/get-all-users
+                       (db/create-user! (keyed [email admin roles id])))))
+  
+  (POST "/api/delete-user" request
+        (let [{:keys [email]} (request :body)]
+          (query-route db/get-all-users
+                       (db/delete-user! (keyed [email]))))))

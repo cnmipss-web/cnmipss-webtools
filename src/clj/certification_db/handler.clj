@@ -3,7 +3,7 @@
             [certification-db.layout :refer [error-page]]
             [certification-db.routes.home :refer [home-routes]]
             [certification-db.routes.oauth :refer [oauth-routes]]
-            [certification-db.routes.api :refer [api-routes]]
+            [certification-db.routes.api :refer [api-routes api-routes-with-auth]]
             [certification-db.routes.upload :refer [upload-routes]]
             [compojure.route :as route]
             [certification-db.env :refer [defaults]]
@@ -21,6 +21,8 @@
         (wrap-routes middleware/wrap-formats))
     #'oauth-routes
     (-> #'api-routes
+        (wrap-routes middleware/wrap-api))
+    (-> #'api-routes-with-auth
         (wrap-routes middleware/wrap-api))
     (-> #'upload-routes
         (wrap-routes middleware/wrap-uploads))
