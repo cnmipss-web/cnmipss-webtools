@@ -27,11 +27,14 @@
 
 (defn all-users
   [[ok {:keys [body]}]]
-  (let [users (clojure.walk/keywordize-keys (get body "users"))]
+  (let [users (clojure.walk/keywordize-keys body)]
     (rf/dispatch [:store-users users])))
 
 (defn all-jvas
-  [[ok {:keys [body]}]]
-  (let [jvas (clojure.walk/keywordize-keys (get body "jvas"))]
-    (rf/dispatch [:store-jvas] jvas)))
+  [[ok response]]
+  (let [{:keys [body]} response
+        jvas (clojure.walk/keywordize-keys body)]
+    (if ok
+      (rf/dispatch [:store-jvas] jvas)
+      (println response))))
 
