@@ -35,6 +35,6 @@
   (let [{:keys [body]} response
         jvas (clojure.walk/keywordize-keys body)]
     (if ok
-      (rf/dispatch [:store-jvas] jvas)
+      (rf/dispatch [:store-jvas jvas])
       (println response))))
 

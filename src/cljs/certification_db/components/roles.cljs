@@ -27,7 +27,7 @@
    [:div.col-xs-12
     [tables/jva-list @(rf/subscribe [:jva-list])]]
    [:div.col-xs-12
-    [forms/jva-upload]]])
+    [forms/jva-upload (.-hash js/location)]]])
 
 (defn- procurement []
   [:div])

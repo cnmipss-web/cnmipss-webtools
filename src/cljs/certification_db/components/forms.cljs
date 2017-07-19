@@ -80,9 +80,12 @@
     [roles-checklist "new-user"]]
    [:button.btn.btn-primary {:type "submit"} "Invite"]])
 
-(defn jva-upload []
-  [:form.jva-upload.col-md-6.offset-md-3 {:on-submit (fn [e] (.preventDefault e))}
+(defn jva-upload [path]
+  [:form.jva-upload.col-md-6.offset-md-3 {:action "/webtools/upload/jva-pdf" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
-    [:label {:for "upload-jva"} "Upload New JVA"]
-    [:input#upload-jva.form-control {:type "file" :name "upload-jva" :accept "pdf"}]]])
+    [:label {:for "file"} "Upload New JVA"]
+    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf"}]]
+   [:div.form-group
+    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
+    [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
  

@@ -26,6 +26,53 @@ tr.user-list-row {
 table.jva-list {
     margin-top: 15px;
     box-shadow: $drop-shadow;
+    
+}
+
+.jva-list-row {
+    cursor: pointer;
+    white-space: prewrap;
+    font-size: 14px;
+    
+    strong {
+        font-weight: 600;
+    }
+
+    em {
+        color: red;
+        font-weight: 600;
+    }
+    
+    td {
+        padding-top: 5px;
+        padding-bottom: auto;
+        border: 1px solid lightgray;
+        max-height: 150px;
+        min-height: 75px;
+        text-align: center;
+    }
+
+    $base-width: 5%;
+
+    .w-1 {
+        width: $base-width;
+    }
+
+    .w-2 {
+        width: $base-width*2;
+    }
+
+    .w-4 {
+        width: $base-width*4;
+    }
+
+    .w-5 {
+        width: $base-width*5;
+    }
+
+    .w-6 {
+        width: $base-width*6;
+    }
 }
 
 
