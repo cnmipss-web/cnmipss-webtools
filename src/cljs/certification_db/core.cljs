@@ -55,12 +55,15 @@
 (secretary/set-config! :prefix "/webtools/#")
 
 (secretary/defroute "/" []
+  (set! (.-href js/location) "#/login"))
+
+(secretary/defroute "/login" []
   (if-let [matches (re-seq #"login_failed=true" (.-hash js/location))]
     (rf/dispatch [:bad-login]))
   (rf/dispatch [:set-active-page :login]))
 
-(secretary/defroute "/users" []
-  (if-let [matches (re-seq #"users\?token=(.*)\&email=(.*org)" (.-hash js/location))]
+(secretary/defroute "/app" []
+  (if-let [matches (re-seq #"app\?token=(.*)\&email=(.*org)" (.-hash js/location))]
     (let [token (get (first matches) 1)
           email (get (first matches) 2)
           success (get (first (re-seq #"success=(.*)" (.-hash js/location))) 1)]

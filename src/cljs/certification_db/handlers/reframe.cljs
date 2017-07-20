@@ -24,6 +24,11 @@
    (assoc db :bad-login true)))
 
 (reg-event-db
+ :successful-login
+ (fn [db [_ _]]
+   (assoc db :bad-login false)))
+
+(reg-event-db
  :action-success
  (fn [db [_ _]]
    (assoc db :success true)))

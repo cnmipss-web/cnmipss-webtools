@@ -18,6 +18,7 @@
           roles (get user "roles")]
       (if ok
         (do
+          (rf/dispatch [:successful-login])
           (rf/dispatch [:set-session (util/keyed [token email admin])])
           (if admin
             (rf/dispatch [:set-roles const/role-list])
