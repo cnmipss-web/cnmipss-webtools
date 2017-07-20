@@ -67,7 +67,8 @@
 (defn edit-jva [jva]
   (fn [e]
     (.preventDefault e)
-    (ajax/ajax-request {:uri "/webtoosl/api/update-jva"
+    (println "Setting: " jva)
+    (ajax/ajax-request {:uri "/webtools/api/update-jva"
                         :method :post
                         :format (ajax/json-request-format)
                         :params jva
