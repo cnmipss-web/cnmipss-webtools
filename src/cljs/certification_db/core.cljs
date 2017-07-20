@@ -8,6 +8,7 @@
             [certification-db.handlers.reframe]
             [certification-db.handlers.reframe-subs]
             [certification-db.components.roles :as roles]
+            [certification-db.components.modals :refer [all-modals]]
             [certification-db.util :as util]
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
@@ -41,6 +42,7 @@
 
 (defn page []
   [:div
+   [all-modals]
    [nav/header]
    [(pages @(rf/subscribe [:page]))]])
 

@@ -33,6 +33,38 @@ $nav-link-color: white;
 $nav-link-hover-color: $light-gold;
 
 /**
+ * Font Weights
+ */
+
+$light: 100;
+$regular: 400;
+$bold: 600;
+
+/**
+ * Fonts
+ */
+
+$base-font-family: 'Roboto', Arial, sans-serif;
+$base-font-weight: $regular;
+$base-font-size: 14px;
+$base-font-line-height: 1.5;
+
+$article-font-family: serif;
+$article-font-weight: $regular;
+$article-font-size: 14px;
+$article-font-line-height: 1.5;
+
+$title-font-family: $base-font-family;
+$title-font-weight: $bold;
+$title-font-size: 24px;
+$title-font-line-height: 2;
+
+$fixed-font-family: monospace;
+$fixed-font-weight: $regular;
+$fixed-font-size: 85%;
+$fixed-font-line-height: $base-font-line-height;
+
+/**
  * Accessibility Variables
  */
 $focus-outline: 1px solid $gold;

@@ -51,6 +51,12 @@ table {
  * Colors by Function
  */
 /**
+ * Font Weights
+ */
+/**
+ * Fonts
+ */
+/**
  * Accessibility Variables
  */
 /**
@@ -115,6 +121,9 @@ button.nav-link {
   border: none;
   background: inherit;
   color: inherit; }
+
+button.jva-file-link {
+  padding: 4px 6px; }
 
 .sidebar {
   position: fixed;
@@ -188,6 +197,15 @@ form {
   .invite-users input[type="text"] {
     margin-top: 10px; }
 
+form.edit-jva {
+  box-shadow: none;
+  border: none;
+  margin: 0px; }
+  form.edit-jva .bold {
+    font-weight: 600; }
+  form.edit-jva label.form-check-label {
+    margin: 0px 5px; }
+
 header.navbar {
   background-color: #1a4167;
   color: white;
@@ -219,31 +237,50 @@ tr.user-list-row {
 
 table.jva-list {
   margin-top: 15px;
-  box-shadow: 1px 2px 2px 2px #ddd; }
+  box-shadow: 1px 2px 2px 2px #ddd;
+  max-height: 600px;
+  overflow-y: scroll; }
+  table.jva-list tr.row:nth-of-type(even) {
+    background-color: #fbf7ea; }
 
-.jva-list-row {
+tr.row.jva-list-row {
   cursor: pointer;
-  white-space: prewrap;
-  font-size: 14px; }
-  .jva-list-row strong {
+  white-space: pre-wrap;
+  font-size: 14px;
+  border-bottom: 1px solid #ddd; }
+  tr.row.jva-list-row.closed {
+    background-color: lightgrey !important; }
+  tr.row.jva-list-row strong {
     font-weight: 600; }
-  .jva-list-row em {
+  tr.row.jva-list-row em {
     color: red;
     font-weight: 600; }
-  .jva-list-row td {
+  tr.row.jva-list-row td:not(:first-child) {
+    border-left: 1px solid #ddd; }
+  tr.row.jva-list-row td {
     padding-top: 5px;
     padding-bottom: auto;
-    border: 1px solid lightgray;
     max-height: 150px;
     min-height: 75px;
     text-align: center; }
-  .jva-list-row .w-1 {
+    tr.row.jva-list-row td button {
+      margin: 5px; }
+  tr.row.jva-list-row .w-1 {
     width: 5%; }
-  .jva-list-row .w-2 {
+  tr.row.jva-list-row .w-2 {
     width: 10%; }
-  .jva-list-row .w-4 {
+  tr.row.jva-list-row .w-4 {
     width: 20%; }
-  .jva-list-row .w-5 {
+  tr.row.jva-list-row .w-5 {
     width: 25%; }
-  .jva-list-row .w-6 {
+  tr.row.jva-list-row .w-6 {
     width: 30%; }
+
+.modal-footer button {
+  margin: -5px 5px; }
+
+.modal-header {
+  display: flex;
+  flex-direction: row; }
+  .modal-header h5 {
+    width: 100%; }

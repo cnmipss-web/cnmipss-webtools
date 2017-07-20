@@ -50,3 +50,8 @@
  :jva-list
  (fn [db _]
    (:jva-list db)))
+
+(reg-sub
+ :jva-modal
+ (fn [db _]
+   (:jva-modal db)))

@@ -67,3 +67,18 @@
  :store-jvas
  (fn [db [_ jvas]]
    (assoc db :jva-list jvas)))
+
+(reg-event-db
+ :set-jva-modal
+ (fn [db [_ jva]]
+   (assoc db :jva-modal jva)))
+
+(reg-event-db
+ :toggle-jva-status
+ (fn [db [_ jva]]
+   (assoc db :jva-modal (assoc jva :status (not (:status jva))))))
+
+(reg-event-db
+ :edit-jva
+ (fn [db [_ key val]]
+   (assoc db :jva-modal (assoc (:jva-modal db) key val))))

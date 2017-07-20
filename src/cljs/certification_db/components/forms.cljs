@@ -4,6 +4,8 @@
             [certification-db.handlers.events :as event-handlers]
             [certification-db.util :as util]))
 
+(def jq js/jQuery)
+
 (defn login-form []
   [:form#login-form {:action "/webtools/oauth/oauth-init" :method "get"}
    [:div.form-group
@@ -88,4 +90,51 @@
    [:div.form-group
     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
+
+(def jva-fields
+  {:announce_no "Announcement Number"
+   :position "Position"
+   :status "Status"
+   :open_date "Opening Date"
+   :close_date "Closing Date"
+   :salary "Salary"
+   :location "Location"})
+
+(defn toggle-status [jva]
+  (fn []
+    (rf/dispatch [:toggle-jva-status jva])))
+
+(defn edit-jva [jva]
+  [:form#edit-jva.edit-jva {:on-submit (event-handlers/edit-jva jva)}
+   (for [[key val] (filter (fn [[key val]] (not= key :file_link)) jva)]
+     (let [field-name (key jva-fields)]
+       (if (= key :status)
+         [:fieldset.form-group.form-inline {:key (str key val)}
+          [:legend.bold field-name]
+          [:div.form-check
+           [:label.form-check-label 
+            [:input.form-check-input {:type "radio"
+                                      :name "status"
+                                      :id "status-open"
+                                      :checked val
+                                      :value true
+                                      :on-change (toggle-status jva)}]
+            " Open"]
+           [:label.form-check-label 
+            [:input.form-check-input {:type "radio"
+                                      :name "status"
+                                      :id "status-closed"
+                                      :checked (not val)
+                                      :value false
+                                      :on-change (toggle-status jva)}]
+            " Closed"]]]
+         [:div.form-group {:key (str key)}
+          [:label.bold {:for field-name} field-name]
+          [:input.form-control {:type "text"
+                                :id (name key)
+                                :name field-name
+                                :value val
+                                :on-change #(->> (-> (str "#" (name key)) jq .val)
+                                                 (conj [:edit-jva key])
+                                                 (rf/dispatch))}]])))])
  

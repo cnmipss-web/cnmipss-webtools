@@ -5,6 +5,7 @@
             [certification-db.util :as util]
             [certification-db.constants :as const]))
 
+
 (defn set-active-role
   [role]
   (fn [event]
@@ -28,7 +29,7 @@
   [email]
   (fn 
     [event]
-    (.preventDefault event)
+    (.preventDefault event) 
     (let [clean-email (apply str (re-seq #"[\w]" email))
           roles (get-all-roles clean-email)
           admin (-> (str "#admin-" clean-email) util/jq (.is ":checked"))]
@@ -62,3 +63,13 @@
                         :params {:email email}
                         :response-format (util/full-response-format ajax/json-response-format)
                         :handler ajax-handlers/all-users})))
+
+(defn edit-jva [jva]
+  (fn [e]
+    (.preventDefault e)
+    (ajax/ajax-request {:uri "/webtoosl/api/update-jva"
+                        :method :post
+                        :format (ajax/json-request-format)
+                        :params jva
+                        :response-format (util/full-response-format ajax/json-response-format)
+                        :handler ajax-handlers/all-jvas})))

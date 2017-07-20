@@ -19,7 +19,7 @@
       ^{:key (str "user-" (user :email))} [user-row user])]])
 
 (defn jva-row [jva]
-  [:tr.row.jva-list-row
+  [:tr.row.jva-list-row {:class (if (not (jva :status)) "closed")}
    [:td.w-1 (jva :announce_no)]
    [:td.w-6 (jva :position)]
    [:td.w-1 (if (jva :status)
@@ -31,7 +31,14 @@
               "Until Filled")]
    [:td.w-5 (jva :salary)]
    [:td.w-2 (jva :location)]
-   [:td.w-1 (jva :file_link)]])
+   [:td.w-1 
+    [:a {:href (jva :file_link)}
+     [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
+    [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
+     [:button.btn.btn-warning.jva-file-link {:title "Edit"
+                                             :data-toggle "modal"
+                                             :data-target "#jva-modal"
+                                             :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]]])
 
 (defn jva-list [jvas]
   [:table.jva-list.col-xs-12

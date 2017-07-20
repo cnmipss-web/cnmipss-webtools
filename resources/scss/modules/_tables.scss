@@ -26,13 +26,23 @@ tr.user-list-row {
 table.jva-list {
     margin-top: 15px;
     box-shadow: $drop-shadow;
-    
+    max-height: 600px;
+    overflow-y: scroll;
+
+    tr.row:nth-of-type(even) {
+        background-color: lighten($light-gold, 35);
+    }
 }
 
-.jva-list-row {
+tr.row.jva-list-row {
     cursor: pointer;
-    white-space: prewrap;
+    white-space: pre-wrap;
     font-size: 14px;
+    border-bottom: 1px solid #ddd;
+
+    &.closed {
+        background-color: lightgrey !important;
+    }
     
     strong {
         font-weight: 600;
@@ -42,14 +52,21 @@ table.jva-list {
         color: red;
         font-weight: 600;
     }
+
+    td:not(:first-child) {
+        border-left: 1px solid #ddd;
+    }
     
     td {
         padding-top: 5px;
         padding-bottom: auto;
-        border: 1px solid lightgray;
         max-height: 150px;
         min-height: 75px;
         text-align: center;
+
+        button {
+            margin: 5px;
+        }
     }
 
     $base-width: 5%;
