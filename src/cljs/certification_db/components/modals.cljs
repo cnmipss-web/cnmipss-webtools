@@ -17,8 +17,12 @@
      [:div.modal-body
       [forms/edit-jva jva]]
      [:div.modal-footer
-      [:button.btn.btn-secondary {:data-dismiss "modal"} "Close"]
-      [:button.btn.btn-primary {:type "submit" :form "edit-jva"} "Save Changes"]]]]])
+      [:div.col-xs-2
+       [:button.btn.btn-danger.jva-reannounce "Re-announce"]]
+      [:div.col-xs-4]
+      [:div.col-xs-6
+       [:button.btn.btn-secondary {:data-dismiss "modal"} "Close"]
+       [:button.btn.btn-primary {:type "submit" :form "edit-jva"} "Save Changes"]]]]]])
 
 (defn all-modals
   []
