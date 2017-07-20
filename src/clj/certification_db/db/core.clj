@@ -69,3 +69,12 @@
   (sql-value [value] (to-pg-json value))
   IPersistentVector
   (sql-value [value] (to-pg-json value)))
+
+(defmacro make-sql-date
+  [m k]
+  `(assoc ~m ~k (try (-> (~k ~m)
+                         java.util.Date.
+                         .getTime
+                         java.sql.Date.)
+                     (catch Exception e#
+                       nil))))

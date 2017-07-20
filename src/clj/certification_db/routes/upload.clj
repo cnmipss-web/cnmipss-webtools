@@ -77,15 +77,6 @@
   (let [this-line (reduce merge (map (fn [[k re]] {k (line-parser re next-line)}) jva-regexes))]
     (merge-with select-non-nil this-line jva)))
 
-(defmacro make-date
-  [m k]
-  `(assoc ~m ~k (try (-> (~k ~m)
-                         java.util.Date.
-                         .getTime
-                         java.sql.Date.)
-                     (catch Exception e#
-                       nil))))
-
 (defn make-status
   [jva]
   (let [{:keys [close_date]} jva
@@ -108,8 +99,8 @@
   (let [jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
         text-list (clojure.string/split jva #"\n")
         jva-record (as-> (reduce jva-reducer {} text-list) jva
-                       (make-date jva :open_date)
-                       (make-date jva :close_date)
+                       (db/make-sql-date jva :open_date)
+                       (db/make-sql-date jva :close_date)
                        (make-status jva)
                        (assoc jva :id (java.util.UUID/randomUUID))
                        (assoc jva :file_link

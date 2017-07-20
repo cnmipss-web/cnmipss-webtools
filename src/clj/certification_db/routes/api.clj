@@ -20,7 +20,7 @@
   JSON format with JSON headers. 
 
   Will perform body parameter before making querying (useful for post routes that modify the db
-  before returning a query).
+  before returning the results of a query).
 
   If there is an error, the response object becomes {:body {:error error}}
   in JSON format with JSON headers."
@@ -37,8 +37,6 @@
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
 
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
-
-
   
   (POST "/api/verify-token" request
         (let [{:keys [token email]} (request :body)
@@ -78,4 +76,10 @@
   (POST "/api/delete-user" request
         (let [{:keys [email]} (request :body)]
           (query-route db/get-all-users
-                       (db/delete-user! (keyed [email]))))))
+                       (db/delete-user! (keyed [email])))))
+
+  (POST "/api/update-jva" {:keys [body]}
+        (let [jva (-> body
+                      (db/make-sql-date :open_date)
+                      (db/make-sql-date :close_date))]
+          (query-route db/get-all-jvas (db/update-jva! jva)))))
