@@ -6,7 +6,9 @@
             [clojure.data.csv :as csv]
             [certification-db.db.core :as db]
             [certification-db.util :refer :all]
+            [certification-db.json :refer :all]
             [certification-db.config :refer [env]]
+            [certification-db.wordpress-api :as wp]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
@@ -95,17 +97,29 @@
         (assoc jva :status true)
         (assoc jva :status false)))))
 
+(defn jva-desc
+  [jva]
+  (str "Job Vacancy Announcement for " (:position jva) " open from " (:open_date jva) " to " (if-let [close (:close_date jva)]
+                                                                                               close
+                                                                                               "until filled.")))
+
 (defn process-jva-pdf
   [{:keys [tempfile size filename]}]
   (let [jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-        text-list (clojure.string/split jva #"\n")]
-    (-> (reduce jva-reducer {} text-list)
-        (make-date :open_date)
-        (make-date :close_date)
-        (make-status)
-        (assoc :id (java.util.UUID/randomUUID))
-        (assoc :file_link "")
-        (db/create-jva!))))
+        text-list (clojure.string/split jva #"\n")
+        jva-record (as-> (reduce jva-reducer {} text-list) jva
+                       (make-date jva :open_date)
+                       (make-date jva :close_date)
+                       (make-status jva)
+                       (assoc jva :id (java.util.UUID/randomUUID))
+                       (assoc jva :file_link
+                              (wp/create-media filename tempfile
+                                               :title (:position jva)
+                                               :alt_text (str "Job Vacancy Announcement for"
+                                                              (:position jva))
+                                               :description (jva-desc jva)
+                                               :slug (:id jva))))]
+    (db/create-jva! jva-record)))
 
 (defmacro post-file-route
   [r p]

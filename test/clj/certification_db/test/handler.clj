@@ -3,6 +3,7 @@
             [ring.mock.request :as mock]
             [certification-db.handler :refer :all]
             [certification-db.util :refer :all]
+            [certification-db.json :refer :all]
             [certification-db.db.core :as db]))
 
 (deftest test-app

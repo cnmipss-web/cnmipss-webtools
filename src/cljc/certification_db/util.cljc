@@ -1,13 +1,4 @@
-(ns certification-db.util
-  (:require ;[clojure.data.json :as json]
-            [cheshire.core :as json]
-            [clojure.walk :as walk]))
-
-(def json->edn
-  (comp walk/keywordize-keys json/parse-string))
-
-(def edn->json
-  (comp json/generate-string))
+(ns certification-db.util)
 
 (let [transforms {:keys keyword
                   :strs str
@@ -21,3 +12,14 @@
        (let [transform (comp (partial list `quote)
                              (transforms key-type))]
          (into {} (map (juxt transform identity) vars))))))
+
+(defn full-response-format [body-format]
+  (-> (body-format)
+      (update :read (fn [original-handler]
+                      (fn [response-obj]
+                        {:headers  #?(:clj (:headers response-obj)
+                                      :cljs (js->clj (.getResponseHeaders response-obj)))
+                         :body    (original-handler response-obj)
+                         :status  #?(:clj (:status response-obj)
+                                     :cljs (.getStatus response-obj))})))))
+

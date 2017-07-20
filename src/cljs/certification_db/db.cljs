@@ -5,4 +5,5 @@
    :session {}
    :bad-login false
    :success nil
-   :show-roles true})
+   :show-roles true
+   :wp-host "/"})

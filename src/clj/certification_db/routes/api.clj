@@ -4,6 +4,7 @@
             [clojure.data.json :as json]
             [certification-db.db.core :as db]
             [certification-db.util :refer :all]
+            [certification-db.json :refer :all]
             [certification-db.layout :refer [error-page]]))
 
 (def truthy (comp some? #{"true" true}))
