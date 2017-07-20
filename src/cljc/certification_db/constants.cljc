@@ -3,7 +3,7 @@
 
 (def role-list ["Certification" "HRO" "Procurement" "Manage Users" "Manage DB"])
 
-(def wp-host (env :wp-host))
+(def wp-host (:wp-host env))
 
 (def wp-token-route "/wp-json/jwt-auth/v1/token")
 
