@@ -88,9 +88,9 @@
 
 (defn make-status
   [jva]
-  (let [{:keys [close-date]} jva
+  (let [{:keys [close_date]} jva
         today (t/now)
-        end (coerce/from-date close-date)]
+        end (coerce/from-date close_date)]
     (if (nil? end)
       (assoc jva :status true)
       (if (t/before? today end)
