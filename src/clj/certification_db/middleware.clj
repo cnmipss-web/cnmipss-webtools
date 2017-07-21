@@ -1,23 +1,31 @@
 (ns certification-db.middleware
   (:require [certification-db.env :refer [defaults]]
-            [clojure.tools.logging :as log]
+            [certification-db.db.core :as db]
+            [certification-db.config :refer [env]]
             [certification-db.layout :refer [*app-context* error-page]]
+            [clojure.tools.logging :as log]
+            [immutant.web.middleware :refer [wrap-session]]
+            [muuntaja.middleware :refer [wrap-format wrap-params]]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
             [ring.middleware.webjars :refer [wrap-webjars]]
             [ring.middleware.json :refer [wrap-json-body]]
-            [muuntaja.middleware :refer [wrap-format wrap-params]]
-            [certification-db.config :refer [env]]
             [ring.middleware.flash :refer [wrap-flash]]
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
-            [immutant.web.middleware :refer [wrap-session]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.cors :refer [wrap-cors]])
+            [ring.middleware.cors :refer [wrap-cors]]
+            [ring.middleware.cookies :refer [wrap-cookies]])
   (:import [javax.servlet ServletContext]))
 
-(defn wrap-webtools-path [handler]
+(defn wrap-webtools-auth [handler]
   (fn [request]
-    ;(println request)
-    (handler request)))
+    (let [email (get-in request [:cookies "email" :value])
+          token (get-in request [:cookies "token" :value])]
+      (if (and (and email token)
+               (= token (get (db/get-user-token {:email email}) :token)))
+        (handler request)
+        (error-page
+         {:status 403
+          :title "Access Forbidden"})))))
 
 (defn wrap-context [handler]
   (fn [request]
@@ -71,14 +79,14 @@
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
-      wrap-webtools-path
       (wrap-json-body {:keywords? true})
       wrap-webjars
-      wrap-flash
-      (wrap-session {:cookie-attrs {:http-only false}})
       (wrap-defaults
         (-> site-defaults
             (assoc-in [:security :anti-forgery] false)
             (dissoc :session)))
+      wrap-cookies 
+      wrap-flash
+      (wrap-session {:cookie-attrs {:http-only false}})
       wrap-context
       wrap-internal-error))

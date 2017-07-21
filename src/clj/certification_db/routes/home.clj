@@ -9,11 +9,8 @@
   (layout/render "home.html"))
 
 (defroutes home-routes
-  (GET "/" []
+  (GET "/" request
        (home-page))
   (GET "/webtools/" request
-       (response/found (env :server-uri)))
-  (GET "/docs" []
-       (-> (response/ok (-> "docs/docs.md" io/resource slurp))
-           (response/header "Content-Type" "text/plain; charset=utf-8"))))
+       (response/found (env :server-uri))))
 

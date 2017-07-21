@@ -23,8 +23,10 @@
     (-> #'api-routes
         (wrap-routes middleware/wrap-api))
     (-> #'api-routes-with-auth
+        (wrap-routes middleware/wrap-webtools-auth)
         (wrap-routes middleware/wrap-api))
     (-> #'upload-routes
+        (wrap-routes middleware/wrap-webtools-auth)
         (wrap-routes middleware/wrap-uploads))
     (route/not-found
       (:body

@@ -39,15 +39,17 @@
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
   
   (POST "/api/verify-token" request
-        (let [{:keys [token email]} (request :body)
-              user-email (keyed [email])
-              correct-token ((db/get-user-token user-email) :token)
-              user (-> (db/get-user-info user-email)
-                       (dissoc :id))
-              is-admin ((db/is-user-admin? user-email) :admin)]
-          (if (= token correct-token)
-            (json-response resp/ok (keyed [user is-admin]))
-            (resp/forbidden)))))
+        (if-let [token (get-in request [:cookies "token" :value])]
+          (let [email (get-in request [:cookies "email" :value])
+                user-email (keyed [email])
+                correct-token ((db/get-user-token user-email) :token)
+                user (-> (db/get-user-info user-email)
+                         (dissoc :id))
+                is-admin ((db/is-user-admin? user-email) :admin)]
+            (if (= token correct-token)
+              (json-response resp/ok (keyed [user is-admin]))
+              (resp/forbidden)))
+          (resp/forbidden))))
 
 (defroutes api-routes-with-auth
   (GET "/api/user" request

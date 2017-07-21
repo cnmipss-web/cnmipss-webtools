@@ -33,7 +33,8 @@
                        (get :body)
                        (json/read-str)
                        (get "email"))
-             user (db/get-user-info (keyed [email]))]
+             user (db/get-user-info (keyed [email]))
+             cookie-opts {:http-only true :max-age 3600 :path "/webtools"}]
          (if (re-seq #"cnmipss.org$" email)
            (do
              (if user
@@ -41,8 +42,7 @@
                (let [admin false
                      id (java.util.UUID/randomUUID)]
                  (db/create-user! (keyed [email token admin id]))))
-             (-> (respond/found (str "/webtools/#/users?token=" token
-                                     "&email=" email))
-                 (respond/set-cookie "token" token)
-                 (respond/set-cookie "email" email)))
+             (-> (respond/found (str "/webtools/#/app"))
+                 (respond/set-cookie "token" token cookie-opts)
+                 (respond/set-cookie "email" email cookie-opts)))
            (respond/found "/webtools/#/?login_failed=true")))))
