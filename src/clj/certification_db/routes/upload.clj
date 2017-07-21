@@ -118,11 +118,11 @@
      (println "File uploaded: " file#)
      (try
        (~p file#)
-       (-> (response/found (str (env :server-uri) (get-in ~r [:params :path]) "&success=true"))
+       (-> (response/found (str (env :server-uri) "#/app?success=true"))
            (response/header "Content-Type" "application/json"))
        (catch Exception e#
          (println e#)
-         (-> (response/found (str (env :server-uri) (get-in ~r [:params :path]) "&success=false"))
+         (-> (response/found (str (env :server-uri) "#/app?&success=false"))
              (response/header "Content-Type" "application/json"))))))
 
 (defroutes upload-routes

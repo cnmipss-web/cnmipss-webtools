@@ -26,17 +26,17 @@
   (format/parse (format/formatter "dd MMM YYYY") date))
 
 (defn force-close?
-  [open close_date]
-  (or (not open)
+  [{:keys [status close_date]}]
+  (or (not status)
       (and close_date
            (time/after? (time/now) (parse-date close_date)))))
 
 (defn jva-row [jva]
   (let [{:keys [status close_date]} jva]
-    [:tr.row.jva-list-row {:class (if (force-close? status close_date) "closed")}
+    [:tr.row.jva-list-row {:class (if (force-close? jva) "closed")}
      [:td.w-1 (jva :announce_no)]
      [:td.w-4 (jva :position)]
-     [:td.w-1 (if (force-close? status close_date)
+     [:td.w-1 (if (force-close? jva)
                 [:em "Closed"]
                 [:strong "Open"])]
      [:td.w-2 (jva :open_date)]
@@ -66,8 +66,8 @@
    jvas))
 
 (defn sort-jvas [jvas]
-  (concat (->> jvas (filter #(not (force-close? (:status %) (:close_date %)))) (sort-by :announce_no) reverse)
-          (->> jvas (filter #(force-close? (:status %) (:close_date %))) (sort-by :announce_no) reverse)))
+  (concat (->> jvas (filter (comp not force-close?)) (sort-by :announce_no) reverse)
+          (->> jvas (filter force-close?) (sort-by :announce_no) reverse)))
 
 (defn jva-list [jvas]
   [:table.jva-list.col-xs-12
