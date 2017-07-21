@@ -9,6 +9,7 @@
                  [clj-time "0.14.0"]
                  [clj-http "3.6.1"]
                  [cljs-ajax "0.6.0"]
+                 [com.andrewmcveigh/cljs-time "0.5.0"]
                  [cljsjs/jquery "3.2.1-0"]
                  [com.cemerick/friend "0.2.3"]
                  [com.cemerick/url "0.1.1"]

@@ -1,5 +1,7 @@
 (ns certification-db.components.tables
   (:require [re-frame.core :as rf]
+            [cljs-time.core :as time]
+            [cljs-time.format :as format]
             [certification-db.components.forms :as forms]
             [certification-db.handlers.events :as events]))
 
@@ -19,30 +21,40 @@
     (for [user (sort-by :email users)]
       ^{:key (str "user-" (user :email))} [user-row user])]])
 
+(defn parse-date
+  [date]
+  (format/parse (format/formatter "dd MMM YYYY") date))
+
+(defn force-close?
+  [open close_date]
+  (or (not open)
+      (and close_date
+           (time/after? (time/now) (parse-date close_date)))))
 
 (defn jva-row [jva]
-  [:tr.row.jva-list-row {:class (if (not (jva :status)) "closed")}
-   [:td.w-1 (jva :announce_no)]
-   [:td.w-4 (jva :position)]
-   [:td.w-1 (if (jva :status)
-              [:strong "Open"]
-              [:em "Closed"])]
-   [:td.w-2 (jva :open_date)]
-   [:td.w-2 (if-let [date (jva :close_date)]
-              date
-              "Until Filled")]
-   [:td.w-5 (jva :salary)]
-   [:td.w-2 (jva :location)]
-   [:td.w-3 
-    [:a {:href (jva :file_link)}
-     [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
-    [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
-     [:button.btn.btn-warning.jva-file-link {:title "Edit"
-                                             :data-toggle "modal"
-                                             :data-target "#jva-modal"
-                                             :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
-    [:a {:on-click (events/delete-jva jva)}
-     [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
+  (let [{:keys [status close_date]} jva]
+    [:tr.row.jva-list-row {:class (if (force-close? status close_date) "closed")}
+     [:td.w-1 (jva :announce_no)]
+     [:td.w-4 (jva :position)]
+     [:td.w-1 (if (force-close? status close_date)
+                [:em "Closed"]
+                [:strong "Open"])]
+     [:td.w-2 (jva :open_date)]
+     [:td.w-2 (if close_date
+                close_date
+                "Until Filled")]
+     [:td.w-5 (jva :salary)]
+     [:td.w-2 (jva :location)]
+     [:td.w-3 
+      [:a {:href (jva :file_link)}
+       [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
+      [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
+       [:button.btn.btn-warning.jva-file-link {:title "Edit"
+                                               :data-toggle "modal"
+                                               :data-target "#jva-modal"
+                                               :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
+      [:a {:on-click (events/delete-jva jva)}
+       [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
 
 (defn filter-jvas
   [jvas]
@@ -54,8 +66,8 @@
    jvas))
 
 (defn sort-jvas [jvas]
-  (concat (->> jvas (filter :status) (sort-by :announce_no) reverse)
-          (->> jvas (filter #(not (:status %))) (sort-by :announce_no) reverse)))
+  (concat (->> jvas (filter #(not (force-close? (:status %) (:close_date %)))) (sort-by :announce_no) reverse)
+          (->> jvas (filter #(force-close? (:status %) (:close_date %))) (sort-by :announce_no) reverse)))
 
 (defn jva-list [jvas]
   [:table.jva-list.col-xs-12
