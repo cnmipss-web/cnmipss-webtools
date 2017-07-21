@@ -55,3 +55,8 @@
  :jva-modal
  (fn [db _]
    (:jva-modal db)))
+
+(reg-sub
+ :jva-searches
+ (fn [db _]
+   (:jva-searches db)))

@@ -80,6 +80,11 @@
    (assoc db :jva-list jvas)))
 
 (reg-event-db
+ :set-jva-searches
+ (fn [db [_ searches]]
+   (assoc db :jva-searches searches)))
+
+(reg-event-db
  :set-jva-modal
  (fn [db [_ jva]]
    (assoc db :jva-modal jva)))

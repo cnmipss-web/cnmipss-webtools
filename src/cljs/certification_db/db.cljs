@@ -6,4 +6,5 @@
    :bad-login false
    :success nil
    :show-roles true
-   :wp-host "/"})
+   :wp-host "/"
+   :jva-searches [""]})

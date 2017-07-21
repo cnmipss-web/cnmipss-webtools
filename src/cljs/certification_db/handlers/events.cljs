@@ -5,6 +5,8 @@
             [certification-db.util :as util]
             [certification-db.constants :as const]))
 
+(def jq js/jQuery)
+
 (defn set-active-role
   [role]
   (fn [event]
@@ -83,3 +85,8 @@
                         :params jva
                         :response-format (util/full-response-format ajax/json-response-format)
                         :handler ajax-handlers/all-jvas})))
+
+
+(defn search-jvas []
+  (let [searches (-> "#search-jvas" jq .val (clojure.string/split #" "))]
+    (rf/dispatch [:set-jva-searches searches])))

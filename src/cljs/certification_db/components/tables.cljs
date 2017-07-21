@@ -19,6 +19,7 @@
     (for [user (sort-by :email users)]
       ^{:key (str "user-" (user :email))} [user-row user])]])
 
+
 (defn jva-row [jva]
   [:tr.row.jva-list-row {:class (if (not (jva :status)) "closed")}
    [:td.w-1 (jva :announce_no)]
@@ -43,6 +44,19 @@
     [:a {:on-click (events/delete-jva jva)}
      [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
 
+(defn filter-jvas
+  [jvas]
+  (filter
+   (fn [jva] (let [{:keys [position location announce_no salary]} jva
+                   searches @(rf/subscribe [:jva-searches])]
+               (every? #(re-seq (re-pattern (str "(?i)" %))
+                                (str position " " location " " announce_no " " salary)) searches)))
+   jvas))
+
+(defn sort-jvas [jvas]
+  (concat (->> jvas (filter :status) (sort-by :announce_no) reverse)
+          (->> jvas (filter #(not (:status %))) (sort-by :announce_no) reverse)))
+
 (defn jva-list [jvas]
   [:table.jva-list.col-xs-12
    [:caption.sr-only "List of current and past JVAs"]
@@ -57,5 +71,5 @@
      [:th.w-2.text-center {:scope "col"} "Location"]
      [:th.w-3.text-center {:scope "col"} "Link"]]]
    [:tbody
-    (for [jva (reverse (sort-by :announce_no jvas))]
+    (for [jva (-> jvas filter-jvas sort-jvas)]
       ^{:key (str "jva-" (jva :announce_no))} [jva-row jva])]])

@@ -25,6 +25,7 @@
                       :handler ajax-handlers/all-jvas})
   [:div
    [:div.col-xs-12
+    [forms/jva-search]
     [tables/jva-list @(rf/subscribe [:jva-list])]]
    [:div.col-xs-12
     [forms/jva-upload (.-hash js/location)]]])

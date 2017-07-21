@@ -137,4 +137,15 @@
                                 :on-change #(->> (-> (str "#" (name key)) jq .val)
                                                  (conj [:edit-jva key])
                                                  (rf/dispatch))}]])))])
+
+(defn jva-search []
+  [:div#jva-search
+   [:form {:role "search"}
+    [:div.form-group
+     [:label.sr-only {:for "search-jvas"} "Search JVAS"]
+     [:input.form-control {:type "search"
+                           :id "search-jvas"
+                           :placeholder "Search JVAS"
+                           :on-change event-handlers/search-jvas
+                           :ref "search-certified"}]]]])
  

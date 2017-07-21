@@ -209,6 +209,15 @@ form.edit-jva {
   form.edit-jva label.form-check-label {
     margin: 0px 5px; }
 
+#jva-search > form {
+  border: none;
+  box-shadow: none;
+  margin-bottom: -15px;
+  margin-top: 15px;
+  padding: 0px; }
+  #jva-search > form input[type='search'] {
+    text-align: center; }
+
 header.navbar {
   background-color: #1a4167;
   color: white;
