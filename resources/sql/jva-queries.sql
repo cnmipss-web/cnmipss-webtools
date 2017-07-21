@@ -20,3 +20,8 @@ set position = :position,
     location = :location,
     file_link = :file_link
 where announce_no = :announce_no
+
+-- :name delete-jva! :! :1
+-- :doc delete a single jva
+delete from jvas
+where announce_no = :announce_no

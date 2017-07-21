@@ -84,4 +84,11 @@
         (let [jva (-> body
                       (db/make-sql-date :open_date)
                       (db/make-sql-date :close_date))]
-          (query-route db/get-all-jvas (db/update-jva! jva)))))
+          (query-route db/get-all-jvas (db/update-jva! jva))))
+
+  (POST "/api/delete-jva" {:keys [body]}
+        (let [jva (-> body
+                      (db/make-sql-date :open_date)
+                      (db/make-sql-date :close_date))]
+          (query-route db/get-all-jvas
+                       (db/delete-jva! jva)))))

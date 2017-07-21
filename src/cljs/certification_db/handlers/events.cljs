@@ -5,7 +5,6 @@
             [certification-db.util :as util]
             [certification-db.constants :as const]))
 
-
 (defn set-active-role
   [role]
   (fn [event]
@@ -69,6 +68,16 @@
     (.preventDefault e)
     (println "Setting: " jva)
     (ajax/ajax-request {:uri "/webtools/api/update-jva"
+                        :method :post
+                        :format (ajax/json-request-format)
+                        :params jva
+                        :response-format (util/full-response-format ajax/json-response-format)
+                        :handler ajax-handlers/all-jvas})))
+
+(defn delete-jva [jva]
+  (fn [e]
+    (.preventDefault e)
+    (ajax/ajax-request {:uri "/webtools/api/delete-jva"
                         :method :post
                         :format (ajax/json-request-format)
                         :params jva
