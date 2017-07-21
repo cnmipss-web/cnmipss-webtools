@@ -1,5 +1,7 @@
 (ns certification-db.handlers.reframe
   (:require [certification-db.db :as db]
+            [certification-db.constants :as const]
+            [certification-db.util :as util]
             [re-frame.core :refer [dispatch reg-event-db]]
             [ajax.core :as ajax]))
 
@@ -24,9 +26,13 @@
    (assoc db :bad-login true)))
 
 (reg-event-db
- :successful-login
- (fn [db [_ _]]
-   (assoc db :bad-login false)))
+ :verified-token
+ (fn [db [_ email admin roles]]
+   (as-> (assoc db :bad-login false) db
+       (assoc db :session (util/keyed [email admin]))
+       (if admin
+         (assoc db :roles const/role-list)
+         (assoc db :roles (clojure.string/split roles #","))))))
 
 (reg-event-db
  :action-success

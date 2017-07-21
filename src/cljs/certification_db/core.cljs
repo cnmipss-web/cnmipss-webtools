@@ -10,6 +10,8 @@
             [certification-db.components.roles :as roles]
             [certification-db.components.modals :refer [all-modals]]
             [certification-db.util :as util]
+            [certification-db.cookies :refer [get-cookie] :as cookies]
+            [cemerick.url :refer [url-decode]]
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
@@ -55,7 +57,7 @@
 (secretary/set-config! :prefix "/webtools/#")
 
 (secretary/defroute "/" []
-  (set! (.-href js/location) "#/login"))
+  (set! (.-href js/location) "#/app"))
 
 (secretary/defroute "/login" []
   (if-let [matches (re-seq #"login_failed=true" (.-hash js/location))]
@@ -63,22 +65,20 @@
   (rf/dispatch [:set-active-page :login]))
 
 (secretary/defroute "/app" []
-  (if-let [matches (re-seq #"app\?token=(.*)\&email=(.*org)" (.-hash js/location))]
-    (let [token (get (first matches) 1)
-          email (get (first matches) 2)
-          success (get (first (re-seq #"success=(.*)" (.-hash js/location))) 1)]
-      (case success
-        "true" (rf/dispatch [:action-success])
-        "false" (rf/dispatch [:action-failed])
-        "")
-      (ajax/ajax-request {:uri "/webtools/api/verify-token"
-                          :method :post
-                          :format (ajax/json-request-format)
-                          :params  {:email email :token token}
-                          :response-format (util/full-response-format ajax/json-response-format)
-                          :handler (ajax-handlers/verified-token? email token)
-                          :error-handler #(.log js/console %)}))
-    (redirect-bad-login)))
+  (let [token (get-cookie :token)
+        email (url-decode (get-cookie :email))
+        success (get (first (re-seq #"success=(.*)" (.-hash js/location))) 1)]
+    (case success
+      "true" (rf/dispatch [:action-success])
+      "false" (rf/dispatch [:action-failed])
+      "")
+    (ajax/ajax-request {:uri "/webtools/api/verify-token"
+                        :method :post
+                        :format (ajax/json-request-format)
+                        :params {:email email :token token}
+                        :response-format (util/full-response-format ajax/json-response-format)
+                        :handler ajax-handlers/verified-token?
+                        :error-handler #(.log js/console %)})))
 
 ;; -------------------------
 ;; History

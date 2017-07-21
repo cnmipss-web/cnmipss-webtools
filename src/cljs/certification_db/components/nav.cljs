@@ -6,7 +6,7 @@
 (defn header []
   [:header.navbar
    [:div.navbar-header
-    [:a.navbar-brand {:href "#/"} "CNMI PSS Webtools"]
+    [:a.navbar-brand {:href "#/app"} "CNMI PSS Webtools"]
     [:ul.navbar-nav.mr-auto
      [:li.nav-item>button.nav-link {:on-click #(rf/dispatch [:toggle-roles])
                                     :aria-controls "nav-sidebar"
