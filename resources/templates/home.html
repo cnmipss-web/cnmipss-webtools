@@ -34,11 +34,12 @@
     {% style "/webtools/css/screen.css" %}
 
     <script type="text/javascript">
-        var context = "{{servlet-context}}";
-        var csrfToken = "{{csrf-token}}";
+     var context = "{{servlet-context}}";
+     var csrfToken = "{{csrf-token}}";
     </script>
     {% script "/webtools/js/app.js" %}
-    {% script "/webtools/assets/bootstrap/js/bootstrap.js" %}
+    {% script "/webtools/assets/tether/dist/js/tether.min.js" %}
+    {% script "/webtools/assets/bootstrap/js/bootstrap.min.js" %}
   </body>
 </html>
 
