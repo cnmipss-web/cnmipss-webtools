@@ -23,7 +23,7 @@
 
 (defn parse-date
   [date]
-  (format/parse (format/formatter "dd MMM YYYY") date))
+  (format/parse (format/formatter "MMMM dd, YYYY") date))
 
 (defn force-close?
   [{:keys [status close_date]}]

@@ -75,7 +75,7 @@
 (defn wrap-api [handler]
   (-> handler
       (wrap-cors :access-control-allow-origin #"https?://(localhost.test|cnmipss).*"
-                 :access-control-allow-methods [:get])))
+                 :access-control-allow-methods [:get :post])))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
