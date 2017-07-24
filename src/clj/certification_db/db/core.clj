@@ -6,6 +6,8 @@
    [clj-time.jdbc]
    [clj-time.format :as f]
    [clj-time.coerce :as c]
+   [clj-time.core :as t]
+   [clj-time.local :as l]
    [clojure.java.jdbc :as jdbc]
    [conman.core :as conman]
    [certification-db.config :refer [env]]
@@ -62,7 +64,7 @@
 
 (add-encoder org.joda.time.DateTime
              (fn [date jg]
-               (.writeString jg (f/unparse (f/formatter "dd MMM YYYY") date))))
+               (.writeString jg (f/unparse (f/formatter "MMMM dd, YYYY") date))))
 
 (extend-protocol jdbc/ISQLValue
   IPersistentMap
@@ -70,11 +72,10 @@
   IPersistentVector
   (sql-value [value] (to-pg-json value)))
 
-(defmacro make-sql-date
+(defn make-sql-date
   [m k]
-  `(assoc ~m ~k (try (-> (~k ~m)
-                         java.util.Date.
-                         .getTime
-                         java.sql.Date.)
-                     (catch Exception e#
-                       nil))))
+  (assoc m k (try (->> (get m k)
+                       (f/parse (f/formatter "MMMM dd, YYYY"))
+                       (c/to-sql-date))
+                  (catch Exception e
+                    nil))))
