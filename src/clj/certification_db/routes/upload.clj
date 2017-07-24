@@ -62,9 +62,7 @@
 
 (defn select-non-nil
   [a b]
-  (let [is-a (some? a)
-        is-b (some? b)]
-    (if is-a a (if is-b b nil))))
+  (or a b))
 
 (defn line-parser
   [re line]
@@ -95,12 +93,16 @@
                                                                                                "until filled.")))
 
 (defn process-jva-pdf
-  [{:keys [tempfile size filename]}]
-  (let [jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-        text-list (clojure.string/split jva #"\n")
-        jva-record (as-> (reduce jva-reducer {} text-list) jva
+  [file-list]
+  (if (= (type file-list) clojure.lang.PersistentArrayMap)
+    (let [{:keys [tempfile size filename]} file-list
+          jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
+          text-list (clojure.string/split jva #"\n")
+          jva-record (as-> (reduce jva-reducer {} text-list) jva
+                       ((fn [j] (println j) j) jva)
                        (db/make-sql-date jva :open_date)
-                       (db/make-sql-date jva :close_date)
+                       (db/make-sql-date jva :close_date)                       
+                       ((fn [j] (println j) j) jva)
                        (make-status jva)
                        (assoc jva :id (java.util.UUID/randomUUID))
                        (assoc jva :file_link
@@ -110,12 +112,12 @@
                                                               (:position jva))
                                                :description (jva-desc jva)
                                                :slug (:id jva))))]
-    (db/create-jva! jva-record)))
+      (db/create-jva! jva-record))
+    (mapv process-jva-pdf file-list)))
 
 (defmacro post-file-route
   [r p]
   `(let [file# (get-in ~r [:params :file])]
-     (println "File uploaded: " file#)
      (try
        (~p file#)
        (-> (response/found (str (env :server-uri) "#/app?success=true"))
