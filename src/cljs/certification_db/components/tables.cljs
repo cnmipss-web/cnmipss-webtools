@@ -85,3 +85,5 @@
    [:tbody
     (for [jva (-> jvas filter-jvas sort-jvas)]
       ^{:key (str "jva-" (jva :announce_no))} [jva-row jva])]])
+
+(defn rfp-ifb-list [rfp-ifbs] [:div])

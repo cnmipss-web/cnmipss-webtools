@@ -148,4 +148,9 @@
                            :placeholder "Search JVAS"
                            :on-change event-handlers/search-jvas
                            :ref "search-certified"}]]]])
+
+(defn rfp-upload [] [:div])
+(defn ifb-upload [] [:div])
+(defn rfp-ifb-search [] [:div])
+
  

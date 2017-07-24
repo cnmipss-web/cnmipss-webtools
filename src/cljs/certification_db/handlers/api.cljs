@@ -35,3 +35,6 @@
       (rf/dispatch [:store-jvas jvas])
       (println response))))
 
+(defn all-procurement
+  [[ok response]]
+  (println ok response))

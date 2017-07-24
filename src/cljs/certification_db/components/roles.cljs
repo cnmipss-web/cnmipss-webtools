@@ -6,6 +6,13 @@
             [certification-db.handlers.api :as ajax-handlers]
             [certification-db.util :as util]))
 
+(defn ajax-get
+  [opts]
+  (let [defaults {:method :get
+                  :format (ajax/json-request-format)
+                  :response-format (util/full-response-format ajax/json-response-format)}]
+    (ajax/ajax-request (merge defaults opts))))
+
 (defn- certification []
   [:div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
    [forms/upload-form (.-hash js/location)]
@@ -18,11 +25,8 @@
         [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]])
 
 (defn- hro []
-  (ajax/ajax-request {:uri "/webtools/api/all-jvas"
-                      :method :get
-                      :format (ajax/json-request-format)
-                      :response-format (util/full-response-format ajax/json-response-format)
-                      :handler ajax-handlers/all-jvas})
+  (ajax-get {:uri "/webtools/api/all-jvas"
+             :handler ajax-handlers/all-jvas})
   [:div
    [:div.col-xs-12
     [forms/jva-search]
@@ -31,14 +35,19 @@
     [forms/jva-upload (.-hash js/location)]]])
 
 (defn- procurement []
-  [:div])
+  (ajax-get {:uri "/webtools/api/all-procurement"
+             :handler ajax-handlers/all-procurement})
+  [:div
+   [:div.col-xs-12
+    [forms/rfp-upload]
+    [forms/ifb-upload]]
+   [:div.col-xs-12
+    [forms/rfp-ifb-search]
+    [tables/rfp-ifb-list @(rf/subscribe [:rfp-ifb-list])]]])
 
 (defn manage-users []
-  (ajax/ajax-request {:uri "/webtools/api/all-users"
-                      :method :get
-                      :format (ajax/json-request-format)
-                      :response-format (util/full-response-format ajax/json-response-format)
-                      :handler ajax-handlers/all-users})
+  (ajax-get {:uri "/webtools/api/all-users"
+             :handler ajax-handlers/all-users})
   [:div
    [tables/user-table @(rf/subscribe [:user-list])]
    [:div.col-xs-12

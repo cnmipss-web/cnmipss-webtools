@@ -60,3 +60,8 @@
  :jva-searches
  (fn [db _]
    (:jva-searches db)))
+
+(reg-sub
+ :rfp-ifb-lsit
+ (fn [db _]
+   (:rfp-ifb-list db)))
