@@ -46,12 +46,15 @@
     (testing "it should respond status 200 if token/email combo match DB"
       (let [correct-token (db/get-user-token "tyler.collins@cnmipss.org")
             response ((app) (-> (mock/request :post "/api/verify-token")
+                                (assoc :cookies {:email {:value "tyler.collins@cnmipss.org"}
+                                                 :token {:value correct-token}})
                                 (mock/body (edn->json {:email "tyler.collins@cnmipss.org" :token correct-token}))
                                 (mock/header "Content-Type" "application/json")))
             {:keys [status]} response]
         (is (= 200 status))))
     (testing "it should respond status 403 if token/email combo do not match DB"
       (let [response ((app) (-> (mock/request :post "/api/verify-token")
+
                                 (mock/body (edn->json {:email "tyler.collins@cnmipss.org" :token "token"}))
                                 (mock/header "Content-Type" "application/json")))
             {:keys [status]} response]
