@@ -18,8 +18,8 @@
 
 (defn wrap-webtools-auth [handler]
   (fn [request]
-    (let [email (get-in request [:cookies "email" :value])
-          token (get-in request [:cookies "token" :value])]
+    (let [email (get-in request [:cookies "wt-email" :value])
+          token (get-in request [:cookies "wt-token" :value])]
       (if (and (and email token)
                (= token (get (db/get-user-token {:email email}) :token)))
         (handler request)

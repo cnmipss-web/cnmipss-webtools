@@ -43,6 +43,6 @@
                      id (java.util.UUID/randomUUID)]
                  (db/create-user! (keyed [email token admin id]))))
              (-> (respond/found (str "/webtools/#/app"))
-                 (respond/set-cookie "token" token cookie-opts)
-                 (respond/set-cookie "email" email cookie-opts)))
+                 (respond/set-cookie "wt-token" token cookie-opts)
+                 (respond/set-cookie "wt-email" email cookie-opts)))
            (respond/found "/webtools/#/?login_failed=true")))))

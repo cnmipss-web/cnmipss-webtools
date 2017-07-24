@@ -4,18 +4,24 @@
             [certification-db.constants :refer [role-list]]))
 
 (defn header []
-  [:header.navbar
-   [:div.navbar-header
-    [:a.navbar-brand {:href "#/app"} "CNMI PSS Webtools"]
-    [:ul.navbar-nav.mr-auto
-     [:li.nav-item>button.nav-link {:on-click #(rf/dispatch [:toggle-roles])
-                                    :aria-controls "nav-sidebar"
-                                    :aria-expanded @(rf/subscribe [:show-roles?])}
-      (if @(rf/subscribe [:show-roles?])
-        "Hide Roles"
-        "Show Roles")]
-     [:li.nav-item>p.nav-link
-      (str " " (:email @(rf/subscribe [:session])))]]]])
+  (let [{:keys [email]} @(rf/subscribe [:session])]
+    [:header.navbar
+     [:div.navbar-header
+      [:a.navbar-brand {:href "#/app"} "CNMI PSS Webtools"]
+      [:ul.navbar-nav
+       (if (some? email)
+         [:li.nav-item>button.nav-link {:on-click #(rf/dispatch [:toggle-roles])
+                                        :aria-controls "nav-sidebar"
+                                        :aria-expanded @(rf/subscribe [:show-roles?])}
+          (if @(rf/subscribe [:show-roles?])
+            "Hide Roles"
+            "Show Roles")])
+       [:li.nav-item>p.nav-link
+        (str " " email)]]]
+     (if (some? email)
+       [:div.navbar-footer
+        [:ul.navbar-nav.ml-auto
+         [:li.nav-item>a.nav-link {:href "/webtools/logout"} "Logout"]]])]))
 
 (defn side-bar-btn [role active]
   [:button.btn.sidebar-btn {:on-click (e/set-active-role role)

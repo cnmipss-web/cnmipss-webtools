@@ -5,7 +5,8 @@
             [certification-db.db.core :as db]
             [certification-db.util :refer :all]
             [certification-db.json :refer :all]
-            [certification-db.layout :refer [error-page]]))
+            [certification-db.layout :refer [error-page]]
+            [certification-db.constants :as const]))
 
 (def truthy (comp some? #{"true" true}))
 
@@ -39,8 +40,8 @@
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
   
   (POST "/api/verify-token" request
-        (if-let [token (get-in request [:cookies "token" :value])]
-          (let [email (get-in request [:cookies "email" :value])
+        (if-let [token (get-in request [:cookies "wt-token" :value])]
+          (let [email (get-in request [:cookies "wt-email" :value])
                 user-email (keyed [email])
                 correct-token ((db/get-user-token user-email) :token)
                 user (-> (db/get-user-info user-email)
@@ -52,6 +53,10 @@
           (resp/forbidden))))
 
 (defroutes api-routes-with-auth
+  (GET "/logout" request
+       (-> (resp/found (str const/wp-host "/webtools/#/login"))
+            (resp/set-cookie "wt-token" "" {:max-age 1 :path "/webtools"})
+            (resp/set-cookie "wt-email" "" {:max-age 1 :path "/webtools"})))
   (GET "/api/user" request
        (if-let [email (get-in request [:query-params "email"])]
          (if-let [user (-> (db/get-user-info (keyed [email]))

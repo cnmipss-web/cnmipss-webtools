@@ -226,6 +226,9 @@ header.navbar {
   header.navbar a {
     color: white; }
 
+.navbar-footer {
+  float: right; }
+
 table.user-list {
   margin-top: 15px;
   width: 100%;
