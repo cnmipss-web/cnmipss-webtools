@@ -14,6 +14,7 @@
                  [com.cemerick/friend "0.2.3"]
                  [com.cemerick/url "0.1.1"]
                  [compojure "1.6.0"]
+                 [com.layerware/hugsql "0.4.7"]
                  [conman "0.6.4"]
                  [cprop "0.1.10"]
                  [funcool/struct "1.0.0"]
