@@ -51,13 +51,14 @@
             (if (= token correct-token)
               (json-response resp/ok (keyed [user is-admin]))
               (resp/forbidden)))
-          (resp/forbidden))))
-
-(defroutes api-routes-with-auth
+          (resp/forbidden)))
+  
   (GET "/logout" request
        (-> (resp/found (str const/wp-host "/webtools/#/login"))
-            (resp/set-cookie "wt-token" "" {:max-age 1 :path "/webtools"})
-            (resp/set-cookie "wt-email" "" {:max-age 1 :path "/webtools"})))
+           (resp/set-cookie "wt-token" "" {:max-age 1 :path "/webtools"})
+           (resp/set-cookie "wt-email" "" {:max-age 1 :path "/webtools"}))))
+
+(defroutes api-routes-with-auth
   (GET "/api/user" request
        (if-let [email (get-in request [:query-params "email"])]
          (if-let [user (-> (db/get-user-info (keyed [email]))
