@@ -20,9 +20,9 @@
     (let [success @(rf/subscribe [:success])]
       (cond
         (= success true)
-        [:p "Your action was successful"]
+        [:p "Your upload was successful"]
         (= success false)
-        [:p.bad-login-text "Your action was unsuccessful. Please try again or contact the Webmaster"]))]])
+        [:p.bad-login-text "Your upload was unsuccessful. Please try again or contact the Webmaster"]))]])
 
 (defn- hro []
   (ajax-get {:uri "/webtools/api/all-jvas"

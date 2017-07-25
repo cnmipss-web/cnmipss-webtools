@@ -11,7 +11,8 @@
   [role]
   (fn [event]
     (.preventDefault event)
-    (rf/dispatch [:set-active-role role])))
+    (rf/dispatch [:set-active-role role])
+    (set! js/location.hash (str "#/app?role=" role))))
 
 (defn get-all-roles
   "For each role in const/role-list, check if the checkbox at #${role}-${id-stem} is checked.
@@ -68,7 +69,7 @@
 (defn edit-jva [jva]
   (fn [e]
     (.preventDefault e)
-    (println "Setting: " jva)
+   (println "Setting: " jva)
     (ajax/ajax-request {:uri "/webtools/api/update-jva"
                         :method :post
                         :format (ajax/json-request-format)

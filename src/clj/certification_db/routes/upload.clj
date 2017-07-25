@@ -116,19 +116,19 @@
     (mapv process-jva-pdf file-list)))
 
 (defmacro post-file-route
-  [r p]
+  [r p role]
   `(let [file# (get-in ~r [:params :file])]
      (try
        (~p file#)
-       (-> (response/found (str (env :server-uri) "#/app?success=true"))
+       (-> (response/found (str (env :server-uri) "#/app" "?success=true" "&role=" ~role ))
            (response/header "Content-Type" "application/json"))
        (catch Exception e#
          (println e#)
-         (-> (response/found (str (env :server-uri) "#/app?&success=false"))
+         (-> (response/found (str (env :server-uri) "#/app" "?success=false" "&role=" ~role))
              (response/header "Content-Type" "application/json"))))))
 
 (defroutes upload-routes
   (POST "/upload/certification-csv" req
-        (post-file-route req process-cert-csv))
+        (post-file-route req process-cert-csv "Certification"))
   (POST "/upload/jva-pdf" req
-        (post-file-route req process-jva-pdf)))
+        (post-file-route req process-jva-pdf "HRO")))

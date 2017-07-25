@@ -67,11 +67,13 @@
 (secretary/defroute "/app" []
   (let [token (get-cookie :token)
         email (url-decode (get-cookie :email))
-        success (get (first (re-seq #"success=(.*)" (.-hash js/location))) 1)]
+        success (get (first (re-seq #"success=(true|false)" (.-hash js/location))) 1)
+        role (get (first (re-seq #"role=(.*)&?" (.-hash js/location))) 1)]
     (case success
       "true" (rf/dispatch [:action-success])
       "false" (rf/dispatch [:action-failed])
       "")
+    (if role (rf/dispatch [:set-active-role role]))
     (ajax/ajax-request {:uri "/webtools/api/verify-token"
                         :method :post
                         :format (ajax/json-request-format)
