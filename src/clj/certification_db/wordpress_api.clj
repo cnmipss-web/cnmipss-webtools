@@ -35,3 +35,15 @@
         (-> body json->edn :source_url))
       (catch Exception e
         (println e)))))
+
+(defn delete-media
+  [slug]
+  (println "Slug: " slug)
+  (let [{:keys [body status error]} (http/get (str wp-host wp-media-route "?slug=" slug))
+        {:keys [id]} (-> body clojure.data.json/read-str clojure.walk/keywordize-keys first)]
+    (println "Id: " id body (type body))
+    (println (str wp-host wp-media-route "/" id))
+    (http/delete (str wp-host wp-media-route "/" id)
+                 {:headers {"Content-Type" "application/json"
+                            "Authorization" (wp-auth-token)}
+                  :body (-> {:force true} clojure.data.json/write-str)})))

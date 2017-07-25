@@ -6,7 +6,8 @@
             [certification-db.util :refer :all]
             [certification-db.json :refer :all]
             [certification-db.layout :refer [error-page]]
-            [certification-db.constants :as const]))
+            [certification-db.constants :as const]
+            [certification-db.wordpress-api :as wp]))
 
 (def truthy (comp some? #{"true" true}))
 
@@ -92,4 +93,9 @@
           (query-route db/get-all-jvas (db/update-jva! jva))))
 
   (POST "/api/delete-jva" {:keys [body]}
-        (query-route db/get-all-jvas (db/delete-jva! body))))
+        (query-route db/get-all-jvas
+                     (-> (db/jva-id body)
+                         :id
+                         .toString
+                         (wp/delete-media))
+                     (db/delete-jva! body))))

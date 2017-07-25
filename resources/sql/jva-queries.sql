@@ -9,6 +9,11 @@ VALUES (:id, :announce_no, :position, :status, :open_date, :close_date, :salary,
 select announce_no, position, status, open_date, close_date, salary, location, file_link from jvas
 where true
 
+-- :name jva-id :? :1
+-- :doc get jva-id from announce_no
+select id from jvas
+where announce_no = :announce_no
+
 -- :name update-jva! :! :1
 -- :doc edit a single jva
 update jvas
