@@ -7,7 +7,11 @@ VALUES (:id, :announce_no, :position, :status, :open_date, :close_date, :salary,
 -- :name get-all-jvas :? :*
 -- :doc retrieve all jvas
 select announce_no, position, status, open_date, close_date, salary, location, file_link from jvas
-where true
+
+-- :name get-open-jvas :? :*
+-- :doc retrieve all jvas
+select announce_no, position, status, open_date, close_date, salary, location, file_link from jvas
+where (select current_date) < close_date or close_date is null
 
 -- :name jva-id :? :1
 -- :doc get jva-id from announce_no
@@ -28,5 +32,6 @@ where announce_no = :announce_no
 
 -- :name delete-jva! :! :1
 -- :doc delete a single jva
+
 delete from jvas
 where announce_no = :announce_no
