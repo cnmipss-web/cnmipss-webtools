@@ -80,6 +80,17 @@
       (is (= "application/json" (get headers "Content-Type")))
       (is (= 3 (count json-body)))
       (is (= "PSS-2015-311" (-> json-body first :announce_no)))))
+
+  (testing "GET /api/all-procurement should return a JSON object holding PersistentVectors of rfps and ifbs"
+    (let [{:keys [status body headers error]} (auth-req :get "/api/all-procurement")
+          json-body (json->edn body)]
+      (is (= 200 status))
+      (is (nil? error))
+      (is (= "application/json" (get headers "Content-Type")))
+      (is (some? (:rfps json-body)))
+      (is (= clojure.lang.PersistentVector (type (:rfps json-body))))
+      (is (some? (:ifbs json-body)))
+      (is (= clojure.lang.PersistentVector (type (:ifbs json-body))))))
   
   (testing "POST /api/verify-token"
     (println "\nWARNING: POST /api/verify-token is untested"))

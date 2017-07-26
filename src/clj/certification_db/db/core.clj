@@ -27,6 +27,8 @@
 
 (conman/bind-connection *db*
                         "sql/test-seed.sql"
+                        "sql/ifb-queries.sql"
+                        "sql/rfp-queries.sql"
                         "sql/jva-queries.sql"
                         "sql/user-queries.sql" 
                         "sql/cert-queries.sql")

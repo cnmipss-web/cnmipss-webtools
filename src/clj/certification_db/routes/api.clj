@@ -41,6 +41,10 @@
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
 
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
+
+  (GET "/api/all-procurement" [] (query-route (fn []
+                                                {:rfps (db/get-all-rfps)
+                                                 :ifbs (db/get-all-ifbs)})))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
