@@ -48,7 +48,6 @@ values ('0209afc1-6b00-4946-b50f-9eaa05a7ce08','tony.stark@cnmipss.org',false,'P
 insert into users (id, email, admin, roles, token)
 values ('0309afc1-6b00-4946-b50f-9eaa05a7ce08','bono.u2@cnmipss.org',false,'Manage Users,Manage DB',null);
 
-
 -- :name clear-users :! :n
 -- :doc clear users from the database
 delete from users where true;
