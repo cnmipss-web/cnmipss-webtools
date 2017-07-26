@@ -11,6 +11,6 @@
 (defroutes home-routes
   (GET "/" request
        (home-page))
-  (GET "/webtools/" request
+  (GET "/webtools" request
        (response/found (env :server-uri))))
 

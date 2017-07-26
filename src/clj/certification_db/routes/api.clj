@@ -7,7 +7,8 @@
             [certification-db.json :refer :all]
             [certification-db.layout :refer [error-page]]
             [certification-db.constants :as const]
-            [certification-db.wordpress-api :as wp]))
+            [certification-db.wordpress-api :as wp]
+            [clojure.tools.logging :as log]))
 
 (def truthy (comp some? #{"true" true}))
 
@@ -60,7 +61,7 @@
 
 (defroutes api-routes-with-auth
   (GET "/api/user" request
-       (if-let [email (get-in request [:query-params "email"])]
+       (if-let [email (get-in request [:cookies "wt-email" :value])]
          (if-let [user (-> (db/get-user-info (keyed [email]))
                            (dissoc :id))]
            (json-response resp/ok {:user user})
@@ -95,8 +96,11 @@
 
   (POST "/api/delete-jva" {:keys [body]}
         (query-route db/get-all-jvas
-                     (-> (db/jva-id body)
-                         :id
-                         .toString
-                         (wp/delete-media))
+                     (try
+                       (-> (db/jva-id body)
+                           :id
+                           .toString
+                           (wp/delete-media))
+                       (catch Exception e
+                         (log/error e)))
                      (db/delete-jva! body))))

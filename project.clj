@@ -3,8 +3,7 @@
   :description "Internal Web Application for various CNMI PSS Webtools"
   :url "http://cnmipss-webtools.herokuapp.com"
 
-  :dependencies [[binaryage/devtools "0.9.4"]
-                 [cheshire "5.7.1"]
+  :dependencies [[cheshire "5.7.1"]
                  [cider/cider-nrepl "0.14.0"]
                  [clj-time "0.14.0"]
                  [clj-http "3.6.1"]
@@ -115,7 +114,8 @@
    :dev           [:project/dev :profiles/dev]
    :test          [:project/dev :project/test :profiles/test]
 
-   :project/dev  {:dependencies [[prone "1.1.4"]
+   :project/dev  {:dependencies [[circleci/bond "0.3.0"]
+                                 [prone "1.1.4"]
                                  [ring/ring-mock "0.3.1"]
                                  [ring/ring-devel "1.6.1"]
                                  [pjstadig/humane-test-output "0.8.2"]
@@ -126,7 +126,8 @@
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.7"]
                                  [lein-figwheel "0.5.11"]
-                                 [org.clojure/clojurescript "1.9.671"]]
+                                 [org.clojure/clojurescript "1.9.671"]
+                                 [lein-cloverage "1.0.9"]]
                   
                   :cljsbuild
                   {:builds
