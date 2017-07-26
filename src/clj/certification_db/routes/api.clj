@@ -3,6 +3,7 @@
             [ring.util.http-response :as resp]
             [clojure.data.json :as json]
             [certification-db.db.core :as db]
+            [certification-db.config :refer [env]]
             [certification-db.util :refer :all]
             [certification-db.json :refer :all]
             [certification-db.layout :refer [error-page]]
@@ -55,7 +56,7 @@
           (resp/forbidden)))
   
   (GET "/logout" request
-       (-> (resp/found (str const/wp-host "/webtools/#/login"))
+       (-> (resp/found (str (env :server-uri) "#/login"))
            (resp/set-cookie "wt-token" "" {:max-age 1 :path "/webtools"})
            (resp/set-cookie "wt-email" "" {:max-age 1 :path "/webtools"}))))
 

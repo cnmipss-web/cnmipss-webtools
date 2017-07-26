@@ -29,9 +29,9 @@
         (wrap-routes middleware/wrap-webtools-auth)
         (wrap-routes middleware/wrap-uploads))
     (route/not-found
-      (:body
-        (error-page {:status 404
-                     :title "page not found"})))))
+     (:body
+      (error-page {:status 404
+                   :title "page not found"})))))
 
 
 (defn app [] (middleware/wrap-base #'app-routes))

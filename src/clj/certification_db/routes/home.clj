@@ -10,7 +10,9 @@
 
 (defroutes home-routes
   (GET "/" request
-       (home-page))
+       (let [host (get-in request [:headers "host"])
+             path (:path-info request)]
+         (home-page)))
   (GET "/webtools" request
-       (response/found (env :server-uri))))
+       (response/found (str (env :server-uri) "/#/app"))))
 
