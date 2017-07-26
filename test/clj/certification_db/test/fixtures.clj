@@ -12,6 +12,8 @@
   (db/seed-users)
   (db/seed-certs)
   (db/seed-jvas)
+  (db/seed-rfps)
+  (db/seed-ifbs)
   (ts)
   (mount/stop))
 
