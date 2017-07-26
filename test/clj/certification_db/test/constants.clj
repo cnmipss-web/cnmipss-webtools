@@ -1,4 +1,4 @@
-(ns certification-db.constants-test)
+(ns certification-db.test.constants)
 
 (def dummy-user {:id (java.util.UUID/randomUUID)
                  :email "email"

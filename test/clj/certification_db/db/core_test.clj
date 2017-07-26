@@ -1,7 +1,7 @@
 (ns certification-db.db.core-test
   (:require [certification-db.config :refer [env]]
             [certification-db.db.core :as db]
-            [certification-db.constants-test :as c-t]
+            [certification-db.test.constants :as c-t]
             [certification-db.test.fixtures :as fixtures]
             [clojure.test :refer :all]
             [conman.core :refer [bind-connection] :as conman]

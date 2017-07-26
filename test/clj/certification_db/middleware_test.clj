@@ -1,7 +1,7 @@
 (ns certification-db.middleware-test
   (:require [certification-db.middleware :as middleware]
             [certification-db.test.fixtures :as fixtures]
-            [certification-db.constants-test :as c-t]
+            [certification-db.test.constants :as c-t]
             [certification-db.layout :refer [error-page]]
             [clojure.test :refer :all]
             [bond.james :refer [with-spy calls]]
