@@ -39,8 +39,7 @@
              :handler ajax-handlers/all-procurement})
   [:div
    [:div.col-xs-12
-    [forms/rfp-upload]
-    [forms/ifb-upload]]
+    [forms/procurement-uploads]]
    [:div.col-xs-12
     [forms/rfp-ifb-search]
     [tables/rfp-ifb-list @(rf/subscribe [:rfp-ifb-list])]]])

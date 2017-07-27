@@ -37,4 +37,7 @@
 
 (defn all-procurement
   [[ok response]]
-  (println ok response))
+  (let [{:keys [body]} response]
+    (if ok
+      (rf/dispatch [:store-rfp-ifb-list (clojure.walk/keywordize-keys body)])
+      (println response))))

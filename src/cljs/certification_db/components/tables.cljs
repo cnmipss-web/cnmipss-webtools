@@ -86,4 +86,35 @@
     (for [jva (-> jvas filter-jvas sort-jvas)]
       ^{:key (str "jva-" (jva :announce_no))} [jva-row jva])]])
 
-(defn rfp-ifb-list [rfp-ifbs] [:div])
+(def key->name {:rfps "Requests for Proposal" :ifbs "Invitations for Bid"})
+
+(defn procurement-row [item]
+  [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
+   [:td.w-2 (or (:rfp_no item) (:ifb_no item))]
+   [:td.w-2 (:open_date item)]
+   [:td.w-2 (:close_date item)]
+   [:td.w-4 (:title item)]
+   [:td.w-8.text-left (-> item :description (subs 0 140) (str "..."))]
+   [:td.w-2 (:file_link item)]])
+
+(defn procurement-table [k m]
+  [:div.procurement-table-box
+   [:h2.procurement-title.text-center (key->name k)]
+   [:table.procurement-list.col-xs-12
+    [:caption.sr-only "List of current"]
+    [:thead
+     [:tr.row.jva-list-row
+      [:th.w-2.text-center {:scope "col"} "Number"]
+      [:th.w-2.text-center {:scope "col"} "Opening Date"]
+      [:th.w-2.text-center {:scope "col"} "Closing Date"]
+      [:th.w-4.text-center {:scope "col"} "Title"]
+      [:th.w-8.text-center {:scope "col"} "Description"]
+      [:th.w-2.text-center {:scope "col"} "Link"]]]
+    [:tbody
+     (for [item (-> m k)]
+       ^{:key (str (name k) (:title item))} [procurement-row (assoc item :status true)])]]])
+
+(defn rfp-ifb-list [rfp-ifb-list]
+  [:div
+   [procurement-table :rfps rfp-ifb-list]
+   [procurement-table :ifbs rfp-ifb-list]])

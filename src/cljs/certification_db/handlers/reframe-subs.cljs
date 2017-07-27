@@ -62,6 +62,6 @@
    (:jva-searches db)))
 
 (reg-sub
- :rfp-ifb-lsit
+ :rfp-ifb-list
  (fn [db _]
    (:rfp-ifb-list db)))

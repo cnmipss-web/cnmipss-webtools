@@ -98,3 +98,8 @@
  :edit-jva
  (fn [db [_ key val]]
    (assoc db :jva-modal (assoc (:jva-modal db) key val))))
+
+(reg-event-db
+ :store-rfp-ifb-list
+(fn [db [_ list]]
+  (assoc db :rfp-ifb-list list)))

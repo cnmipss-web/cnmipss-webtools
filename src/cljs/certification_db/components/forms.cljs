@@ -149,8 +149,23 @@
                            :on-change event-handlers/search-jvas
                            :ref "search-certified"}]]]])
 
-(defn rfp-upload [] [:div])
-(defn ifb-upload [] [:div])
+(defn rfp-upload []
+  [:div.form-group
+   [:label {:for "ifb"} "Upload New RFPs"]
+   [:input#upload-jva.form-control {:type "file" :id "rfp" :name "rfp" :accept "pdf" :multiple true}]])
+(defn ifb-upload []
+  [:div.form-group
+   [:label {:for "ifb"} "Upload New IFBs"]
+   [:input#upload-jva.form-control {:type "file" :id "ifb" :name "ifb" :accept "pdf" :multiple true}]])
+
+(defn procurement-uploads [path]
+  [:form#procurement-uploads.col-xs-12 {:action "/webtools/upload/procurement-pdf" :method "post" :enc-type "multipart/form-data"}
+   [:div.form-inline
+    [rfp-upload]
+    [ifb-upload]]
+   [:div.form-group
+    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
+    [:button#upload-btn.btn.btn-primary {:type "submit"} "Upload"]]])
 (defn rfp-ifb-search [] [:div])
 
  
