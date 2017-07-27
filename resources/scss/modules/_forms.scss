@@ -59,7 +59,7 @@ form {
     }
 }
 
-form.edit-jva {
+form.edit-modal {
     box-shadow: none;
     border: none;
     margin: 0px;
@@ -70,6 +70,10 @@ form.edit-jva {
 
     label.form-check-label {
         margin: 0px 5px;
+    }
+
+    textarea {
+        height: 250px;
     }
 }
 

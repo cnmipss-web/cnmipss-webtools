@@ -100,24 +100,5 @@ div.procurement-table-box {
     }
 }
 
-$base-width: 5%;
 
-.w-1 {
-    width: $base-width;
-}
-
-.w-2 {
-    width: $base-width*2;
-}
-
-.w-4 {
-    width: $base-width*4;
-}
-
-.w-5 {
-    width: $base-width*5;
-}
-
-.w-6 {
-    width: $base-width*6;
-}
+@include custom-columns(20, td);

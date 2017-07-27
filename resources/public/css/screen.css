@@ -68,6 +68,9 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
+/*
+ * Custom width columns
+ */
 /**
  * Breakpoints Based on Bootstrap v3
  */
@@ -203,14 +206,16 @@ form {
   .invite-users input[type="text"] {
     margin-top: 10px; }
 
-form.edit-jva {
+form.edit-modal {
   box-shadow: none;
   border: none;
   margin: 0px; }
-  form.edit-jva .bold {
+  form.edit-modal .bold {
     font-weight: 600; }
-  form.edit-jva label.form-check-label {
+  form.edit-modal label.form-check-label {
     margin: 0px 5px; }
+  form.edit-modal textarea {
+    height: 250px; }
 
 #jva-search > form {
   border: none;
@@ -328,20 +333,65 @@ div.procurement-table-box {
     box-shadow: none;
     margin: 0px; }
 
-.w-1 {
+td.custom-col-1 {
   width: 5%; }
 
-.w-2 {
+td.custom-col-2 {
   width: 10%; }
 
-.w-4 {
+td.custom-col-3 {
+  width: 15%; }
+
+td.custom-col-4 {
   width: 20%; }
 
-.w-5 {
+td.custom-col-5 {
   width: 25%; }
 
-.w-6 {
+td.custom-col-6 {
   width: 30%; }
+
+td.custom-col-7 {
+  width: 35%; }
+
+td.custom-col-8 {
+  width: 40%; }
+
+td.custom-col-9 {
+  width: 45%; }
+
+td.custom-col-10 {
+  width: 50%; }
+
+td.custom-col-11 {
+  width: 55%; }
+
+td.custom-col-12 {
+  width: 60%; }
+
+td.custom-col-13 {
+  width: 65%; }
+
+td.custom-col-14 {
+  width: 70%; }
+
+td.custom-col-15 {
+  width: 75%; }
+
+td.custom-col-16 {
+  width: 80%; }
+
+td.custom-col-17 {
+  width: 85%; }
+
+td.custom-col-18 {
+  width: 90%; }
+
+td.custom-col-19 {
+  width: 95%; }
+
+td.custom-col-20 {
+  width: 100%; }
 
 .modal-footer button {
   margin: -5px 5px; }
