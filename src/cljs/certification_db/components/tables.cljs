@@ -34,18 +34,18 @@
 (defn jva-row [jva]
   (let [{:keys [status close_date]} jva]
     [:tr.row.jva-list-row {:class (if (force-close? jva) "closed")}
-     [:td.w-1 (jva :announce_no)]
-     [:td.w-4 (jva :position)]
-     [:td.w-1 (if (force-close? jva)
+     [:td.custom-col-1 (jva :announce_no)]
+     [:td.custom-col-4 (jva :position)]
+     [:td.custom-col-1 (if (force-close? jva)
                 [:em "Closed"]
                 [:strong "Open"])]
-     [:td.w-2 (jva :open_date)]
-     [:td.w-2 (if close_date
+     [:td.custom-col-2 (jva :open_date)]
+     [:td.custom-col-2 (if close_date
                 close_date
                 "Until Filled")]
-     [:td.w-5 (jva :salary)]
-     [:td.w-2 (jva :location)]
-     [:td.w-3 
+     [:td.custom-col-5 (jva :salary)]
+     [:td.custom-col-2 (jva :location)]
+     [:td.custom-col-3 
       [:a {:href (jva :file_link)}
        [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
       [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
@@ -90,12 +90,21 @@
 
 (defn procurement-row [item]
   [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
-   [:td.w-2 (or (:rfp_no item) (:ifb_no item))]
-   [:td.w-2 (:open_date item)]
-   [:td.w-2 (:close_date item)]
-   [:td.w-4 (:title item)]
-   [:td.w-8.text-left (-> item :description (subs 0 140) (str "..."))]
-   [:td.w-2 (:file_link item)]])
+   [:td.custom-col-1 (or (:rfp_no item) (:ifb_no item))]
+   [:td.custom-col-2 (:open_date item)]
+   [:td.custom-col-2 (:close_date item)]
+   [:td.custom-col-4 (:title item)]
+   [:td.custom-col-8.text-left (-> item :description (subs 0 140) (str "..."))]
+   [:td.custom-col-3
+    [:a {:href (item :file_link)}
+     [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
+    [:a {:on-click (fn [] (rf/dispatch [:set-procurement-modal item]))}
+       [:button.btn.btn-warning.jva-file-link {:title "Edit"
+                                               :data-toggle "modal"
+                                               :data-target "#procurement-modal"
+                                               :aria-controls "procurement-modal"} [:i.fa.fa-pencil]]]
+    [:a {:on-click (events/delete-procurement item)}
+       [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
 
 (defn procurement-table [k m]
   [:div.procurement-table-box

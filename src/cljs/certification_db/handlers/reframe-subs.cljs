@@ -71,3 +71,8 @@
  :rfp-ifb-list
  (fn [db _]
    (:rfp-ifb-list db)))
+
+(reg-sub
+ :procurement-modal
+(fn [db _]
+  (:procurement-modal db)))

@@ -103,3 +103,13 @@
  :store-rfp-ifb-list
 (fn [db [_ list]]
   (assoc db :rfp-ifb-list list)))
+
+(reg-event-db
+ :set-procurement-modal
+ (fn [db [_ item]]
+   (assoc db :procurement-modal item)))
+
+(reg-event-db
+ :edit-procurement
+ (fn [{:keys [procurement-modal] :as db} [_ key val]]
+   (assoc db :procurement-modal (assoc procurement-modal key val))))

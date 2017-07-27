@@ -100,12 +100,12 @@
    :salary "Salary"
    :location "Location"})
 
-(defn toggle-status [jva]
+(defn toggle-jva-status [jva]
   (fn []
     (rf/dispatch [:toggle-jva-status jva])))
 
 (defn edit-jva [jva]
-  [:form#edit-jva.edit-jva {:on-submit (event-handlers/edit-jva jva)}
+  [:form#edit-jva.edit-modal {:on-submit (event-handlers/edit-jva jva)}
    (for [[key val] (filter (fn [[key val]] (not= key :file_link)) jva)]
      (let [field-name (key jva-fields)]
        (if (= key :status)
@@ -118,7 +118,7 @@
                                       :id "status-open"
                                       :checked val
                                       :value true
-                                      :on-change (toggle-status jva)}]
+                                      :on-change (toggle-jva-status jva)}]
             " Open"]
            [:label.form-check-label 
             [:input.form-check-input {:type "radio"
@@ -126,7 +126,7 @@
                                       :id "status-closed"
                                       :checked (not val)
                                       :value false
-                                      :on-change (toggle-status jva)}]
+                                      :on-change (toggle-jva-status jva)}]
             " Closed"]]]
          [:div.form-group {:key (str key)}
           [:label.bold {:for field-name} field-name]
@@ -168,4 +168,39 @@
     [:button#upload-btn.btn.btn-primary {:type "submit"} "Upload"]]])
 (defn rfp-ifb-search [] [:div])
 
- 
+(def procurement-fields
+  {:rfp_no "Number"
+   :ifb_no "Number"
+   :status "Status"
+   :open_date "Opening Date"
+   :close_date "Closing Date"
+   :description "Description"
+   :title "Title"})
+
+(defn toggle-procurement-status
+  [item]
+  (fn [] ))
+
+(defn edit-rfp-ifb [item]
+  [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)}
+   (for [[key val] (filter (fn [[key val]] (not= key :file_link)) item)]
+     (let [field-name (key procurement-fields)]
+       (case key
+         :status [:div {:key (str key)}]
+         :description [:div.form-group {:key (str key)}
+                       [:label.bold {:for field-name} field-name]
+                       [:textarea.form-control {:id (name key)
+                                                :name field-name
+                                                :value val
+                                                :on-change #(->> (-> (str "#" (name key)) jq .val)
+                                                                 (conj [:edit-procurement key])
+                                                                 (rf/dispatch))}]] 
+         [:div.form-group {:key (str key)}
+          [:label.bold {:for field-name} field-name]
+          [:input.form-control {:type "text"
+                                :id (name key)
+                                :name field-name
+                                :value val
+                                :on-change #(->> (-> (str "#" (name key)) jq .val)
+                                                 (conj [:edit-procurement key])
+                                                 (rf/dispatch))}]])))])
