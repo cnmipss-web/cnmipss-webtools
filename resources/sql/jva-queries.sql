@@ -7,11 +7,13 @@ VALUES (:id, :announce_no, :position, :status, :open_date, :close_date, :salary,
 -- :name get-all-jvas :? :*
 -- :doc retrieve all jvas
 select announce_no, position, status, open_date, close_date, salary, location, file_link from jvas
+order by status desc, announce_no desc
 
 -- :name get-open-jvas :? :*
 -- :doc retrieve all jvas
 select announce_no, position, status, open_date, close_date, salary, location, file_link from jvas
 where (select current_date) < close_date or close_date is null
+order by status desc, announce_no desc
 
 -- :name jva-id :? :1
 -- :doc get jva-id from announce_no

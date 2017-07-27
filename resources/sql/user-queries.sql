@@ -14,6 +14,7 @@ where email = :email
 -- :doc retrieve a user given the email.
 SELECT * FROM users
 WHERE email = :email
+order by email
 
 -- :name get-all-users :? :*
 -- :doc retrieve all users
