@@ -108,4 +108,23 @@
                            (wp/delete-media))
                        (catch Exception e
                          (log/error e)))
-                     (db/delete-jva! body))))
+                     (db/delete-jva! body)))
+
+  (POST "/api/update-rfp" {:keys [body]}
+        (let [rfp (-> body
+                      (db/make-sql-date :open_date)
+                      (db/make-sql-date :close_date))]
+          (query-route db/get-all-rfps (db/update-rfp rfp))))
+
+  (POST "/api/delete-rfp" {:keys [body]}
+        (query-route db/get-all-rfps
+                     (db/delete-rfp! body)))
+
+  (POST "/api/update-ifb" {:keys [body]}
+        (let [ifb (-> body
+                      (db/make-sql-date :open_date)
+                      (db/make-sql-date :close_date))]
+          (query-route db/get-all-ifbs (db/update-ifb ifb))))
+
+  (POST "/api/delete-ifb" {:keys [body]}
+        (query-route db/get-all-ifbs (db/delete-ifb! body))))

@@ -78,8 +78,7 @@
       (is (= 200 status))
       (is (nil? error))
       (is (= "application/json" (get headers "Content-Type")))
-      (is (= 3 (count json-body)))
-      (is (= "PSS-2015-311" (-> json-body first :announce_no)))))
+      (is (= (count (db/get-all-jvas)) (count json-body)))))
 
   (testing "GET /api/all-procurement should return a JSON object holding PersistentVectors of rfps and ifbs"
     (let [{:keys [status body headers error]} (auth-req :get "/api/all-procurement")
@@ -221,7 +220,77 @@
       (let [json-body (json->edn body)
             jva (first (filter #(= (:announce_no jva-data) (:announce_no %)) json-body))]
         (is (= 2 (count json-body)))
-        (is (nil? jva))))))
+        (is (nil? jva)))))
+
+  (testing "POST /api/update-rfp"
+    (let [res (db/create-rfp! c-t/dummy-rfp)
+          rfp (-> c-t/dummy-rfp
+                  (assoc :open_date "July 04, 1776")
+                  (assoc :close_date "July 05, 1776")
+                  (assoc :description "New Desc"))
+          {:keys [status body headers error] :as response}
+          (auth-req :post "/api/update-rfp"
+                    (mock/body (edn->json rfp))
+                    (mock/header "Content-Type" "application/json"))]
+      (is (= 200 status))
+      (is (nil? error))
+      (is (= java.lang.String (type body)))
+      (let [json-body (json->edn body)
+            new-rfp (last json-body)]
+        (is (= "New Desc" (:description new-rfp)))
+        (is (= (:rfp_no rfp) (:rfp_no new-rfp)))
+        (is (= (:title rfp) (:title new-rfp)))
+        (is (= (:open_date rfp) (:open_date new-rfp)))
+        (is (= (:close_date rfp) (:close_date new-rfp))))))
+
+  (testing "POST /api/delete-rfp"
+    (do
+      (is (= 4 (count (db/get-all-rfps))))
+      (let [{:keys [status body headers error] :as response}
+            (auth-req :post "/api/delete-rfp"
+                      (mock/body (edn->json c-t/dummy-rfp))
+                      (mock/header "Content-Type" "application/json"))]
+        (is (= 200 status))
+        (is (nil? error))
+        (is (= java.lang.String (type body)))
+        (let [json-body (json->edn body)]
+          (is (= 3 (count json-body)))
+          (is (empty? (filter #(= (:rfp_no %) (:rfp_no c-t/dummy-rfp)) json-body)))))))
+
+  (testing "POST /api/update-ifb"
+    (let [res (db/create-ifb! c-t/dummy-ifb)
+          ifb (-> c-t/dummy-ifb
+                  (assoc :open_date "July 04, 1776")
+                  (assoc :close_date "July 05, 1776")
+                  (assoc :description "New Desc"))
+          {:keys [status body headers error] :as response}
+          (auth-req :post "/api/update-ifb"
+                    (mock/body (edn->json ifb))
+                    (mock/header "Content-Type" "application/json"))]
+      (is (= 200 status))
+      (is (nil? error))
+      (is (= java.lang.String (type body)))
+      (let [json-body (json->edn body)
+            new-ifb (last json-body)]
+        (is (= "New Desc" (:description new-ifb)))
+        (is (= (:ifb_no ifb) (:ifb_no new-ifb)))
+        (is (= (:title ifb) (:title new-ifb)))
+        (is (= (:open_date ifb) (:open_date new-ifb)))
+        (is (= (:close_date ifb) (:close_date new-ifb))))))
+
+  (testing "POST /api/delete-ifb"
+    (do
+      (is (= 4 (count (db/get-all-ifbs))))
+      (let [{:keys [status body headers error] :as response}
+            (auth-req :post "/api/delete-ifb"
+                      (mock/body (edn->json c-t/dummy-ifb))
+                      (mock/header "Content-Type" "application/json"))]
+        (is (= 200 status))
+        (is (nil? error))
+        (is (= java.lang.String (type body)))
+        (let [json-body (json->edn body)]
+          (is (= 3 (count json-body)))
+          (is (empty? (filter #(= (:ifb_no %) (:ifb_no c-t/dummy-ifb)) json-body))))))))
 
 (deftest test-upload-routes
   (testing "POST /upload/certification-csv"
