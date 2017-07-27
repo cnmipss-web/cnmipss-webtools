@@ -138,7 +138,7 @@ button.jva-reannounce {
   width: 300px;
   border-right: 1px solid rgba(26, 65, 103, 0.15);
   z-index: 1;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.85);
   transition-delay: 0s;
   transition-timing-function: ease;
   transition: left 0.5s; }
@@ -148,7 +148,7 @@ button.jva-reannounce {
   height: 100px;
   text-align: center;
   border-radius: 0px;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: inherit;
   color: #1a4167;
   transition-delay: 0s;
   transition-timing-function: ease;
@@ -241,6 +241,10 @@ form#procurement-uploads.col-xs-12 {
   right: 33%;
   margin-top: 25px; }
 
+div.no-role {
+  margin-top: 25%;
+  font-size: 21px; }
+
 header.navbar {
   background-color: #1a4167;
   color: white;
@@ -273,7 +277,8 @@ tr {
   padding: 0px;
   border-bottom: 1px solid #ddd; }
 
-tr.user-list-row {
+tr.row.user-list-row {
+  margin: 0;
   width: 100%;
   display: flex;
   flex-direction: row;

@@ -28,7 +28,8 @@ tr {
     
 }
 
-tr.user-list-row {
+tr.row.user-list-row {
+    margin: 0;
     width: 100%;
     display:flex;
     flex-direction: row;

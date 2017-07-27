@@ -32,6 +32,11 @@ $nav-btn-bg-color: $gold;
 $nav-link-color: white;
 $nav-link-hover-color: $light-gold;
 
+$sidebar-transparency: 0.15;
+$sidebar-bg-color: transparentize(white, $sidebar-transparency);
+$sidebar-bg-hilight: transparentize(lighten($light-gold, 25), $sidebar-transparency);
+$sidebar-bg-active: transparentize($light-gold, $sidebar-transparency);
+
 /**
  * Font Weights
  */
@@ -80,4 +85,3 @@ $drop-shadow: 1px 2px 2px 2px #ddd;
 /**
  * Misc
  */
-$sidebar-transparency: 0.15;

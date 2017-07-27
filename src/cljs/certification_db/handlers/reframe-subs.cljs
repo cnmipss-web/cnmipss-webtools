@@ -29,7 +29,13 @@
 (reg-sub
  :active-role
  (fn [db _]
-   (:active-role db)))
+   (let [{:keys [roles active-role session]} db
+         {:keys [admin]} session]
+     (if admin
+       active-role
+       (if ((set roles) active-role)
+         active-role
+         "")))))
 
 (reg-sub
  :user-list

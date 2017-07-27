@@ -63,4 +63,6 @@
      "Procurement" (procurement)
      "Manage Users" (manage-users)
      "Manage DB" (manage-db)
-     [:div])])
+     nil [:div]
+     [:div.no-role
+      [:p.text-center "You have no assigned roles.  Please contact the Webmaster for more information."]])])

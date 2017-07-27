@@ -5,7 +5,7 @@
     width: 300px;
     border-right: 1px solid transparentize($blue, 0.85);
     z-index: 1;
-    background: transparent;
+    background: $sidebar-bg-color;
 
     @include custom-transition(left 0.5s, ease, 0s);
 }
@@ -15,16 +15,16 @@
     height: 100px;
     text-align: center;
     border-radius: 0px;
-    background-color: transparentize(white, $sidebar-transparency);
+    background-color: inherit;
     color: $blue;
     @include custom-transition(background-color 0.65s, ease, 0s);
 
     &:hover, &:focus {
-        background-color: transparentize(lighten($light-gold, 25), $sidebar-transparency);
+        background-color: $sidebar-bg-hilight;
     }
 }
 
 .sidebar-btn.active {
-    background-color: transparentize($light-gold, $sidebar-transparency);
+    background-color: $sidebar-bg-active;
 }
 
