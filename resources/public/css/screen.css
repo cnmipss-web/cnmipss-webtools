@@ -1,3 +1,27 @@
+/**
+ * Bootstrap v3 Breakpoints for Custom Media Queries
+ */
+/**
+ * Colors by Name
+ */
+/**
+ * Colors by Function
+ */
+/**
+ * Font Weights
+ */
+/**
+ * Fonts
+ */
+/**
+ * Accessibility Variables
+ */
+/**
+ * Borders
+ */
+/**
+ * Misc
+ */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -11,7 +35,10 @@ article, aside, canvas, details, embed,
 figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
-  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: "Roboto", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
   margin: 0;
   padding: 0;
   border: 0;
@@ -41,30 +68,6 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
-/**
- * Bootstrap v3 Breakpoints for Custom Media Queries
- */
-/**
- * Colors by Name
- */
-/**
- * Colors by Function
- */
-/**
- * Font Weights
- */
-/**
- * Fonts
- */
-/**
- * Accessibility Variables
- */
-/**
- * Borders
- */
-/**
- * Misc
- */
 /**
  * Breakpoints Based on Bootstrap v3
  */
@@ -103,11 +106,11 @@ table {
   text-align: right; }
 
 #main-container {
-  position: fixed;
   width: 100%;
   height: 100%;
   top: 46px;
-  left: 0px; }
+  left: 0px;
+  margin-bottom: 50px; }
 
 .sidebar {
   width: 20%;
@@ -218,6 +221,26 @@ form.edit-jva {
   #jva-search > form input[type='search'] {
     text-align: center; }
 
+form.jva-upload {
+  margin-top: 25px; }
+
+form#procurement-uploads.col-xs-12 {
+  margin-top: 25px; }
+  form#procurement-uploads.col-xs-12 div.form-inline {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around; }
+    form#procurement-uploads.col-xs-12 div.form-inline > div.form-group > * {
+      display: block !important;
+      text-align: center; }
+
+#upload-btn {
+  position: relative;
+  width: 33%;
+  left: 33%;
+  right: 33%;
+  margin-top: 25px; }
+
 header.navbar {
   background-color: #1a4167;
   color: white;
@@ -229,37 +252,39 @@ header.navbar {
 .navbar-footer {
   float: right; }
 
-table.user-list {
+table {
   margin-top: 15px;
   width: 100%;
-  box-shadow: 1px 2px 2px 2px #ddd; }
-  table.user-list form {
+  box-shadow: 1px 2px 2px 2px #ddd;
+  font-family: "Roboto", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.25em; }
+  table tr.row:nth-of-type(even), table tr.row:nth-of-type(even) label {
+    background-color: #fbf7ea; }
+  table form {
     box-shadow: none; }
 
 th {
   padding: 10px 0px; }
 
-tr.user-list-row {
+tr {
   margin: 0;
   padding: 0px;
-  height: 100%;
+  border-bottom: 1px solid #ddd; }
+
+tr.user-list-row {
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-bottom: 1px solid #ddd;
   padding-bottom: 5px; }
 
 table.jva-list {
-  margin-top: 15px;
-  box-shadow: 1px 2px 2px 2px #ddd;
-  max-height: 600px;
+  max-height: 800px;
   overflow-y: scroll; }
-  table.jva-list tr.row:nth-of-type(even) {
-    background-color: #fbf7ea; }
 
 tr.row.jva-list-row {
-  cursor: pointer;
   white-space: pre-wrap;
   font-size: 14px;
   border-bottom: 1px solid #ddd; }
@@ -280,16 +305,38 @@ tr.row.jva-list-row {
     text-align: center; }
     tr.row.jva-list-row td button {
       margin: 5px; }
-  tr.row.jva-list-row .w-1 {
-    width: 5%; }
-  tr.row.jva-list-row .w-2 {
-    width: 10%; }
-  tr.row.jva-list-row .w-4 {
-    width: 20%; }
-  tr.row.jva-list-row .w-5 {
-    width: 25%; }
-  tr.row.jva-list-row .w-6 {
-    width: 30%; }
+
+div.procurement-table-box {
+  box-shadow: 1px 2px 2px 2px #ddd;
+  display: table;
+  margin-top: 20px;
+  margin-top: 20px;
+  max-height: 800px;
+  overflow-y: scroll;
+  padding-top: 10px; }
+  div.procurement-table-box h2.procurement-title {
+    font-family: "Roboto", Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 2; }
+  div.procurement-table-box table {
+    box-shadow: none;
+    margin: 0px; }
+
+.w-1 {
+  width: 5%; }
+
+.w-2 {
+  width: 10%; }
+
+.w-4 {
+  width: 20%; }
+
+.w-5 {
+  width: 25%; }
+
+.w-6 {
+  width: 30%; }
 
 .modal-footer button {
   margin: -5px 5px; }

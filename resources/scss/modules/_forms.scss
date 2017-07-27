@@ -85,3 +85,31 @@ form.edit-jva {
     }
     
 }
+
+form.jva-upload {
+    margin-top: 25px;
+}
+
+
+form#procurement-uploads.col-xs-12 {
+    margin-top: 25px;
+    div.form-inline {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+
+        &>div.form-group>* {
+            display: block !important;
+            text-align: center;
+        }
+
+    }
+
+}
+#upload-btn {
+    position: relative;
+    width: 33%;
+    left: 33%;
+    right: 33%;
+    margin-top: 25px;
+}

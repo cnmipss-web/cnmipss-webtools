@@ -15,7 +15,10 @@ article, aside, canvas, details, embed,
 figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: $base-font-family;
+    font-weight: $base-font-weight;
+    font-size: $base-font-size;
+    line-height: $base-font-line-height;
     margin: 0;
     padding: 0;
     border: 0;

@@ -1,7 +1,17 @@
-table.user-list {
+table {
     margin-top: 15px;
     width: 100%;
     box-shadow: $drop-shadow;
+    font-family: $base-font-family;
+    font-weight: $base-font-weight;
+    font-size: $base-font-size;
+    line-height: 1.25em;
+    
+    tr.row:nth-of-type(even) {
+        &, label {
+            background-color: lighten($light-gold, 35);
+        }
+    }
     form {
         box-shadow: none;
     }
@@ -11,31 +21,27 @@ th {
     padding: 10px 0px;;
 }
 
-tr.user-list-row {
+tr {
     margin: 0;
     padding: 0px;
-    height: 100%;
+    border-bottom: 1px solid #ddd;
+    
+}
+
+tr.user-list-row {
     width: 100%;
     display:flex;
     flex-direction: row;
     align-items: center;
-    border-bottom: 1px solid #ddd;
     padding-bottom: 5px;
 }
 
 table.jva-list {
-    margin-top: 15px;
-    box-shadow: $drop-shadow;
-    max-height: 600px;
+    max-height: 800px;
     overflow-y: scroll;
-
-    tr.row:nth-of-type(even) {
-        background-color: lighten($light-gold, 35);
-    }
 }
 
 tr.row.jva-list-row {
-    cursor: pointer;
     white-space: pre-wrap;
     font-size: 14px;
     border-bottom: 1px solid #ddd;
@@ -69,27 +75,48 @@ tr.row.jva-list-row {
         }
     }
 
-    $base-width: 5%;
+}
 
-    .w-1 {
-        width: $base-width;
+div.procurement-table-box {
+    box-shadow: $drop-shadow;
+    display: table;
+    margin-top: 20px;
+    margin-top: 20px;
+    max-height: 800px;
+    overflow-y: scroll;
+    padding-top: 10px;
+    
+    h2.procurement-title {
+        font-family: $title-font-family;
+        font-size: $title-font-size;
+        font-weight: $title-font-weight;
+        line-height: $title-font-line-height;
     }
 
-    .w-2 {
-        width: $base-width*2;
-    }
-
-    .w-4 {
-        width: $base-width*4;
-    }
-
-    .w-5 {
-        width: $base-width*5;
-    }
-
-    .w-6 {
-        width: $base-width*6;
+    table {
+        box-shadow: none;
+        margin: 0px;
     }
 }
 
+$base-width: 5%;
 
+.w-1 {
+    width: $base-width;
+}
+
+.w-2 {
+    width: $base-width*2;
+}
+
+.w-4 {
+    width: $base-width*4;
+}
+
+.w-5 {
+    width: $base-width*5;
+}
+
+.w-6 {
+    width: $base-width*6;
+}
