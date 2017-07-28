@@ -60,7 +60,7 @@
   :test-paths ["test/clj"]
   :resource-paths ["resources" "target/cljsbuild"]
   :target-path "target/%s/"
-  :main ^:skip-aot certification-db.core
+  :main ^:skip-aot webtools.core
   :migratus {:store :database
              :db ~(get (System/getenv) "DATABASE_URL")}
   
@@ -107,7 +107,7 @@
                  :externs ["react/externs/react.js"]}}}}
              
              :aot :all
-             :uberjar-name "certification-db.jar"
+             :uberjar-name "webtools.jar"
              :source-paths ["env/prod/clj"]
              :resource-paths ["env/prod/resources"]}
 
@@ -133,10 +133,10 @@
                   {:builds
                    {:app
                     {:source-paths ["src/cljs" "src/cljc" "env/dev/cljs"]
-                     :figwheel {:on-jsload "certification-db.core/mount-components"}
+                     :figwheel {:on-jsload "webtools.core/mount-components"}
                      :compiler
                      {:preloads [devtools.preload]
-                      :main "certification-db.app"
+                      :main "webtools.app"
                       :asset-path "/webtools/js/out"
                       :output-to "target/cljsbuild/public/js/app.js"
                       :output-dir "target/cljsbuild/public/js/out"
@@ -158,7 +158,7 @@
                     {:source-paths ["src/cljc" "src/cljs" "test/cljs"]
                      :compiler
                      {:output-to "target/test.js"
-                      :main "certification-db.doo-runner"
+                      :main "webtools.doo-runner"
                       :optimizations :whitespace
                       :pretty-print true}}}}
                   

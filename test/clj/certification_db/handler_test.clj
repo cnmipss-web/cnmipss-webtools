@@ -2,6 +2,7 @@
   (:require [clojure.test :refer :all]
             [clojure.data.json :as json]
             [clojure.walk :as walk]
+            [clojure.java.io :refer [file]]
             [ring.mock.request :as mock]
             [certification-db.handler :refer :all]
             [certification-db.util :refer :all]
@@ -297,5 +298,17 @@
     (println "\nWARNING: POST /upload/certification-csv is untested"))
 
   (testing "POST /upload/jva-pdf"
-    (println "\nWARNING: POST /upload/jva-pdf is untested")))
+    (println "\nWARNING: POST /upload/jva-pdf is untested")
+    )
+
+  (testing "POST /upload/rfp-pdf"
+    (let [pdf (file "test/clj/certification_db/test/rfp-sample.pdf")
+          {:keys [status body headers error params] :as response}
+          (auth-req :post "/upload/rfp-pdf"
+                    (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}}))]
+      (is (= 302 status))
+      (is (nil? error))
+      (println response)))
+
+  (testing "POST /upload/ifb-pdf"))
 
