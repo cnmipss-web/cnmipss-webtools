@@ -1,6 +1,6 @@
-(ns certification-db.test.fixtures
-  (:require [certification-db.config :refer [env]]
-            [certification-db.db.core :as db]
+(ns webtools.test.fixtures
+  (:require [webtools.config :refer [env]]
+            [webtools.db.core :as db]
             [conman.core :refer [bind-connection] :as conman]
             [clojure.java.jdbc :as sql]
             [mount.core :as mount]))

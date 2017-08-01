@@ -1,5 +1,5 @@
-(ns certification-db.app
-  (:require [certification-db.core :as core]))
+(ns webtools.app
+  (:require [webtools.core :as core]))
 
 ;;ignore println statements in prod
 (set! *print-fn* (fn [& _]))

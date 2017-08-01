@@ -4,7 +4,8 @@
             [webtools.components.forms :as forms]
             [webtools.components.tables :as tables]
             [webtools.handlers.api :as ajax-handlers]
-            [webtools.util :as util]))
+            [webtools.util :as util]
+            [webtools.cookies :refer [get-cookie]]))
 
 (defn ajax-get
   [opts]
@@ -17,12 +18,15 @@
   [:div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
    [forms/upload-form (.-hash js/location)]
    [:div {:style {:margin-top "15px" :text-align "center"}}
-    (let [success @(rf/subscribe [:success])]
-      (cond
-        (= success true)
-        [:p "Your upload was successful"]
-        (= success false)
-        [:p.bad-login-text "Your upload was unsuccessful. Please try again or contact the Webmaster"]))]])
+    (let [wt-success (get-cookie "wt-success")]
+      (when (string? wt-success)
+        (let [success (re-find #"(true|false)_?(.*)?" wt-success)]
+          (println success)
+          (cond
+            (= success "true")
+            [:p "Your upload was successful"]
+            ("false")
+            [:p.bad-login-text "Your upload was unsuccessful. Please try again or contact the Webmaster"]))))]])
 
 (defn- hro []
   (ajax-get {:uri "/webtools/api/all-jvas"

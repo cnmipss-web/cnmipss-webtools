@@ -1,8 +1,8 @@
-(ns certification-db.middleware-test
-  (:require [certification-db.middleware :as middleware]
-            [certification-db.test.fixtures :as fixtures]
-            [certification-db.test.constants :as c-t]
-            [certification-db.layout :refer [error-page]]
+(ns webtools.middleware-test
+  (:require [webtools.middleware :as middleware]
+            [webtools.test.fixtures :as fixtures]
+            [webtools.test.constants :as c-t]
+            [webtools.layout :refer [error-page]]
             [clojure.test :refer :all]
             [bond.james :refer [with-spy calls]]
             [ring.mock.request :as mock]))

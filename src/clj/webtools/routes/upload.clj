@@ -46,7 +46,7 @@
     (loop [current (first data) rem (next data)]
       (let [[_ last-name first-name mi _ _ type cert-no start expiry _] current
             fresh-cert (create-new-cert current)]
-        (if-let [cert (some (match-cert? cert-no) (db/get-all-certs))] ;existing-certs
+        (if-let [cert (some (match-cert? cert-no) existing-certs)] ;existing-certs vs db/get-all-certs
           (if (cert-changed? fresh-cert cert)
             (db/update-cert! fresh-cert))
           (db/create-cert! fresh-cert)))
@@ -118,14 +118,17 @@
 
 (defmacro post-file-route
   [r p role]
-  `(let [file# (get-in ~r [:params :file])]
+  `(let [file# (get-in ~r [:params :file])
+         cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
      (try
        (~p file#)
-       (-> (response/found (str (env :server-uri) "#/app" "?success=true" "&role=" ~role ))
+       (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role ))
+           (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/header "Content-Type" "application/json"))
        (catch Exception e#
          (println e#)
-         (-> (response/found (str (env :server-uri) "#/app" "?success=false" "&role=" ~role))
+         (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role))
+             (response/set-cookie "wt-success" (str "false_" e#) cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
 
 (def rfp-regexes
