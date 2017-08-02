@@ -37,42 +37,38 @@
          active-role
          "")))))
 
-(reg-sub
- :user-list
+(reg-sub :user-list
  (fn [db _]
    (:user-list db)))
 
-(reg-sub
- :admin-access
+(reg-sub :admin-access
  (fn [db _]
    (get-in db [:session :admin])))
 
-(reg-sub
- :show-roles?
+(reg-sub :show-roles?
  (fn [db _]
    (:show-roles db)))
 
-(reg-sub
- :jva-list
+(reg-sub :jva-list
  (fn [db _]
    (:jva-list db)))
 
-(reg-sub
- :jva-modal
+(reg-sub :jva-modal
  (fn [db _]
    (:jva-modal db)))
 
-(reg-sub
- :jva-searches
+(reg-sub :jva-searches
  (fn [db _]
    (:jva-searches db)))
 
-(reg-sub
- :rfp-ifb-list
+(reg-sub :rfp-ifb-list
  (fn [db _]
    (:rfp-ifb-list db)))
 
-(reg-sub
- :procurement-modal
-(fn [db _]
+(reg-sub :procurement-modal
+ (fn [db _]
   (:procurement-modal db)))
+
+(reg-sub :error-list
+ (fn [db _]
+   (:error-list db)))

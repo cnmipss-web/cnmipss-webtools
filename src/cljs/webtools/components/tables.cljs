@@ -127,3 +127,32 @@
   [:div
    [procurement-table :rfps rfp-ifb-list]
    [procurement-table :ifbs rfp-ifb-list]])
+
+(defn cert-row [row]
+  (let [{:keys [last_name first_name cert_type cert_no start_date expiry_date mi]} row]
+    [:tr.row.lookup-row.col-xs-12
+     [:th.col-xs-2 {:scope "row"}
+      [:p.text-center (second (re-find #"(.*?)(\-renewal\-\d+)?$" cert_no))]]
+     [:td.col-xs-2
+      [:p.text-center last_name]]
+     [:td.col-xs-2
+      [:p.text-center (str first_name " " mi)]]
+     [:td.col-xs-2
+      [:p.text-center cert_type]]
+     [:td.col-xs-2
+      [:p.text-center start_date]]
+     [:td.col-xs-2
+      [:p.text-center expiry_date]]]))
+
+
+(defn error-table [error-list]
+  [:table
+   [:thead
+    [:caption "Duplicate Certs: "]]
+   [:tbody
+    (for [error error-list]
+      (let [certs (->> (clojure.string/split error #"\n")
+                       (mapv cljs.reader/read-string))]
+        ^{:key (str (* 100000000 (.random js/Math)))} [:div.container-fluid
+                                                       [cert-row (first certs)]
+                                                       [cert-row (second certs)]]))]]) 

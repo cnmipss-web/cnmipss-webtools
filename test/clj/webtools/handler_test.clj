@@ -3,6 +3,7 @@
             [clojure.data.json :as json]
             [clojure.walk :as walk]
             [clojure.java.io :refer [file]]
+            [clj-fuzzy.metrics :as measure]
             [ring.mock.request :as mock]
             [webtools.handler :refer :all]
             [webtools.util :refer :all]
@@ -295,7 +296,13 @@
 
 (deftest test-upload-routes
   (testing "POST /upload/certification-csv"
-    (println "\nWARNING: POST /upload/certification-csv is untested"))
+    (println "\nWARNING: POST /upload/certification-csv is untested")
+
+    (testing "should store certifications in the database")
+
+    (testing "should reject certification collisions that are not renewals")
+
+    (testing "should mark certification collisions that are renewals and save them without error"))
 
   (testing "POST /upload/jva-pdf"
     (println "\nWARNING: POST /upload/jva-pdf is untested")

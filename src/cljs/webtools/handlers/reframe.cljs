@@ -113,3 +113,10 @@
  :edit-procurement
  (fn [{:keys [procurement-modal] :as db} [_ key val]]
    (assoc db :procurement-modal (assoc procurement-modal key val))))
+
+(reg-event-db :error-list
+ (fn [db [_ errors]]
+   (println (type errors))
+   (assoc db :error-list (-> errors cemerick.url/url-decode
+                             (clojure.string/replace "+" " ")
+                             (clojure.string/split #"\n\n")))))

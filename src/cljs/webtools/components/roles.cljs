@@ -1,5 +1,6 @@
 (ns webtools.components.roles
   (:require [ajax.core :as ajax]
+            [cemerick.url :refer [url-decode]]
             [re-frame.core :as rf]
             [webtools.components.forms :as forms]
             [webtools.components.tables :as tables]
@@ -15,18 +16,26 @@
     (ajax/ajax-request (merge defaults opts))))
 
 (defn- certification []
-  [:div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-   [forms/upload-form (.-hash js/location)]
-   [:div {:style {:margin-top "15px" :text-align "center"}}
-    (let [wt-success (get-cookie "wt-success")]
-      (when (string? wt-success)
-        (let [success (re-find #"(true|false)_?(.*)?" wt-success)]
-          (println success)
-          (cond
-            (= success "true")
-            [:p "Your upload was successful"]
-            ("false")
-            [:p.bad-login-text "Your upload was unsuccessful. Please try again or contact the Webmaster"]))))]])
+  [:div
+   [:div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
+    [forms/upload-form (.-hash js/location)]
+    [:div {:style {:margin-top "15px" :text-align "center"}}
+     (let [wt-success (get-cookie "wt-success")]
+       (when (string? wt-success)
+         (let [matches (re-find #"(true|false)_?(.*)?" wt-success)
+               success (second matches)
+               errors (last matches)]
+           (cond
+             (= success "true")
+             [:p "Your upload was successful"]
+             (= success "false")
+             [:p.bad-login-text "Your upload was unsuccessful. Please try again or contact the Webmaster"])
+           (if errors
+             (rf/dispatch [:error-list errors])))))]]
+   (if-let [errors @(rf/subscribe [:error-list])]
+     [:div.col-xs-12.col-sm-10.offset-sm-1
+      (println "Errors: " errors)
+      [tables/error-table errors]])])
 
 (defn- hro []
   (ajax-get {:uri "/webtools/api/all-jvas"
