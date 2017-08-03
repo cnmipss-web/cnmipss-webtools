@@ -57,6 +57,10 @@
  (fn [db _]
    (:jva-modal db)))
 
+(reg-sub :edit-jva
+ (fn [db _]
+   (:edit-jva db)))
+
 (reg-sub :jva-searches
  (fn [db _]
    (:jva-searches db)))

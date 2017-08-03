@@ -91,6 +91,9 @@
     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
 
+(defn replace-jva [jva]
+  [jva-upload ""])
+
 (def jva-fields
   {:announce_no "Announcement Number"
    :position "Position"

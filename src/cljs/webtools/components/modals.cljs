@@ -12,17 +12,21 @@
      [:div.modal-header
       [:h5#jva-moda-label.modal-title (str "Editing JVA for: " (:position jva))]
       [:button.close {:data-dismiss "modal"
-                      :aria-label "Close"}
+                      :aria-label "Close"
+                      :on-click #(rf/dispatch [:set-edit-jva true])}
        [:span {:aria-hidden "true"} "\u00d7"]]]
      [:div.modal-body
-      [forms/edit-jva jva]]
+      (if @(rf/subscribe [:edit-jva])
+        [forms/edit-jva jva]
+        [forms/replace-jva jva])]
      [:div.modal-footer
       [:div.col-xs-2
-       ;[:button.btn.btn-danger.jva-reannounce "Re-announce"]
+       [:button.btn.btn-danger.jva-reannounce {:on-click #(rf/dispatch [:set-edit-jva false])} "Re-announce"]
        ]
       [:div.col-xs-4]
       [:div.col-xs-6
-       [:button.btn.btn-secondary {:data-dismiss "modal"} "Exit"]
+       [:button.btn.btn-secondary {:data-dismiss "modal"
+                                   :on-click #(rf/dispatch [:set-edit-jva true])} "Exit"]
        [:button.btn.btn-primary {:type "submit" :form "edit-jva"} "Save Changes"]]]]]])
 
 (defn procurement-type

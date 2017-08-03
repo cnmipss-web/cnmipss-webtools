@@ -90,6 +90,11 @@
    (assoc db :jva-modal jva)))
 
 (reg-event-db
+ :set-edit-jva
+ (fn [db [_ setting]]
+   (assoc db :edit-jva setting)))
+
+(reg-event-db
  :toggle-jva-status
  (fn [db [_ jva]]
    (assoc db :jva-modal (assoc jva :status (not (:status jva))))))

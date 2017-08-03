@@ -7,4 +7,5 @@
    :success nil
    :show-roles true
    :wp-host "/"
-   :jva-searches [""]})
+   :jva-searches [""]
+   :edit-jva true})
