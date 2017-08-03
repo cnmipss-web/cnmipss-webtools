@@ -1,55 +1,10 @@
--- :name create-tables :! :*
+-- :name clear-all-tables! :! :*
 -- :doc create tables in database
-drop table certifications;
-CREATE TABLE certifications (
-    cert_no text NOT NULL primary key,
-    last_name text,
-    first_name text,
-    mi text,
-    cert_type text,
-    start_date text,
-    expiry_date text
-);
-drop table jvas;
-CREATE TABLE jvas (
-    id uuid NOT NULL primary key,
-    announce_no character varying(20) NOT NULL unique,
-    "position" character varying(140) NOT NULL,
-    status boolean DEFAULT true,
-    open_date date NOT NULL,
-    close_date date,
-    salary character varying(140) NOT NULL,
-    location character varying(140) NOT NULL,
-    file_link text DEFAULT ''::text
-);
-drop table users;
-CREATE TABLE users (
-    id uuid NOT NULL primary key,
-    email character varying(140) unique,
-    admin boolean DEFAULT false NOT NULL,
-    roles character varying(140) DEFAULT ''::character varying,
-    token text DEFAULT ''::text
-);
-drop table rfps;
-CREATE TABLE rfps (
-       id UUID PRIMARY KEY,
-       rfp_no varchar(140) unique,
-       open_date date not null,
-       close_date date not null,
-       title varchar(140) default '',
-       description text default '',
-       file_link text default ''
-);
-drop table ifbs;
-create table ifbs (
-       id UUID primary key,
-       ifb_no varchar(140) unique,
-       open_date date not null,
-       close_date date not null,
-       title varchar(140) default '',
-       description text default '',
-       file_link text default ''
-);
+delete from certifications where true;
+delete from jvas where true;
+delete from users where true;
+delete from rfps where true;
+delete from ifbs where true;
 
 -- :name seed-users :! :n
 -- :doc create user data in database
