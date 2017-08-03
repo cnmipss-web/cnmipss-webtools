@@ -8,7 +8,7 @@
 (defn prep-db
   [ts]
   (mount/start)
-  (db/create-tables)
+  (db/clear-all-tables!)
   (db/seed-users)
   (db/seed-certs)
   (db/seed-jvas)
