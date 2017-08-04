@@ -36,13 +36,15 @@
     [:tr.row.jva-list-row {:class (if (force-close? jva) "closed")}
      [:td.custom-col-1 (jva :announce_no)]
      [:td.custom-col-4 (jva :position)]
-     [:td.custom-col-1 (if (force-close? jva)
-                [:em "Closed"]
-                [:strong "Open"])]
+     [:td.custom-col-1
+      (if (force-close? jva)
+        [:em "Closed"]
+        [:strong "Open"])]
      [:td.custom-col-2 (jva :open_date)]
-     [:td.custom-col-2 (if close_date
-                close_date
-                "Until Filled")]
+     [:td.custom-col-2
+      (if close_date
+        close_date
+        "Until Filled")]
      [:td.custom-col-5 (jva :salary)]
      [:td.custom-col-2 (jva :location)]
      [:td.custom-col-3 

@@ -1,6 +1,7 @@
 (ns webtools.timeout
   (:require [ajax.core :as ajax]
-            [webtools.constants :refer [max-cookie-age]]))
+            [webtools.constants :refer [max-cookie-age]]
+            [webtools.cookies :as cookies]))
 
 (def jq js/jQuery)
 
@@ -11,7 +12,7 @@
 (defn check-idle-time []
   (swap! idle-time (partial + interval))
   (when (> @idle-time timeout)
-    (js/alert "Your session has timed out!")
+    (cookies/set-cookie :timed-out true :max-age 60 :path "/webtools")
     (.reload js/location))
   (when (< @idle-time (inc interval))
     (ajax/GET "/webtools/api/refresh-session")))

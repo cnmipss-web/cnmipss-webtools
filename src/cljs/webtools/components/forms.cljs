@@ -2,7 +2,8 @@
   (:require [re-frame.core :as rf]
             [webtools.constants :as const]
             [webtools.handlers.events :as event-handlers]
-            [webtools.util :as util]))
+            [webtools.util :as util]
+            [webtools.cookies :as cookies]))
 
 (def jq js/jQuery)
 
@@ -10,8 +11,10 @@
   [:form#login-form {:action "/webtools/oauth/oauth-init" :method "get"}
    [:div.form-group
     [:label {:for "oauth-button"} "Login with your CNMI PSS Email"]
-    (if-let [bad-login @(rf/subscribe [:bad-login])]
-      [:p.bad-login-text "Sorry, that login attempt failed.  Please try again or contact the Webmaster."])
+    (when @(rf/subscribe [:bad-login])
+      (if (cookies/get-cookie :timed-out)
+        [:p.bad-login-text "Your session has timed out.  Please login again to continue."]
+        [:p.bad-login-text "Sorry, that login attempt failed.  Please try again or contact the Webmaster."]))
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
 
 (defn upload-form [path]
