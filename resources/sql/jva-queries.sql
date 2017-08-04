@@ -15,6 +15,11 @@ select announce_no, position, status, open_date, close_date, salary, location, f
 where (select current_date) < close_date or close_date is null
 order by status desc, announce_no desc
 
+-- :name get-jva :? :1
+-- :doc retrieve a single jva by its announce_no
+select * from jvas
+where announce_no = :announce_no
+
 -- :name jva-id :? :1
 -- :doc get jva-id from announce_no
 select id from jvas
@@ -34,6 +39,5 @@ where announce_no = :announce_no
 
 -- :name delete-jva! :! :1
 -- :doc delete a single jva
-
 delete from jvas
 where announce_no = :announce_no
