@@ -3,6 +3,7 @@
             [webtools.config :refer [env]]
             [webtools.auth :as auth]
             [webtools.util :refer :all]
+            [webtools.constants :refer [max-cookie-age]]
             [clj-http.client :as http]
             [cemerick.url :refer [url-decode]]
             [clj-oauth2.client :as oauth2]
@@ -34,7 +35,7 @@
                        (json/read-str)
                        (get "email"))
              user (db/get-user-info (keyed [email]))
-             cookie-opts {:http-only true :max-age 3600 :path "/webtools"}]
+             cookie-opts {:http-only true :max-age max-cookie-age :path "/webtools"}]
          (if (re-seq #"cnmipss.org$" email)
            (do
              (if user

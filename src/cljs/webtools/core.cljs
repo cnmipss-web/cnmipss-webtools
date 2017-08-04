@@ -10,6 +10,7 @@
             [webtools.components.roles :as roles]
             [webtools.components.modals :refer [all-modals]]
             [webtools.util :as util]
+            [webtools.timeout :as timeout]
             [webtools.cookies :refer [get-cookie] :as cookies]
             [cemerick.url :refer [url-decode]]
             [goog.events :as events]
@@ -103,4 +104,5 @@
   (rf/dispatch-sync [:initialize-db])
   (load-interceptors!)
   (hook-browser-navigation!)
-  (mount-components))
+  (mount-components)
+  (timeout/configure))

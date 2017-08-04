@@ -9,3 +9,4 @@
 
 (def wp-media-route "/wp-json/wp/v2/media")
 
+(def max-cookie-age 900)
