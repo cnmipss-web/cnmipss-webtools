@@ -161,6 +161,29 @@
       (db/create-jva! jva-record))
     (mapv process-jva-pdf file-list)))
 
+(defn process-reannouncement
+  [file]
+  (let [{:keys [tempfile size filename]} file
+          jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
+          text-list (split jva #"\n")
+          jva-record (as-> (reduce jva-reducer {} text-list) jva
+                       (db/make-sql-date jva :open_date)
+                       (db/make-sql-date jva :close_date)                       
+                       (make-status jva)
+                       (assoc jva :id (java.util.UUID/randomUUID)))
+        existing-jva (db/get-jva jva-record)]
+    (db/delete-jva! existing-jva)
+    (wp/delete-media (str (:id existing-jva)))
+    (->
+     (assoc jva-record :file_link
+            (wp/create-media filename tempfile
+                             :title (:position jva-record)
+                             :alt_text (str "Job Vacancy Announcement for"
+                                            (:position jva-record))
+                             :description (jva-desc jva-record)
+                             :slug (:id jva-record)))
+     (db/create-jva!))))
+
 (defmacro post-file-route
   [r p role]
   `(let [file# (get-in ~r [:params :file])
@@ -198,5 +221,7 @@
         (post-file-route req process-cert-csv "Certification"))
   (POST "/upload/jva-pdf" req
         (post-file-route req process-jva-pdf "HRO"))
+  (POST "/upload/reannounce-jva" req
+        (post-file-route req process-reannouncement "HRO"))
   (POST "/upload/rfp-pdf" req
         (post-file-route req process-rfp-pdf "Procurement")))
