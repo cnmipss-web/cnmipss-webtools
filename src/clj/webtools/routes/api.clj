@@ -3,11 +3,12 @@
             [ring.util.http-response :as resp]
             [clojure.data.json :as json]
             [webtools.db.core :as db]
+            [webtools.email :as email]
             [webtools.config :refer [env]]
             [webtools.util :refer :all]
             [webtools.json :refer :all]
             [webtools.layout :refer [error-page]]
-            [webtools.constants :as const]
+            [webtools.constants :refer [max-cookie-age]  :as const]
             [webtools.wordpress-api :as wp]
             [clojure.tools.logging :as log]))
 
@@ -65,6 +66,14 @@
            (resp/set-cookie "wt-email" "" {:max-age 1 :path "/webtools"}))))
 
 (defroutes api-routes-with-auth
+  (GET "/api/refresh-session" request
+       (let [wt-token (get-in request [:cookies "wt-token" :value])
+             wt-email (get-in request [:cookies "wt-email" :value])
+             cookie-opts {:http-only true :max-age max-cookie-age :path "/webtools"}]
+         (-> (resp/ok "Refreshing session")
+             (resp/set-cookie "wt-token" wt-token cookie-opts)
+             (resp/set-cookie "wt-email" wt-email cookie-opts))))
+  
   (GET "/api/user" request
        (if-let [email (get-in request [:cookies "wt-email" :value])]
          (if-let [user (-> (db/get-user-info (keyed [email]))
@@ -86,7 +95,8 @@
               admin (-> (get-in request [:body :admin]) truthy)
               id (java.util.UUID/randomUUID)]
           (query-route db/get-all-users
-                       (db/create-user! (keyed [email admin roles id])))))
+                       (db/create-user! (keyed [email admin roles id]))
+                       (email/invite (keyed [email admin roles id])))))
   
   (POST "/api/delete-user" request
         (let [{:keys [email]} (request :body)]
