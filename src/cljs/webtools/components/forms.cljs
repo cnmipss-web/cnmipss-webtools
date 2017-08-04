@@ -92,7 +92,14 @@
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
 
 (defn replace-jva [jva]
-  [jva-upload ""])
+  [:form#replace-jva.edit-modal
+   {:action "/webtools/upload/reannounce-jva" :method "post" :enc-type "multipart/form-data"}
+   [:div.form-group
+    [:label {:for "file"} "Upload New JVA"]
+    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple false}]]
+   [:div.form-group 
+    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value ""}  ]
+    [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
 
 (def jva-fields
   {:announce_no "Announcement Number"

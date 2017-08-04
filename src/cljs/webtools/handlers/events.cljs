@@ -21,7 +21,7 @@
   (->> (for [role const/role-list]
          (if-let [checked (as-> (apply str (re-seq #"\S" role)) role-id
                             (str "#" role-id "-" id-stem)
-                            (-> role-id util/jq (.is ":checked")))]
+                            (-> role-id jq (.is ":checked")))]
            role))
        (filter some?)
        (clojure.string/join ",")))
@@ -34,7 +34,7 @@
     (.preventDefault event) 
     (let [clean-email (apply str (re-seq #"[\w]" email))
           roles (get-all-roles clean-email)
-          admin (-> (str "#admin-" clean-email) util/jq (.is ":checked"))]
+          admin (-> (str "#admin-" clean-email) jq (.is ":checked"))]
       (ajax/ajax-request {:uri "/webtools/api/update-user"
                           :method :post
                           :format (ajax/json-request-format)
@@ -45,9 +45,9 @@
 (defn invite-user
   [event]
   (.preventDefault event)
-  (let [email (.val (util/jq "#new-user-email"))
+  (let [email (.val (jq "#new-user-email"))
         roles (get-all-roles "new-user")
-        admin (-> (str "#admin-new-user") util/jq (.is ":checked"))]
+        admin (-> (str "#admin-new-user") jq (.is ":checked"))]
     (ajax/ajax-request {:uri "/webtools/api/create-user"
                           :method :post
                           :format (ajax/json-request-format)

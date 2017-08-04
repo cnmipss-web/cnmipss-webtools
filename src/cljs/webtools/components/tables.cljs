@@ -81,7 +81,7 @@
      [:th.w-2.text-center {:scope "col"} "Closing Date"]
      [:th.w-5.text-center {:scope "col"} "Salary"]
      [:th.w-2.text-center {:scope "col"} "Location"]
-     [:th.w-3.text-center {:scope "col"} "Link"]]]
+     [:th.w-3.text-center {:scope "col"} "Links"]]]
    [:tbody
     (for [jva (-> jvas filter-jvas sort-jvas)]
       ^{:key (str "jva-" (jva :announce_no))} [jva-row jva])]])

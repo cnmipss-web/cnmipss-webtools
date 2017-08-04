@@ -21,8 +21,8 @@
         [forms/replace-jva jva])]
      [:div.modal-footer
       [:div.col-xs-2
-       [:button.btn.btn-danger.jva-reannounce {:on-click #(rf/dispatch [:set-edit-jva false])} "Re-announce"]
-       ]
+       (if @(rf/subscribe [:edit-jva])
+         [:button.btn.btn-danger.jva-reannounce {:on-click #(rf/dispatch [:set-edit-jva false])} "Re-announce"])]
       [:div.col-xs-4]
       [:div.col-xs-6
        [:button.btn.btn-secondary {:data-dismiss "modal"
