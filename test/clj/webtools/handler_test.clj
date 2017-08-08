@@ -12,35 +12,10 @@
             [webtools.db.core :as db]
             [webtools.test.constants :as c-t]
             [webtools.test.fixtures :as fixtures]
+            [webtools.test.tools :refer [auth-req equal-props? not-equal-props?]]
             [conman.core :refer [bind-connection] :as conman]
             [mount.core :as mount]))
 
-
-(defn- authorize
-  [request]
-  (let [auth-cookies {"wt-token" {:value c-t/auth-token
-                                  :domain "localhost"
-                                  :path "/webtools"}
-                      "wt-email" {:value "tyler.collins@cnmipss.org"
-                                  :domain "localhost"
-                                  :path "/webtools"}}]
-    (assoc request :cookies auth-cookies)))
-
-(defmacro auth-req
-  ([method url] `(auth-req ~method ~url (identity)))
-  ([method url & body]
-   `((app) (-> (mock/request ~method ~url)
-               ~@body
-               authorize
-               ))))
-
-(defn equal-props?
-  [props a b]
-  (every? #(= (% a) (% b)) props))
-
-(defn not-equal-props?
-  [props a b]
-  (not-any? #(= (% a) (% b)) props))
 
 (use-fixtures :once fixtures/prep-db)
 
@@ -302,81 +277,5 @@
           (is (= 3 (count json-body)))
           (is (empty? (filter #(= (:ifb_no %) (:ifb_no c-t/dummy-ifb)) json-body))))))))
 
-(deftest test-upload-routes
-  (testing "POST /upload/certification-csv"
-    (testing "should store certifications in the database"
-      (let [csv-file (file "test/clj/webtools/test/certificates-clean.csv")
-            {:keys [status body headers error] :as response}
-            (auth-req :post "/upload/certification-csv"
-                      (assoc :params {:file {:tempfile csv-file
-                                             :file-name "certificates-clean.csv"
-                                             :size (.length csv-file)}}))]
-        (is (= 302 status))
-        (is (nil? error))
-        (is (= (str (env :server-uri) "#/app?role=Certification") (get headers "Location")))
-        (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie")))
-        (is (= "" body))))
 
-    (testing "should reject certification collisions that are not renewals"
-      (let [csv-file (file "test/clj/webtools/test/certificates-collisions.csv")
-            {:keys [status body headers error] :as response}
-            (auth-req :post "/upload/certification-csv"
-                      (assoc :params {:file {:tempfile csv-file
-                                             :file-name "certificates-collisions.csv"
-                                             :size (.length csv-file)}}))
-            msg (-> headers (get "Set-Cookie") first cemerick.url/url-decode)
-            {:keys [last_name cert_no first_name cert_type]}
-            (-> (re-seq #"(\{.*?\})" msg) second second read-string)
-            existing-cert (db/get-cert {:cert_no "BI-003-2006"})]
-        (is (= 302 status))
-        (is (nil? error))
-        (is (= (str (env :server-uri) "#/app?role=Certification") (get headers "Location")))
-        (is (= "" body))
-        (is (= "Victor" (:first_name existing-cert)))
-        (is (= "Jones" (:last_name existing-cert)))
-        (is (= "Basic I" cert_type))
-        
-        (testing "should respond with a cookie that identifies the rejected certification"
-          (is (= "Terra" first_name))
-          (is (= "Allen" last_name))
-          (is (= "Basic I" cert_type))
-          (is (= "BI-003-2006" cert_no)))))
-
-    (testing "should mark certification collisions that are renewals and save them without error"
-      (let [csv-file (file "test/clj/webtools/test/certificates-renewal.csv")
-            {:keys [status body headers error] :as response}
-            (auth-req :post "/upload/certification-csv"
-                      (assoc :params {:file {:tempfile csv-file
-                                             :file-name "certificates-renewal.csv"
-                                             :size (.length csv-file)}}))
-            S-03-127 (db/get-cert {:cert_no "S-03-127"})
-            S-03-127-renewal (db/get-cert {:cert_no "S-03-127-renewal-1"})
-            S-04-095 (db/get-cert {:cert_no "S-04-095"})
-            S-04-095-renewal (db/get-cert {:cert_no "S-04-095-renewal-1"})]
-        (is (= 302 status))
-        (is (nil? error))
-        (is (= (str (env :server-uri) "#/app?role=Certification") (get headers "Location")))
-        (is (= "" body))
-
-        (is (equal-props? [:first_name :last_name :cert_type] S-03-127 S-03-127-renewal))
-        (is (not-equal-props? [:start_date :expiry_date :cert_no] S-03-127 S-03-127-renewal))
-        
-        (is (equal-props? [:first_name :last_name :cert_type] S-04-095 S-04-095-renewal))
-        (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal)))))
-
-  (testing "POST /upload/jva-pdf"
-    (println "\nWARNING: POST /upload/jva-pdf is untested")
-    )
-
-  (testing "POST /upload/rfp-pdf"
-    (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
-          {:keys [status body headers error params] :as response}
-          (auth-req :post "/upload/rfp-pdf"
-                    (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}}))]
-      (is (= 302 status))
-      (is (nil? error))
-      ;(println response)
-      ))
-
-  (testing "POST /upload/ifb-pdf"))
 
