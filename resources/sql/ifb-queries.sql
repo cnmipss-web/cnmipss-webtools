@@ -21,13 +21,13 @@ where ifb_no = :ifb_no
 
 -- :name get-all-ifbs :? :*
 -- :doc return all records of Request for Proposals
-select ifb_no, open_date, close_date, title, description, file_link  from ifbs
+select id, ifb_no, open_date, close_date, title, description, file_link  from ifbs
 order by close_date desc
 
 -- :name get-ifb :? :1
 -- :doc returns a single record of a Request for Proposal
-select ifb_no, open_date, close_date, title, description, file_link  from ifbs
-where id = :id or ifb_no = :ifb_no
+select id, ifb_no, open_date, close_date, title, description, file_link  from ifbs
+where ifb_no = :ifb_no
 
 -- :name get-open-ifbs :? :n
 -- :doc returns records of open Requests for Proposal

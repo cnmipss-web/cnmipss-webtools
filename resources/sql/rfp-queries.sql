@@ -21,14 +21,14 @@ where rfp_no = :rfp_no
 
 -- :name get-all-rfps :? :*
 -- :doc return all records of Request for Proposals
-select rfp_no, open_date, close_date, title, description, file_link  from rfps
+select id, rfp_no, open_date, close_date, title, description, file_link  from rfps
 where true
 order by close_date desc
 
 -- :name get-rfp :? :1
 -- :doc returns a single record of a Request for Proposal
-select rfp_no, open_date, close_date, title, description, file_link  from rfps
-where id = :id or rfp_no = :rfp_no
+select id, rfp_no, open_date, close_date, title, description, file_link  from rfps
+where rfp_no = :rfp_no
 
 -- :name get-open-rfps :? :n
 -- :doc returns records of open Requests for Proposal
