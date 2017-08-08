@@ -11,6 +11,7 @@
    [clojure.java.jdbc :as jdbc]
    [conman.core :as conman]
    [webtools.config :refer [env]]
+   [webtools.constants :as const]
    [mount.core :refer [defstate]])
   (:import org.postgresql.util.PGobject
            java.sql.Array
@@ -82,3 +83,14 @@
                        (c/to-sql-date))
                   (catch Exception e
                     nil))))
+
+(defn make-sql-datetime
+  [m k]
+  (assoc m k (try (->> (get m k)
+                       (re-find const/procurement-datetime-re)
+                       (second)
+                       ((fn [date-time]
+                          (let [f-date-time (partial f/parse (f/formatter const/procurement-datetime-format))]
+                            (-> date-time f-date-time c/to-sql-time)))))
+                  (catch Exception e
+                    (println e)))))

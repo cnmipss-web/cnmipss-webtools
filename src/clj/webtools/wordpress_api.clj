@@ -44,10 +44,8 @@
   [slug]
   (let [{:keys [wp-host]} env
         media-url (str wp-host wp-media-route "?slug=" slug)
-        x (println "Grabbing: " media-url)
         {:keys [body status error]} (http/get media-url)
-        {:keys [id]} (-> body clojure.data.json/read-str clojure.walk/keywordize-keys first)
-        y (println "Retrieved id: " id)]
+        {:keys [id]} (-> body clojure.data.json/read-str clojure.walk/keywordize-keys first)]
     (try
       (http/delete (str wp-host wp-media-route "/" id)
                    {:headers {"Content-Type" "application/json"

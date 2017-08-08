@@ -12,3 +12,4 @@ profiles.clj
 /log
 figwheel_server.log
 hs_err_pid18549.log
+.DS_Store
