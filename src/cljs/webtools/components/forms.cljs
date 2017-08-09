@@ -162,20 +162,15 @@
                            :on-change event-handlers/search-jvas
                            :ref "search-certified"}]]]])
 
-(defn rfp-upload []
+(defn procurement-upload []
   [:div.form-group
-   [:label {:for "ifb"} "Upload New RFPs"]
-   [:input#upload-jva.form-control {:type "file" :id "rfp" :name "rfp" :accept "pdf" :multiple true}]])
-(defn ifb-upload []
-  [:div.form-group
-   [:label {:for "ifb"} "Upload New IFBs"]
-   [:input#upload-jva.form-control {:type "file" :id "ifb" :name "ifb" :accept "pdf" :multiple true}]])
+   [:label {:for "file"} "Upload New RFP/IFB Announcements"]
+   [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple true}]])
 
 (defn procurement-uploads [path]
   [:form#procurement-uploads.col-xs-12 {:action "/webtools/upload/procurement-pdf" :method "post" :enc-type "multipart/form-data"}
    [:div.form-inline
-    [rfp-upload]
-    [ifb-upload]]
+    [procurement-upload]]
    [:div.form-group
     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
     [:button#upload-btn.btn.btn-primary {:type "submit"} "Upload"]]])
@@ -196,10 +191,20 @@
 
 (defn edit-rfp-ifb [item]
   [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)}
-   (for [[key val] (filter (fn [[key val]] (not= key :file_link)) item)]
+   (for [[key val] (->> item
+                        (filter (fn [[key val]] (not= key :file_link)))
+                        (sort-by (fn [[key val]] (case key
+                                                   :rfp_no 0
+                                                   :ifb_no 0
+                                                   :title 1
+                                                   :open_date 2
+                                                   :close_date 3
+                                                   :description 4
+                                                   5))))]
      (let [field-name (key procurement-fields)]
        (case key
-         :status [:div {:key (str key)}]
+         :status [:div {:key (str key (.random js/Math))}]
+         :id [:div {:key (str key (.random js/Math))}]
          :description [:div.form-group {:key (str key)}
                        [:label.bold {:for field-name} field-name]
                        [:textarea.form-control {:id (name key)
@@ -217,3 +222,22 @@
                                 :on-change #(->> (-> (str "#" (name key)) jq .val)
                                                  (conj [:edit-procurement key])
                                                  (rf/dispatch))}]])))])
+
+(defn procurement-addendum
+  [item]
+  (println item)
+  [:form#procurement-addendum.edit-modal
+   {:action "/webtools/upload/procurement-addendum" :method "post" :enc-type "multipart/form-data"}
+   [:div.form-group
+    [:label {:for "file"} "Upload Addendum"]
+    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple false}]]
+   [:div.form-group.sr-only
+    [:input.form-control {:type "text" :name "id" :value (:id item)}]
+    [:input.form-control {:type "text" :name "number" :value (or (:rfp_no item)
+                                                             (:ifb_no item))}]
+    [:input.form-control {:type "text" :name "type" :value (if (:rfp_no item)
+                                                             "RFP"
+                                                             "IFB")}]]
+   [:div.form-group 
+    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value ""}  ]
+    [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])

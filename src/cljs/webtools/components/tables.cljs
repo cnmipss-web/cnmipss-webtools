@@ -3,7 +3,8 @@
             [cljs-time.core :as time]
             [cljs-time.format :as format]
             [webtools.components.forms :as forms]
-            [webtools.handlers.events :as events]))
+            [webtools.handlers.events :as events]
+            [webtools.constants :as const]))
 
 (defn user-row [user]
   [:tr.row.user-list-row
@@ -23,7 +24,12 @@
 
 (defn parse-date
   [date]
-  (format/parse (format/formatter "MMMM dd, YYYY") date))
+  (println date)
+  (if (some? (re-find #"at" date))
+    (format/parse (format/formatter "MMMM dd, YYYY h:mm A") (-> date
+                                                                (clojure.string/replace #"at" "")
+                                                                (clojure.string/replace #"\s+" " ")))
+    (format/parse (format/formatter "MMMM dd, YYYY") date)))
 
 (defn force-close?
   [{:keys [status close_date]}]
@@ -109,18 +115,18 @@
        [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
 
 (defn procurement-table [k m]
-  [:div.procurement-table-box
+  [:div.procurement-table-box.col-xs-12
    [:h2.procurement-title.text-center (key->name k)]
-   [:table.procurement-list.col-xs-12
+   [:table.procurement-list
     [:caption.sr-only "List of current"]
     [:thead
      [:tr.row.jva-list-row
-      [:th.w-2.text-center {:scope "col"} "Number"]
-      [:th.w-2.text-center {:scope "col"} "Opening Date"]
-      [:th.w-2.text-center {:scope "col"} "Closing Date"]
-      [:th.w-4.text-center {:scope "col"} "Title"]
-      [:th.w-8.text-center {:scope "col"} "Description"]
-      [:th.w-2.text-center {:scope "col"} "Link"]]]
+      [:th.custom-col-1.text-center {:scope "col"} "Number"]
+      [:th.custom-col-2.text-center {:scope "col"} "Opening Date"]
+      [:th.custom-col-2.text-center {:scope "col"} "Closing Date"]
+      [:th.custom-col-4.text-center {:scope "col"} "Title"]
+      [:th.custom-col-8.text-center {:scope "col"} "Description"]
+      [:th.custom-col-3.text-center {:scope "col"} "Link"]]]
     [:tbody
      (for [item (-> m k)]
        ^{:key (str (name k) (:title item))} [procurement-row (assoc item :status true)])]]])

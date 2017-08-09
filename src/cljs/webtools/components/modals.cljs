@@ -48,14 +48,16 @@
                       :aria-label "Close"}
        [:span {:aria-hidden "true"} "\u00d7"]]]
      [:div.modal-body
-      [forms/edit-rfp-ifb item]]
+      (if @(rf/subscribe [:add-addendum])
+        [forms/procurement-addendum item]
+        [forms/edit-rfp-ifb item])]
      [:div.modal-footer
       [:div.col-xs-2
-       ;[:button.btn.btn-danger.procurement-reannounce "Re-announce"]
-       ]
+       [:button.btn.btn-danger.procurement-addendum {:on-click #(rf/dispatch [:add-addendum true])} "Addendum"]]
       [:div.col-xs-4]
       [:div.col-xs-6
-       [:button.btn.btn-secondary {:data-dismiss "modal"} "Exit"]
+       [:button.btn.btn-secondary {:data-dismiss "modal"
+                                   :on-click #(rf/dispatch [:add-addendum false])} "Exit"]
        [:button.btn.btn-primary {:type "submit" :form "edit-procurement"} "Save Changes"]]]]]])
 
 (defn all-modals

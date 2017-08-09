@@ -118,5 +118,5 @@
                           :method :post
                           :format (ajax/json-request-format)
                           :params item
-                          :response-format (util/full-response-format ajax/json-request-format)
+                          :response-format (util/full-response-format ajax/json-response-format)
                           :handler ajax-handlers/all-procurement}))))

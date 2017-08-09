@@ -125,3 +125,7 @@
    (assoc db :error-list (-> errors cemerick.url/url-decode
                              (clojure.string/replace "+" " ")
                              (clojure.string/split #"\n\n")))))
+
+(reg-event-db :add-addendum
+ (fn [db [_ setting]]
+   (assoc db :add-addendum setting)))

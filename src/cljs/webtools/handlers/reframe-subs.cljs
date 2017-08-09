@@ -76,3 +76,7 @@
 (reg-sub :error-list
  (fn [db _]
    (:error-list db)))
+
+(reg-sub :add-addendum
+ (fn [db _]
+   (:add-addendum db)))

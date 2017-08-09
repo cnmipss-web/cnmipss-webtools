@@ -8,4 +8,5 @@
    :show-roles true
    :wp-host "/"
    :jva-searches [""]
-   :edit-jva true})
+   :edit-jva true
+   :add-addendum false})
