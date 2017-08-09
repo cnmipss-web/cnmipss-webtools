@@ -28,6 +28,7 @@
 
 (conman/bind-connection *db*
                         "sql/test-seed.sql"
+                        "sql/procurement-addenda-queries.sql"
                         "sql/ifb-queries.sql"
                         "sql/rfp-queries.sql"
                         "sql/jva-queries.sql"
@@ -37,6 +38,9 @@
 (extend-protocol jdbc/IResultSetReadColumn
   java.sql.Date
   (result-set-read-column [v _ _] (c/from-sql-date v))
+
+  java.sql.Timestamp
+  (result-set-read-column [v _ _] (c/from-sql-time v))
   
   Array
   (result-set-read-column [v _ _] (vec (.getArray v)))
@@ -68,7 +72,11 @@
 
 (add-encoder org.joda.time.DateTime
              (fn [date jg]
-               (.writeString jg (f/unparse (f/formatter "MMMM dd, YYYY") date))))
+               (if (and (= (t/hour date) 0)
+                        (= (t/minute date) 0)
+                        (= (t/second date) 0))
+                 (.writeString jg (f/unparse (f/formatter "MMMM dd, YYYY") date))
+                 (.writeString jg (f/unparse (f/formatter const/procurement-datetime-format) date)))))
 
 (extend-protocol jdbc/ISQLValue
   IPersistentMap
