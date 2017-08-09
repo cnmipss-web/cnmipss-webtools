@@ -30,7 +30,7 @@ order by close_date desc
 select id, rfp_no, open_date, close_date, title, description, file_link  from rfps
 where rfp_no = :rfp_no
 
--- :name get-open-rfps :? :n
+-- :name get-open-rfps :? :*
 -- :doc returns records of open Requests for Proposal
-select rfp_no, open_date, close_date, title, description, file_link from rfps
+select id, rfp_no, open_date, close_date, title, description, file_link from rfps
 where (select current_date) < close_date
