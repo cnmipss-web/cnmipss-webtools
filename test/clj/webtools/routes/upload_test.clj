@@ -84,14 +84,13 @@
         (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal)))))
 
   (testing "POST /upload/jva-pdf"
-    (println "\nWARNING: POST /upload/jva-pdf is untested")
-    )
-  
-  (testing "POST /upload/rfp-pdf"
-    
-    (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
+    (println "\nWARNING: POST /upload/jva-pdf is untested"))
+
+  (testing "POST /upload/procurement-pdf"
+    (testing "should handle uploaded rfps"
+      (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
           {:keys [status body headers error params] :as response}
-          (auth-req :post "/upload/rfp-pdf"
+          (auth-req :post "/upload/procurement-pdf"
                     (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}}))]
       (testing "should redirect after successful upload"
         (is (= 302 status))
@@ -103,10 +102,10 @@
           (is (= "Training on the Foundations of Reading and Guided Reading" (:title rfp)))
           (wp/delete-media (.toString (:id rfp)))))))
 
-  (testing "POST /upload/ifb-pdf"
-    (let [pdf (file "test/clj/webtools/test/ifb-sample.pdf")
+    (testing "should handle uploaded ifbs"
+          (let [pdf (file "test/clj/webtools/test/ifb-sample.pdf")
           {:keys [status body headers error params] :as response}
-          (auth-req :post "/upload/ifb-pdf"
+          (auth-req :post "/upload/procurement-pdf"
                     (assoc :params {:file {:tempfile pdf :filename "sample-ifb.pdf" :size (.length pdf)}}))]
       (testing "should redirect after successful upload"
         (is (= 302 status))
@@ -117,3 +116,5 @@
           (is (some? ifb))
           (is (= "Purchase of 1 (One) Riding Mower for the Public School System" (:title ifb)))
           (wp/delete-media (.toString (:id ifb))))))))
+
+  )
