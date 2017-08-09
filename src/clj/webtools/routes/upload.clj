@@ -84,8 +84,10 @@
           (db/update-cert! new-cert))))))
 
 (defn process-cert-csv
-  [{:keys [tempfile size filename]}]
-  (let [data (->> tempfile slurp csv/read-csv (drop 1) (sort-by #(get % 7)))
+  [params]
+  (let [{:keys [file]} params
+        {:keys [tempfile size filename]} file
+        data (->> tempfile slurp csv/read-csv (drop 1) (sort-by #(get % 7)))
         existing-certs (db/get-all-certs)]
     (loop [current (first data) rem (next data) errors (atom [])]
       (let [[_ last-name first-name mi _ _ type cert-no start expiry _] current
@@ -142,29 +144,31 @@
                 "until filled.")))
 
 (defn process-jva-pdf
-  [file-list]
-  (if (= (type file-list) clojure.lang.PersistentArrayMap)
-    (let [{:keys [tempfile size filename]} file-list
-          jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-          text-list (split jva #"\n")
-          jva-record (as-> (reduce jva-reducer {} text-list) jva
-                       (db/make-sql-date jva :open_date)
-                       (db/make-sql-date jva :close_date)                       
-                       (make-status jva)
-                       (assoc jva :id (java.util.UUID/randomUUID))
-                       (assoc jva :file_link
-                              (wp/create-media filename tempfile
-                                               :title (:position jva)
-                                               :alt_text (str "Job Vacancy Announcement for"
-                                                              (:position jva))
-                                               :description (jva-desc jva)
-                                               :slug (:id jva))))]
-      (db/create-jva! jva-record))
-    (mapv process-jva-pdf file-list)))
+  [params]
+  (let [{:keys [file]} params]
+    (if (= (type file) clojure.lang.PersistentArrayMap)
+      (let [{:keys [tempfile size filename]} file
+            jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
+            text-list (split jva #"\n")
+            jva-record (as-> (reduce jva-reducer {} text-list) jva
+                         (db/make-sql-date jva :open_date)
+                         (db/make-sql-date jva :close_date)                       
+                         (make-status jva)
+                         (assoc jva :id (java.util.UUID/randomUUID))
+                         (assoc jva :file_link
+                                (wp/create-media filename tempfile
+                                                 :title (:position jva)
+                                                 :alt_text (str "Job Vacancy Announcement for"
+                                                                (:position jva))
+                                                 :description (jva-desc jva)
+                                                 :slug (:id jva))))]
+        (db/create-jva! jva-record))
+      (mapv (comp process-jva-pdf #(into {} [[:file %]])) file))))
 
 (defn process-reannouncement
-  [file]
-  (let [{:keys [tempfile size filename]} file
+  [params]
+  (let [{:keys [file]} params
+        {:keys [tempfile size filename]} file
           jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
           text-list (split jva #"\n")
           jva-record (as-> (reduce jva-reducer {} text-list) jva
@@ -187,10 +191,10 @@
 
 (defmacro post-file-route
   [r p role]
-  `(let [file# (get-in ~r [:params :file])
+  `(let [params# (get ~r :params)
          cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
      (try
-       (~p file#)
+       (~p params#)
        (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role ))
            (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/header "Content-Type" "application/json"))
@@ -212,24 +216,26 @@
     (merge-with select-non-nil this-line rfp)))
 
 (defn process-procurement-pdf
-  [file-list]
-  (let [{:keys [tempfile size filename]} file-list
-        announcement (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-        desc (-> (re-find #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/" announcement)
-                 (last)
-                 (clojure.string/trim))
-        lines (split announcement #"\n")
-        record (as->
-                 (reduce procurement-reducer {} lines) rec
-                 (filter (comp some? val) rec)
-                 (map (fn [[k v]] [k (clojure.string/replace v #"\s+" " ")]) rec)
-                 (into {} rec)
-                 (assoc rec :description desc)
-                 (db/make-sql-date rec :open_date)
-                 (db/make-sql-datetime rec :close_date)
-                 (make-status rec)
-                 (assoc rec :id (java.util.UUID/randomUUID))
-                 (assoc rec :file_link
+  [params]
+  (let [{:keys [file]} params]
+    (if (= (type file) clojure.lang.PersistentArrayMap)
+      (let [{:keys [tempfile size filename]} file
+            announcement (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
+            desc (-> (re-find #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/" announcement)
+                     (last)
+                     (clojure.string/trim))
+            lines (split announcement #"\n")
+            record (as->
+                       (reduce procurement-reducer {} lines) rec
+                     (filter (comp some? val) rec)
+                     (map (fn [[k v]] [k (clojure.string/replace v #"\s+" " ")]) rec)
+                     (into {} rec)
+                     (assoc rec :description desc)
+                     (db/make-sql-date rec :open_date)
+                     (db/make-sql-datetime rec :close_date)
+                     (make-status rec)
+                     (assoc rec :id (java.util.UUID/randomUUID))
+                     (assoc rec :file_link
                             (wp/create-media filename tempfile
                                              :title (:title rec)
                                              :alt_text (str "Announcement for "
@@ -242,9 +248,23 @@
                                                               (last)
                                                               (cemerick.url/url-encode))
                                              :slug (:id rec))))]
-    (if (some? (:rfp_no record))
-      (db/create-rfp! record)
-      (db/create-ifb! record))))
+        (if (some? (:rfp_no record))
+          (db/create-rfp! record)
+          (db/create-ifb! record)))
+      (mapv (comp process-procurement-pdf #(into {} [[:file %]])) file))))
+
+(defn process-procurement-addendum
+  [params]
+  (let [{:keys [file id number type]} params
+        {:keys [tempfile size filename]} file
+        slug (java.util.UUID/randomUUID)
+        file_link (wp/create-media filename tempfile
+                              :title (str "Addendum for " type "# " number)
+                              :slug slug)]
+    (db/create-addendum! {:id slug
+                          :file_link file_link
+                          :rfp_id (if (= "RFP" type) (java.util.UUID/fromString id))
+                          :ifb_id (if (= "IFB" type) (java.util.UUID/fromString id))})))
 
 (defroutes upload-routes
   (POST "/upload/certification-csv" req
@@ -253,7 +273,7 @@
         (post-file-route req process-jva-pdf "HRO"))
   (POST "/upload/reannounce-jva" req
         (post-file-route req process-reannouncement "HRO"))
-  (POST "/upload/rfp-pdf" req
+  (POST "/upload/procurement-pdf" req
         (post-file-route req process-procurement-pdf "Procurement"))
-  (POST "/upload/ifb-pdf" req
-        (post-file-route req process-procurement-pdf "Procurement")))
+  (POST "/upload/procurement-addendum" req
+        (post-file-route req process-procurement-addendum "Procurement")))

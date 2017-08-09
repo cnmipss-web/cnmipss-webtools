@@ -38,14 +38,34 @@
         (println e#)
         (json-response resp/internal-server-error e#)))))
 
+(defn get-all-procurement
+  []
+  {:rfps (db/get-all-rfps)
+   :ifbs (db/get-all-ifbs)})
+
+(defn clear-procurement
+  [type {:keys [id] :as body}]
+  (let [get-fn {:ifb db/get-ifb-addenda
+                :rfp db/get-rfp-addenda}
+        id-key {:ifb :ifb_id
+                :rfp :rfp_id}
+        del-fn {:ifb db/delete-ifb!
+                :rfp db/delete-rfp!}]
+    (try
+      (wp/delete-media id)
+      (catch Exception e
+        (log/error e)))
+    (let [addenda ((get-fn type) {(id-key type) (java.util.UUID/fromString id)})]
+      (mapv db/delete-addendum! addenda)
+      (mapv (comp wp/delete-media :id) addenda)
+      ((del-fn type) body))))
+
 (defroutes api-routes
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
 
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
 
-  (GET "/api/all-procurement" [] (query-route (fn []
-                                                {:rfps (db/get-all-rfps)
-                                                 :ifbs (db/get-all-ifbs)})))
+  (GET "/api/all-procurement" [] (query-route get-all-procurement))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
@@ -93,10 +113,11 @@
   (POST "/api/create-user" request
         (let [{:keys [email roles]} (request :body)
               admin (-> (get-in request [:body :admin]) truthy)
-              id (java.util.UUID/randomUUID)]
+              id (java.util.UUID/randomUUID)
+              user (keyed [email admin roles id])]
           (query-route db/get-all-users
-                       (db/create-user! (keyed [email admin roles id]))
-                       (email/invite (keyed [email admin roles id])))))
+                       (db/create-user! user)
+                       (email/invite user))))
   
   (POST "/api/delete-user" request
         (let [{:keys [email]} (request :body)]
@@ -123,18 +144,21 @@
   (POST "/api/update-rfp" {:keys [body]}
         (let [rfp (-> body
                       (db/make-sql-date :open_date)
-                      (db/make-sql-date :close_date))]
+                      (db/make-sql-datetime :close_date))]
           (query-route db/get-all-rfps (db/update-rfp rfp))))
 
   (POST "/api/delete-rfp" {:keys [body]}
-        (query-route db/get-all-rfps
-                     (db/delete-rfp! body)))
+        (query-route get-all-procurement
+                     (clear-procurement :rfp body)))
 
   (POST "/api/update-ifb" {:keys [body]}
         (let [ifb (-> body
                       (db/make-sql-date :open_date)
-                      (db/make-sql-date :close_date))]
+                      (db/make-sql-datetime :close_date))]
           (query-route db/get-all-ifbs (db/update-ifb ifb))))
 
   (POST "/api/delete-ifb" {:keys [body]}
-        (query-route db/get-all-ifbs (db/delete-ifb! body))))
+        (query-route db/get-all-ifbs
+                     (clear-procurement :ifb body))))
+
+
