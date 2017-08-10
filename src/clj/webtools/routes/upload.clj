@@ -257,14 +257,19 @@
   [params]
   (let [{:keys [file id number type]} params
         {:keys [tempfile size filename]} file
+        uuid (java.util.UUID/fromString id)
         slug (java.util.UUID/randomUUID)
         file_link (wp/create-media filename tempfile
                               :title (str "Addendum for " type "# " number)
-                              :slug slug)]
+                              :slug slug)
+        existing-addenda (cond
+                           (= "RFP" type) (db/get-rfp-addenda {:rfp_id uuid})
+                           (= "IFB" type) (db/get-ifb-addenda {:ifb_id uuid}))]
     (db/create-addendum! {:id slug
                           :file_link file_link
-                          :rfp_id (if (= "RFP" type) (java.util.UUID/fromString id))
-                          :ifb_id (if (= "IFB" type) (java.util.UUID/fromString id))})))
+                          :rfp_id (if (= "RFP" type) uuid)
+                          :ifb_id (if (= "IFB" type) uuid)
+                          :number (count existing-addenda)})))
 
 (defroutes upload-routes
   (POST "/upload/certification-csv" req

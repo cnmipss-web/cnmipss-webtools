@@ -41,7 +41,8 @@
 (defn get-all-procurement
   []
   {:rfps (db/get-all-rfps)
-   :ifbs (db/get-all-ifbs)})
+   :ifbs (db/get-all-ifbs)
+   :addenda (db/get-all-addenda)})
 
 (defn clear-procurement
   [type {:keys [id] :as body}]
