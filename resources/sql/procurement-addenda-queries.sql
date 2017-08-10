@@ -1,8 +1,8 @@
 -- :name create-addendum! :! :1
 -- :doc Creates a new addendum to an existing rfp/ifb
 insert into procurement_addenda
-(id, file_link, rfp_id, ifb_id)
-values (:id, :file_link, :rfp_id, :ifb_id);
+(id, file_link, rfp_id, ifb_id, addendum_number)
+values (:id, :file_link, :rfp_id, :ifb_id, :number);
 
 -- :name delete-addendum! :! :1
 -- :doc Deletes an addendum from the database
@@ -18,3 +18,7 @@ where rfp_id = :rfp_id;
 -- :doc Retrieve addenda with matching ifb_no
 select * from procurement_addenda
 where ifb_id = :ifb_id;
+
+-- :name get-all-addenda :? :*
+-- :doc Retrieve all addenda
+select * from procurement_addenda;
