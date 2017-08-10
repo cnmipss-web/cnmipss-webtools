@@ -43,7 +43,7 @@
    [:div.modal-dialog {:role "document"}
     [:div.modal-content
      [:div.modal-header
-      [:h5#procurement-moda-label.modal-title (str (procurement-type item)  ": " (:title item))]
+      [:h5#procurement-modal-label.modal-title (str (procurement-type item)  ": " (:title item))]
       [:button.close {:data-dismiss "modal"
                       :aria-label "Close"}
        [:span {:aria-hidden "true"} "\u00d7"]]]
