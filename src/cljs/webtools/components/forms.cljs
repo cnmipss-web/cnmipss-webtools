@@ -225,7 +225,6 @@
 
 (defn procurement-addendum
   [item]
-  (println item)
   [:form#procurement-addendum.edit-modal
    {:action "/webtools/upload/procurement-addendum" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group

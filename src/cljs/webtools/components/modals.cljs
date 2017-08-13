@@ -1,6 +1,7 @@
 (ns webtools.components.modals
   (:require [re-frame.core :as rf]
-            [webtools.components.forms :as forms]))
+            [webtools.components.forms :as forms]
+            [webtools.components.tables :as tables]))
 
 (defn jva-modal [jva]
   [:div#jva-modal.modal.fade {:role "dialog"
@@ -49,16 +50,20 @@
        [:span {:aria-hidden "true"} "\u00d7"]]]
      [:div.modal-body
       (if @(rf/subscribe [:add-addendum])
-        [forms/procurement-addendum item]
+        [:div
+         [tables/existing-addenda item]
+         [forms/procurement-addendum item]]
         [forms/edit-rfp-ifb item])]
      [:div.modal-footer
       [:div.col-xs-2
-       [:button.btn.btn-danger.procurement-addendum {:on-click #(rf/dispatch [:add-addendum true])} "Addendum"]]
+       (if (not @(rf/subscribe [:add-addendum]))
+         [:button.btn.btn-danger.procurement-addendum {:on-click #(rf/dispatch [:add-addendum true])} "Addendum"])]
       [:div.col-xs-4]
       [:div.col-xs-6
        [:button.btn.btn-secondary {:data-dismiss "modal"
                                    :on-click #(rf/dispatch [:add-addendum false])} "Exit"]
-       [:button.btn.btn-primary {:type "submit" :form "edit-procurement"} "Save Changes"]]]]]])
+       (if (not @(rf/subscribe [:add-addendum]))
+         [:button.btn.btn-primary {:type "submit" :form "edit-procurement"} "Save Changes"])]]]]])
 
 (defn all-modals
   []

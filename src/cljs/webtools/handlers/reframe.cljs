@@ -2,8 +2,16 @@
   (:require [webtools.db :as db]
             [webtools.constants :as const]
             [webtools.util :as util]
+            [webtools.handlers.api :as ajax-handlers]
             [re-frame.core :refer [dispatch reg-event-db]]
             [ajax.core :as ajax]))
+
+(defn ajax-get
+  [opts]
+  (let [defaults {:method :get
+                  :format (ajax/json-request-format)
+                  :response-format (util/full-response-format ajax/json-response-format)}]
+    (ajax/ajax-request (merge defaults opts))))
 
 (reg-event-db
   :initialize-db
@@ -52,6 +60,14 @@
 (reg-event-db
  :set-active-role
  (fn [db [_ role]]
+   (case role
+     "HRO" (ajax-get {:uri "/webtools/api/all-jvas"
+                      :handler ajax-handlers/all-jvas})
+     "Procurement" (ajax-get {:uri "/webtools/api/all-procurement"
+                              :handler ajax-handlers/all-procurement})
+     "Manage Users" (ajax-get {:uri "/webtools/api/all-users"
+                               :handler ajax-handlers/all-users})
+     nil)
    (assoc db :active-role role)))
 
 (reg-event-db
@@ -105,9 +121,9 @@
    (assoc db :jva-modal (assoc (:jva-modal db) key val))))
 
 (reg-event-db
- :store-rfp-ifb-list
+ :store-procurement-list
 (fn [db [_ list]]
-  (assoc db :rfp-ifb-list list)))
+  (assoc db :procurement-list list)))
 
 (reg-event-db
  :set-procurement-modal

@@ -24,7 +24,6 @@
 
 (defn parse-date
   [date]
-  (println date)
   (if (some? (re-find #"at" date))
     (format/parse (format/formatter "MMMM dd, YYYY h:mm A") (-> date
                                                                 (clojure.string/replace #"at" "")
@@ -131,10 +130,31 @@
      (for [item (-> m k)]
        ^{:key (str (name k) (:title item))} [procurement-row (assoc item :status true)])]]])
 
-(defn rfp-ifb-list [rfp-ifb-list]
+(defn rfp-ifb-list [procurement-list]
   [:div
-   [procurement-table :rfps rfp-ifb-list]
-   [procurement-table :ifbs rfp-ifb-list]])
+   [procurement-table :rfps procurement-list]
+   [procurement-table :ifbs procurement-list]])
+
+(defn existing-addenda [pns-item]
+  (let [{:keys [id]} pns-item
+        addenda (->> @(rf/subscribe [:procurement-list])
+                    :addenda
+                    (filter #(or (= id (:rfp_id %))
+                                 (= id (:ifb_id %)))))]
+    [:table#existing-addenda.text-center
+     [:caption "Existing Addendums"]
+     [:thead
+      [:tr
+       [:th.text-center "Number"]
+       [:th.text-center "Link"]]]
+     [:tbody
+      (for [{:keys [addendum_number file_link]} addenda]
+        (let [filename (last (re-find #"/([\w\.\-]+)$" file_link))]
+          ^{:key (str (* addendum_number (.random js/Math)))}
+          [:tr
+           [:td (inc addendum_number)]
+           [:td
+            [:a {:href file_link :target "_blank"} filename]]]))]]))
 
 (defn cert-row [row]
   (let [{:keys [last_name first_name cert_type cert_no start_date expiry_date mi]} row]

@@ -65,9 +65,9 @@
  (fn [db _]
    (:jva-searches db)))
 
-(reg-sub :rfp-ifb-list
+(reg-sub :procurement-list
  (fn [db _]
-   (:rfp-ifb-list db)))
+   (:procurement-list db)))
 
 (reg-sub :procurement-modal
  (fn [db _]
@@ -80,3 +80,7 @@
 (reg-sub :add-addendum
  (fn [db _]
    (:add-addendum db)))
+
+(reg-sub :addenda
+ (fn [db _]
+   (:addenda db)))

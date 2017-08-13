@@ -8,12 +8,7 @@
             [webtools.util :as util]
             [webtools.cookies :refer [get-cookie]]))
 
-(defn ajax-get
-  [opts]
-  (let [defaults {:method :get
-                  :format (ajax/json-request-format)
-                  :response-format (util/full-response-format ajax/json-response-format)}]
-    (ajax/ajax-request (merge defaults opts))))
+
 
 (defn- certification []
   [:div
@@ -38,8 +33,6 @@
       [tables/error-table errors]])])
 
 (defn- hro []
-  (ajax-get {:uri "/webtools/api/all-jvas"
-             :handler ajax-handlers/all-jvas})
   [:div
    [:div.col-xs-12
     [forms/jva-search]
@@ -48,18 +41,14 @@
     [forms/jva-upload (.-hash js/location)]]])
 
 (defn- procurement []
-  (ajax-get {:uri "/webtools/api/all-procurement"
-             :handler ajax-handlers/all-procurement})
   [:div
    [:div.col-xs-12
     [forms/procurement-uploads]]
    [:div.col-xs-12
     [forms/rfp-ifb-search]
-    [tables/rfp-ifb-list @(rf/subscribe [:rfp-ifb-list])]]])
+    [tables/rfp-ifb-list @(rf/subscribe [:procurement-list])]]])
 
 (defn manage-users []
-  (ajax-get {:uri "/webtools/api/all-users"
-             :handler ajax-handlers/all-users})
   [:div
    [tables/user-table @(rf/subscribe [:user-list])]
    [:div.col-xs-12
