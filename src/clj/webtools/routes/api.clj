@@ -67,6 +67,21 @@
   (GET "/api/all-jvas" [] (query-route db/get-all-jvas))
 
   (GET "/api/all-procurement" [] (query-route get-all-procurement))
+
+  (POST "/api/subscribe-procurement" {:keys [body] :as request}
+        (let [{:keys [company person email tel rfp_id ifb_id]} (-> body json->edn)
+              existing-subs (db/get-subscriptions {:rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
+                                                   :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))})]
+          (json-response
+           resp/ok
+           (db/create-subscription! {:id (java.util.UUID/randomUUID)
+                                     :rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
+                                     :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))
+                                     :company_name company
+                                     :contact_person person
+                                     :email email
+                                     :telephone (read-string (clojure.string/replace tel #"\D" ""))
+                                     :subscription_number (count existing-subs)}))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
