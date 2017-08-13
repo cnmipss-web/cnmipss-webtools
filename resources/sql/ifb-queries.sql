@@ -31,5 +31,6 @@ where ifb_no = :ifb_no
 
 -- :name get-open-ifbs :? :n
 -- :doc returns records of open Requests for Proposal
-select ifb_no, open_date, close_date, title, description, file_link from ifbs
-where (select current_date) < close_date
+select id, ifb_no, open_date, close_date, title, description, file_link from ifbs
+where (select date_part('day', current_date - close_date)) < 2
+order by close_date desc
