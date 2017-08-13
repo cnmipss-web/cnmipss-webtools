@@ -29,6 +29,7 @@
 (conman/bind-connection *db*
                         "sql/test-seed.sql"
                         "sql/procurement-addenda-queries.sql"
+                        "sql/subscription-queries.sql"
                         "sql/ifb-queries.sql"
                         "sql/rfp-queries.sql"
                         "sql/jva-queries.sql"
