@@ -549,3 +549,16 @@ td.custom-col-19 {
 
 td.custom-col-20 {
   width: 100%; }
+
+#existing-addenda {
+  width: 250px;
+  margin: 0 0; }
+  #existing-addenda caption {
+    margin-left: 15px;
+    caption-side: top; }
+  #existing-addenda, #existing-addenda td, #existing-addenda th, #existing-addenda tr {
+    box-shadow: none;
+    text-align: center;
+    border: none; }
+  #existing-addenda td, #existing-addenda th {
+    width: 50px; }

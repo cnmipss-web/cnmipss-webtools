@@ -103,3 +103,21 @@ div.procurement-table-box {
 
 
 @include custom-columns(20, td);
+
+#existing-addenda {
+    width: 250px;
+    margin: 0 0;
+    caption {
+        margin-left: 15px;
+        caption-side: top;
+    }
+
+    &,td,th,tr {
+        box-shadow: none;
+        text-align: center;
+        border: none;
+    }
+    td, th {
+        width: 50px;
+    }
+}
