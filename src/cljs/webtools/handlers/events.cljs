@@ -111,12 +111,19 @@
                           :handler ajax-handlers/all-procurement}))))
 
 (defn delete-procurement [item]
-  (let [type (procurement-type item)]
+  (let [type (-> item procurement-type name)]
     (fn [e]
       (.preventDefault e)
-      (ajax/ajax-request {:uri (str "/webtools/api/delete-" (name type))
-                          :method :post
-                          :format (ajax/json-request-format)
-                          :params item
-                          :response-format (util/full-response-format ajax/json-response-format)
-                          :handler ajax-handlers/all-procurement}))))
+      (if (js/confirm (str "WARNING: Deleting this "
+                           (clojure.string/upper-case type)
+                           " will delete ALL related data including addendums and contractor subscriptions.  "
+                           "The data will be permanently deleted.  "
+                           "Are you sure you want to delete this "
+                           (clojure.string/upper-case type)
+                           "?"))
+        (ajax/ajax-request {:uri (str "/webtools/api/delete-" type)
+                            :method :post
+                            :format (ajax/json-request-format)
+                            :params item
+                            :response-format (util/full-response-format ajax/json-response-format)
+                            :handler ajax-handlers/all-procurement})))))

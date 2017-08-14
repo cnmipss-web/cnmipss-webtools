@@ -4,7 +4,8 @@
             [cljs-time.format :as format]
             [webtools.components.forms :as forms]
             [webtools.handlers.events :as events]
-            [webtools.constants :as const]))
+            [webtools.constants :as const]
+            [webtools.util :as util]))
 
 (defn user-row [user]
   [:tr.row.user-list-row
@@ -188,27 +189,12 @@
         ^{:key (str (* 100000000 (.random js/Math)))} [:div.container-fluid
                                                        [cert-row (first certs)]
                                                        [cert-row (second certs)]]))]]) 
-(defn format-tel
-  [tel]
-  (let [suffix (-> tel (mod 10000))
-        rm-suffix #(-> % (- suffix) (/ 10000))
-        prefix (-> tel (rm-suffix) (mod 1000))
-        rm-prefix #(-> % (- prefix) (/ 1000))
-        area-code (-> tel rm-suffix rm-prefix (mod 1000))
-        rm-ac #(-> % (- area-code) (/ 1000))
-        country-code (-> tel rm-suffix rm-prefix rm-ac)]
-    (str
-     (if (> country-code 0)
-       (str "+" country-code " "))
-     (if (> area-code 0)
-       (str "(" area-code ") "))
-     prefix "-" suffix)))
 
 (defn subscriber-row [subscriber]
   [:tr
    [:td (:company_name subscriber)]
    [:td (:contact_person subscriber)]
-   [:td (-> subscriber :telephone format-tel)]
+   [:td (-> subscriber :telephone util/format-tel-num)]
    [:td (:email subscriber)]])
 
 (defn pns-subscribers [subscribers]
