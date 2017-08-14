@@ -5,6 +5,7 @@
             [webtools.routes.oauth :refer [oauth-routes]]
             [webtools.routes.api :refer [api-routes api-routes-with-auth]]
             [webtools.routes.upload :refer [upload-routes]]
+            [webtools.routes.download :refer [download-routes]]
             [compojure.route :as route]
             [webtools.env :refer [defaults]]
             [mount.core :as mount]
@@ -26,6 +27,9 @@
         (wrap-routes middleware/wrap-webtools-auth)
         (wrap-routes middleware/wrap-api))
     (-> #'upload-routes
+        (wrap-routes middleware/wrap-webtools-auth)
+        (wrap-routes middleware/wrap-uploads))
+    (-> #'download-routes
         (wrap-routes middleware/wrap-webtools-auth)
         (wrap-routes middleware/wrap-uploads))
     (route/not-found
