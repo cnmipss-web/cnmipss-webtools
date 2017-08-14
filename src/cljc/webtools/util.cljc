@@ -23,3 +23,18 @@
                          :status  #?(:clj (:status response-obj)
                                      :cljs (.getStatus response-obj))})))))
 
+(defn format-tel-num
+  [tel]
+  (let [suffix (-> tel (mod 10000))
+        rm-suffix #(-> % (- suffix) (/ 10000))
+        prefix (-> tel (rm-suffix) (mod 1000))
+        rm-prefix #(-> % (- prefix) (/ 1000))
+        area-code (-> tel rm-suffix rm-prefix (mod 1000))
+        rm-ac #(-> % (- area-code) (/ 1000))
+        country-code (-> tel rm-suffix rm-prefix rm-ac)]
+    (str
+     (if (> country-code 0)
+       (str "+" country-code " "))
+     (if (> area-code 0)
+       (str "(" area-code ") "))
+     prefix "-" suffix)))
