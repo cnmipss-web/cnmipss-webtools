@@ -42,21 +42,24 @@
   []
   {:rfps (db/get-all-rfps)
    :ifbs (db/get-all-ifbs)
-   :addenda (db/get-all-addenda)})
+   :addenda (db/get-all-addenda)
+   :subscriptions (db/get-all-subscriptions)})
 
 (defn clear-procurement
   [type {:keys [id] :as body}]
-  (let [get-fn {:ifb db/get-ifb-addenda
-                :rfp db/get-rfp-addenda}
-        id-key {:ifb :ifb_id
-                :rfp :rfp_id}
+  (let [get-fn ({:ifb db/get-ifb-addenda
+                  :rfp db/get-rfp-addenda} type)
+        uuid (java.util.UUID/fromString id)
         del-fn {:ifb db/delete-ifb!
-                :rfp db/delete-rfp!}]
+                :rfp db/delete-rfp!}
+        query-map {:rfp_id uuid :ifb_id uuid}]
     (try
       (wp/delete-media id)
       (catch Exception e
         (log/error e)))
-    (let [addenda ((get-fn type) {(id-key type) (java.util.UUID/fromString id)})]
+    (let [addenda (get-fn query-map)
+          subscriptions (db/get-subscriptions query-map)]
+      (mapv db/delete-subscription! subscriptions)
       (mapv db/delete-addendum! addenda)
       (mapv (comp wp/delete-media :id) addenda)
       ((del-fn type) body))))
@@ -71,17 +74,26 @@
   (POST "/api/subscribe-procurement" {:keys [body] :as request}
         (let [{:keys [company person email tel rfp_id ifb_id]} (-> body json->edn)
               existing-subs (db/get-subscriptions {:rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
-                                                   :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))})]
-          (json-response
-           resp/ok
-           (db/create-subscription! {:id (java.util.UUID/randomUUID)
-                                     :rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
-                                     :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))
-                                     :company_name company
-                                     :contact_person person
-                                     :email email
-                                     :telephone (read-string (clojure.string/replace tel #"\D" ""))
-                                     :subscription_number (count existing-subs)}))))
+                                                   :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))})
+              subscription {:id (java.util.UUID/randomUUID)
+                            :rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
+                            :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))
+                            :company_name company
+                            :contact_person person
+                            :email email
+                            :telephone (read-string (clojure.string/replace tel #"\D" ""))
+                            :subscription_number (count existing-subs)}]
+          (try-let [created (db/create-subscription! subscription)]
+                   (try-let [pns (cond
+                                   rfp_id (db/get-rfp {:id (java.util.UUID/fromString rfp_id)})
+                                   ifb_id (db/get-ifb {:id (java.util.UUID/fromString ifb_id)}))]
+                            (email/confirm-subscription subscription pns)
+                            (catch Exception e
+                              (println e)))
+                   (json-response resp/ok created)
+                   (catch Exception e
+                     (println e)
+                     (json-response resp/internal-server-error {:error e})))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
