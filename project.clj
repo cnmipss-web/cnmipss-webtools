@@ -50,7 +50,8 @@
                  [ring/ring-json "0.4.0"]
                  [secretary "1.2.3"]
                  [selmer "1.10.8"]
-                 [stuarth/clj-oauth2 "0.3.2"]]
+                 [stuarth/clj-oauth2 "0.3.2"]
+                 [try-let "1.1.0"]]
 
   :min-lein-version "2.0.0"
 
