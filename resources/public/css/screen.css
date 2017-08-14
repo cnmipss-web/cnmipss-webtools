@@ -122,13 +122,44 @@ table {
   div > .sidebar {
     padding: 0px; }
 
+/**
+ * Accessible button colors to replace Bootstrap defaults
+ */
+/**
+ * Button Styles
+ */
+.btn.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac; }
+
+.btn.btn-success {
+  color: #fff;
+  background-color: #396f3a;
+  border-color: #305e31; }
+
+.btn.btn-info {
+  color: #fff;
+  background-color: #0b7285;
+  border-color: #095e6d; }
+
+.btn.btn-warning {
+  color: #fff;
+  background-color: #b24d04;
+  border-color: #994203; }
+
+.btn.btn-danger {
+  color: #fff;
+  background-color: #c92a2a;
+  border-color: #b42626; }
+
 button.nav-link {
   cursor: pointer;
   border: none;
   background: inherit;
   color: inherit; }
 
-button.jva-file-link {
+button.file-link {
   padding: 4px 6px; }
 
 button.jva-reannounce {
@@ -375,7 +406,7 @@ div.no-role {
 .modal-header {
   display: flex;
   flex-direction: row; }
-  .modal-header h5 {
+  .modal-header h2, .modal-header h3, .modal-header h4, .modal-header h5 {
     width: 100%; }
 
 header.navbar {
@@ -553,12 +584,17 @@ td.custom-col-20 {
 #existing-addenda {
   width: 250px;
   margin: 0 0; }
-  #existing-addenda caption {
-    margin-left: 15px;
-    caption-side: top; }
-  #existing-addenda, #existing-addenda td, #existing-addenda th, #existing-addenda tr {
-    box-shadow: none;
-    text-align: center;
-    border: none; }
   #existing-addenda td, #existing-addenda th {
-    width: 50px; }
+    width: 50px;
+    text-align: center; }
+
+#existing-addenda caption, #pns-subscriber-table caption {
+  margin-left: 15px;
+  caption-side: top; }
+
+#existing-addenda, #existing-addenda td, #existing-addenda th, #existing-addenda tr, #pns-subscriber-table, #pns-subscriber-table td, #pns-subscriber-table th, #pns-subscriber-table tr {
+  box-shadow: none;
+  border: none; }
+
+#pns-subscriber-table {
+  text-align: left; }

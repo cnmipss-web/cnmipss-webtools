@@ -107,6 +107,12 @@ div.procurement-table-box {
 #existing-addenda {
     width: 250px;
     margin: 0 0;
+    td, th {
+        width: 50px;
+        text-align: center;
+    }
+}
+#existing-addenda, #pns-subscriber-table {
     caption {
         margin-left: 15px;
         caption-side: top;
@@ -114,10 +120,9 @@ div.procurement-table-box {
 
     &,td,th,tr {
         box-shadow: none;
-        text-align: center;
         border: none;
     }
-    td, th {
-        width: 50px;
-    }
+}
+#pns-subscriber-table {
+    text-align: left;
 }
