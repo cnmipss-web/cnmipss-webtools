@@ -14,6 +14,8 @@
   (db/seed-jvas)
   (db/seed-rfps)
   (db/seed-ifbs)
+  (db/seed-addenda)
+  (db/seed-subscriptions)
   (ts)
   (mount/stop))
 
