@@ -145,3 +145,17 @@
 (reg-event-db :add-addendum
  (fn [db [_ setting]]
    (assoc db :add-addendum setting)))
+
+(reg-event-db :set-subscriber-modal
+ (fn [db [_ {:keys [id] :as item}]]
+   (let [subscriptions (filter #(or (= id (:rfp_id %))
+                                    (= id (:ifb_id %))) (get-in db [:procurement-list :subscriptions]))]
+     (assoc db :subscriber-modal [item subscriptions]))))
+
+(reg-event-db :clear-subscriber-modal
+ (fn [db _ ]
+   (dissoc db :subscriber-modal)))
+
+(reg-event-db :email-subscribers
+ (fn [db [_ item subscribers]]
+   ))

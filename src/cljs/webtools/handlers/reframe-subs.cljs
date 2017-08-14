@@ -84,3 +84,7 @@
 (reg-sub :addenda
  (fn [db _]
    (:addenda db)))
+
+(reg-sub :subscriber-modal
+ (fn [db _]
+   (:subscriber-modal db)))

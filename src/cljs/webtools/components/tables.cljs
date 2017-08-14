@@ -54,14 +54,14 @@
      [:td.custom-col-2 (jva :location)]
      [:td.custom-col-3 
       [:a {:href (jva :file_link)}
-       [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
+       [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
       [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
-       [:button.btn.btn-warning.jva-file-link {:title "Edit"
+       [:button.btn.btn-warning.file-link {:title "Edit"
                                                :data-toggle "modal"
                                                :data-target "#jva-modal"
                                                :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
       [:a {:on-click (events/delete-jva jva)}
-       [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
+       [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
 
 (defn filter-jvas
   [jvas]
@@ -103,15 +103,20 @@
    [:td.custom-col-4 (:title item)]
    [:td.custom-col-8.text-left (-> item :description (subs 0 140) (str "..."))]
    [:td.custom-col-3
+    [:a {:on-click #(rf/dispatch [:set-subscriber-modal item])}
+     [:button.btn.btn-success.file-link {:title "Subscribers"
+                                         :data-toggle "modal"
+                                         :data-target "#pns-subscriber-modal"
+                                         :aria-controls "pns-subscriber-modal"} [:i.fa.fa-envelope]]]
     [:a {:href (item :file_link)}
-     [:button.btn.btn-info.jva-file-link {:title "Download"} [:i.fa.fa-download]]]
+     [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
     [:a {:on-click (fn [] (rf/dispatch [:set-procurement-modal item]))}
-       [:button.btn.btn-warning.jva-file-link {:title "Edit"
-                                               :data-toggle "modal"
-                                               :data-target "#procurement-modal"
-                                               :aria-controls "procurement-modal"} [:i.fa.fa-pencil]]]
+       [:button.btn.btn-warning.file-link {:title "Edit"
+                                           :data-toggle "modal"
+                                           :data-target "#procurement-modal"
+                                           :aria-controls "procurement-modal"} [:i.fa.fa-pencil]]]
     [:a {:on-click (events/delete-procurement item)}
-       [:button.btn.btn-danger.jva-file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
+       [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
 
 (defn procurement-table [k m]
   [:div.procurement-table-box.col-xs-12
@@ -175,8 +180,7 @@
 
 (defn error-table [error-list]
   [:table
-   [:thead
-    [:caption "Duplicate Certs: "]]
+   [:caption "Duplicate Certs: "]
    [:tbody
     (for [error error-list]
       (let [certs (->> (clojure.string/split error #"\n")
@@ -184,3 +188,39 @@
         ^{:key (str (* 100000000 (.random js/Math)))} [:div.container-fluid
                                                        [cert-row (first certs)]
                                                        [cert-row (second certs)]]))]]) 
+(defn format-tel
+  [tel]
+  (let [suffix (-> tel (mod 10000))
+        rm-suffix #(-> % (- suffix) (/ 10000))
+        prefix (-> tel (rm-suffix) (mod 1000))
+        rm-prefix #(-> % (- prefix) (/ 1000))
+        area-code (-> tel rm-suffix rm-prefix (mod 1000))
+        rm-ac #(-> % (- area-code) (/ 1000))
+        country-code (-> tel rm-suffix rm-prefix rm-ac)]
+    (str
+     (if (> country-code 0)
+       (str "+" country-code " "))
+     (if (> area-code 0)
+       (str "(" area-code ") "))
+     prefix "-" suffix)))
+
+(defn subscriber-row [subscriber]
+  [:tr
+   [:td (:company_name subscriber)]
+   [:td (:contact_person subscriber)]
+   [:td (-> subscriber :telephone format-tel)]
+   [:td (:email subscriber)]])
+
+(defn pns-subscribers [subscribers]
+  [:table#pns-subscriber-table
+   [:caption "List of Subscribers"]
+   [:thead
+    [:tr
+     [:th "Company Name"]
+     [:th "Contact Person"]
+     [:th "Phone Number"]
+     [:th "Email"]]]
+   [:tbody
+    (for [subscriber subscribers]
+      ^{:key (:id subscriber)}
+      [subscriber-row subscriber])]])

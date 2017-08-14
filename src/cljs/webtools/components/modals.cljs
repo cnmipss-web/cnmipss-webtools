@@ -44,7 +44,7 @@
    [:div.modal-dialog {:role "document"}
     [:div.modal-content
      [:div.modal-header
-      [:h5#procurement-modal-label.modal-title (str (procurement-type item)  ": " (:title item))]
+      [:h2#procurement-modal-label.modal-title (str (procurement-type item)  ": " (:title item))]
       [:button.close {:data-dismiss "modal"
                       :aria-label "Close"}
        [:span {:aria-hidden "true"} "\u00d7"]]]
@@ -65,8 +65,46 @@
        (if (not @(rf/subscribe [:add-addendum]))
          [:button.btn.btn-primary {:type "submit" :form "edit-procurement"} "Save Changes"])]]]]])
 
+(def reduce-subscriber-emails
+  (partial reduce (fn [prev next]
+                    (if (string? prev)
+                      (str prev "," (:email next))
+                      (str (:email prev) "," (:email next))))))
+
+(defn pns-subscriber-modal
+  [[item subscribers]]
+  [:div#pns-subscriber-modal.modal.fade {:role "dialog"
+                                         :tabIndex "-1"
+                                         :aria-labelledby "pns-subscriber-modal-label"
+                                         :aria-hidden "true"}
+   [:div.modal-dialog {:role "document"}
+    [:div.modal-content
+     [:div.modal-header
+      [:h2#pns-subscriber-modal-label.modal-title (str (procurement-type item)  ": " (:title item))]
+      [:button.close {:on-click #(rf/dispatch [:clear-subscriber-modal])
+                      :data-dismiss "modal"
+                      :aria-label "Close"}
+       [:span {:aria-hidden "true"} "\u00d7"]]]
+     [:div.modal-body
+      [:p (str "There are " (count subscribers) " subscribers to this announcement.  Click below to email all subscribers or to download the list as a spreadsheet file.")]
+      [tables/pns-subscribers subscribers]]
+     [:div.modal-footer
+      [:div.col-xs-2
+       [:a {:href (str "mailto:"
+                       (reduce-subscriber-emails subscribers))}
+        [:button.btn.btn-success {:on-click #(rf/dispatch [:email-subscribers item subscribers])}
+         [:i.fa.fa-envelope] " Mail All"]]]
+      [:div.col-xs-4]
+      [:div.col-xs-6
+       [:button.btn.btn-secondary {:data-dismiss "modal"
+                                   :on-click #(rf/dispatch [:clear-subscriber-modal])} " Exit"]
+       [:a {:href (str "/webtools/download/subscribers/" (:id item))}
+        [:button.btn.btn-primary
+         [:i.fa.fa-download] " Download"]]]]]]])
+
 (defn all-modals
   []
   [:div
    [jva-modal @(rf/subscribe [:jva-modal])]
-   [procurement-modal @(rf/subscribe [:procurement-modal])]])
+   [procurement-modal @(rf/subscribe [:procurement-modal])]
+   [pns-subscriber-modal @(rf/subscribe [:subscriber-modal])]])
