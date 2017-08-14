@@ -23,5 +23,3 @@
                          :status  #?(:clj (:status response-obj)
                                      :cljs (.getStatus response-obj))})))))
 
-#?(:cljs (do
-           (def jq js/jQuery)))
