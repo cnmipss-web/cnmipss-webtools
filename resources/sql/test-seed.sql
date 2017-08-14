@@ -1,10 +1,12 @@
 -- :name clear-all-tables! :! :*
 -- :doc create tables in database
-delete from certifications where true;
-delete from jvas where true;
-delete from users where true;
-delete from rfps where true;
+delete from procurement_addenda where true;
+delete from procurement_subscriptions where true;
 delete from ifbs where true;
+delete from rfps where true;
+delete from jvas where true;
+delete from certifications where true;
+delete from users where true;
 
 -- :name seed-users :! :n
 -- :doc create user data in database
@@ -102,3 +104,29 @@ Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec c
 -- :doc clear the db of all ifb records
 delete from ifbs where true;
 
+-- :name seed-addenda :! :n
+-- :doc seed the database with dummy addenda to procurement announcements
+insert into procurement_addenda (id, file_link, rfp_id, ifb_id, addendum_number)
+values ('b0e0ed24-7e5a-425a-9c13-fbfe14e8e532', 'http://dummlink.id', null, '5c052995-12c5-4fcc-b57e-bcbf7323f174', 0);
+
+insert into procurement_addenda (id, file_link, rfp_id, ifb_id, addendum_number)
+values ('388a3e90-adef-470c-96a3-4707e05c2610', 'http://dummlink.id', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 0);
+
+insert into procurement_addenda (id, file_link, rfp_id, ifb_id, addendum_number)
+values ('89ebc5a8-2809-4948-a43b-644098ed040d', 'http://dummlink.id', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 1);
+
+-- :name clear-addenda :! :n
+--:doc clear the db of all procurement addenda
+delete from procurement_addenda where true;
+
+-- :name seed-subscriptions :! :n
+-- :doc seed the database with dummy subscriptions to procurement announcements.
+insert into procurement_subscriptions (id, rfp_id, ifb_id, subscription_number, company_name, contact_person, email, telephone)
+values ('8fd0eb24-82d5-4d79-ae44-676694e3b555', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 0, 'Simple Construction', 'John Doe', 'john.doe@simple.com', 16705555550);
+
+insert into procurement_subscriptions (id, rfp_id, ifb_id, subscription_number, company_name, contact_person, email, telephone)
+values ('7cb66ca0-8741-4067-a9a3-993d93c42e69', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 1, 'Complected Construction', 'Juan Tzu', 'j.tzu@complect.com', 16705505550);
+
+-- :name clear-subscriptions :! :n
+-- :doc clear the db of all procurement subscriptions
+delete from procurement_subscriptions where true;

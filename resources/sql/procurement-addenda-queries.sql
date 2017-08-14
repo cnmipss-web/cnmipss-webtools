@@ -10,12 +10,12 @@ delete from procurement_addenda
 where id = :id;
 
 -- :name get-rfp-addenda :? :*
--- :doc Retrieve addenda with matching :rfp_no
+-- :doc Retrieve addenda with matching :rfp_id
 select * from procurement_addenda
 where rfp_id = :rfp_id;
 
 -- :name get-ifb-addenda :? :*
--- :doc Retrieve addenda with matching ifb_no
+-- :doc Retrieve addenda with matching ifb_id
 select * from procurement_addenda
 where ifb_id = :ifb_id;
 
