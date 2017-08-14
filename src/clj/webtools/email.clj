@@ -46,3 +46,26 @@
                                          [:br]
                                          [:a {:href "mailto:tyler.collins@cnmipss.org"}
                                           "tyler.collins@cnmipss.org"]]]])}]})))
+
+(defn confirm-subscription [subscription pns]
+  (let [{:keys [email contact_person company_name]} subscription]
+    (send-message {:from "procurement@cnmipss.org"
+                   :to [email]
+                   :subject "Subscription Confirmed"
+                   :body [{:type "text/html"
+                           :content (html
+                                     [:html
+                                      [:body
+                                       [:p (str "Greetings " contact_person ",")]
+                                       [:p (str "This email is your confirmation that you have registered to receive updates and information regarding "
+                                                (if (:rfp_no pns) (str "Request for Proposal " (:rfp_no pns)))
+                                                (if (:ifb_no pns) (str "Invitation for Bid " (:ifb_no pns)))
+                                                ": " (:title pns) ".")]
+                                       [:p (str "You will be contacted as additional information is published.  If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org")]
+                                       [:br]
+                                       [:p "Thank you,"]
+                                       [:p "Kimo Rosario"]
+                                       [:p "Procurement & Supply Officer"]
+                                       [:p "CNMI PSS"]]])}]})))
+
+(defn announce-updates [update subscribers])
