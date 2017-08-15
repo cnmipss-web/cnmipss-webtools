@@ -1,5 +1,8 @@
 (ns webtools.email
   (:require [webtools.config :refer [env]]
+            [webtools.db.core :as db]
+            [clj-time.coerce :as c]
+            [clj-time.format :as f]
             [postal.core :refer [send-message]]
             [hiccup.core :refer [html]]))
 
@@ -68,4 +71,123 @@
                                        [:p "Procurement & Supply Officer"]
                                        [:p "CNMI PSS"]]])}]})))
 
-(defn announce-updates [update subscribers])
+(defn fix-dates [data]
+  (if (= java.sql.Timestamp (-> data :close_date type))
+    (-> data
+        (assoc :close_date (c/from-sql-time (:close_date data)))
+        (assoc :open_date (c/from-sql-date (:open_date data)))
+        (dissoc :status))
+    data))
+
+(defn stringify-procurement
+  [data]
+  (into {} (map (fn [[k v]] [k (.toString v)]) (fix-dates data))))
+
+(def time-format (f/formatter "MMMM dd, YYYY 'at' h:mm a"))
+(def date-format (f/formatter "MMMM dd, YYYY"))
+
+(defn print-date
+  [date]
+  (->> date
+      (f/parse (f/formatters :date-time))
+      (f/unparse date-format)))
+
+(defn print-datetime
+  [datetime]
+  (->> datetime
+      (f/parse (f/formatters :date-time))
+      (f/unparse time-format)))
+
+(defn notify-changes [data [new orig] subscribers]
+  (println data new orig subscribers)
+  (let [send-fn
+        (fn [{:keys [email contact_person] :as sub}]
+          (send-message {:to email
+                         :from "procurement@cnmipss.org"
+                         :subject (str "Changes to "
+                                       (if (-> sub :rfp_id some?)
+                                         "RFP#"
+                                         "IFB#")
+                                       (if (-> sub :rfp_id some?)
+                                         (:rfp_no data)
+                                         (:ifb_no data))
+                                       " " (:title data))
+                         :body [{:type "text/html"
+                                 :content (html
+                                           [:html
+                                            [:body
+                                             [:p (str "Greetings " contact_person ",")]
+                                             [:p (str "We would like to notify you that details of "
+                                                      (if (-> sub :rfp_id some?)
+                                                        "RFP#"
+                                                        "IFB#")
+                                                      (if (-> sub :rfp_id some?)
+                                                        (:rfp_no data)
+                                                        (:ifb_no data))
+                                                      " " (:title data)
+                                                      " have been changed.")]
+                                             (if (some? (:open_date new))
+                                               [:p (str "The window for submissions will now begin on "
+                                                        (print-date (:open_date new))
+                                                        ".  ")])
+                                             (if (some? (:close_date new))
+                                               [:p (str "The window for submissions will now close at "
+                                                        (print-datetime (:close_date new))
+                                                        ".  ")])
+                                             (if (some? (:rfp_no new))
+                                               [:p (str "The RFP# of this request has been changed to "
+                                                        (:rfp_no new)
+                                                        ".  ")])
+                                             (if (some? (:ifb_no new))
+                                               [:p (str "The IFB# of this invitation has been changed to "
+                                                        (:ifb_no new)
+                                                        ".  ")])
+                                             (if (some? (:title new))
+                                               [:p
+                                                (str "The title of this "
+                                                     (if (-> sub :rfp_id some?)
+                                                       "request"
+                                                       "invitation")
+                                                     " has been changed to: ")
+                                                [:em (:title new)]
+                                                ".  "])
+                                             (if (some? (:description new))
+                                               [:p
+                                                (str "The description of this "
+                                                     (if (-> sub :rfp_id some?)
+                                                       "request"
+                                                       "invitation")
+                                                     " has been change to the following: ")
+                                                [:br]
+                                                [:br]
+                                                (:description new)])
+                                             [:br]
+                                             [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                             [:br]
+                                             [:p "Thank you,"]
+                                             [:p "Kimo Rosario"]
+                                             [:p "Procurement & Supply Officer"]
+                                             [:p "CNMI PSS"]]])}]}))]
+    (mapv send-fn subscribers)))
+
+(defn id-key [k]
+  (->> k name drop-last (apply str) (#(str % "_id")) keyword))
+
+(defn notify-subscribers [event k data]
+  (let [procurement-data {:rfps (map stringify-procurement (db/get-all-rfps))
+                          :ifbs (map stringify-procurement (db/get-all-ifbs))
+                          :addenda (db/get-all-addenda)
+                          :subscriptions (db/get-all-subscriptions)}
+        s-data (stringify-procurement data)
+        s-orig (->> procurement-data k (filter #(= (:id s-data) (:id %))) first)
+        changes (take 2 (clojure.data/diff s-data s-orig))]
+    (case event
+      :update
+      (when (every? some? changes)
+        (notify-changes s-orig changes (->> procurement-data
+                                            :subscriptions
+                                            (filter #(= (:id s-data) (if-let [id ((id-key k) %)]
+                                                                       (.toString id)
+                                                                       nil))))))
+      :delete
+      (println data (k procurement-data)))))
