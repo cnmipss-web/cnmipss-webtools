@@ -5,7 +5,8 @@ create table procurement_subscriptions (
        subscription_number int default 0,
        company_name varchar(140) not null,
        contact_person varchar(140) not null,
-       email varchar(140) unique not null,
+       email varchar(140) not null,
        telephone bigint,
-       constraint subscribe_once unique (email, rfp_id, ifb_id)
+       unique (email, rfp_id),
+       unique (email, ifb_id)
 );

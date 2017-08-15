@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [defroutes GET POST]]
             [ring.util.http-response :as resp]
             [clojure.data.json :as json]
+            [try-let :refer [try-let]]
             [webtools.db.core :as db]
             [webtools.email :as email]
             [webtools.config :refer [env]]
@@ -64,6 +65,9 @@
       (mapv (comp wp/delete-media :id) addenda)
       ((del-fn type) body))))
 
+(def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address."
+                 :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance."})
+
 (defroutes api-routes
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
 
@@ -91,9 +95,12 @@
                             (catch Exception e
                               (println e)))
                    (json-response resp/ok created)
+                   (catch java.sql.BatchUpdateException e
+                     (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_(rfp|ifb)_id_key"))]
+                       (json-response resp/internal-server-error {:message (:duplicate error-msg)})
+                       (json-response resp/internal-server-error {:message (:unknown error-msg)})))
                    (catch Exception e
-                     (println e)
-                     (json-response resp/internal-server-error {:error e})))))
+                     (json-response resp/internal-server-error {:message (:unknown error-msg)})))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
@@ -173,20 +180,26 @@
         (let [rfp (-> body
                       (db/make-sql-date :open_date)
                       (db/make-sql-datetime :close_date))]
-          (query-route db/get-all-rfps (db/update-rfp rfp))))
+          (query-route db/get-all-rfps
+                       (email/notify-subscribers :update :rfps rfp)
+                       (db/update-rfp rfp))))
 
   (POST "/api/delete-rfp" {:keys [body]}
         (query-route get-all-procurement
+                     (email/notify-subscribers :delete :rfps body)
                      (clear-procurement :rfp body)))
 
   (POST "/api/update-ifb" {:keys [body]}
         (let [ifb (-> body
                       (db/make-sql-date :open_date)
                       (db/make-sql-datetime :close_date))]
-          (query-route db/get-all-ifbs (db/update-ifb ifb))))
+          (query-route db/get-all-ifbs
+                       (email/notify-subscribers :update :ifbs ifb)
+                       (db/update-ifb ifb))))
 
   (POST "/api/delete-ifb" {:keys [body]}
         (query-route db/get-all-ifbs
+                     (email/notify-subscribers :delete :ifbs body)
                      (clear-procurement :ifb body))))
 
 
