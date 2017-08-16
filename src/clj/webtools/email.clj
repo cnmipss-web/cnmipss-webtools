@@ -4,7 +4,9 @@
             [clj-time.coerce :as c]
             [clj-time.format :as f]
             [postal.core :refer [send-message]]
-            [hiccup.core :refer [html]]))
+            [hiccup.core :refer [html]]
+            [clojure.tools.logging :as log]
+            [clojure.data :refer [diff]]))
 
 (defn invite [user]
   (let [{:keys [email roles admin]} user
@@ -99,7 +101,7 @@
       (f/unparse time-format)))
 
 (defn notify-changes [data [new orig] subscribers]
-  (println data new orig subscribers)
+  (println "\n\nChanging: " data new orig subscribers)
   (let [send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (send-message {:to email
@@ -173,21 +175,108 @@
 (defn id-key [k]
   (->> k name drop-last (apply str) (#(str % "_id")) keyword))
 
+(defn match-subscriber
+  [pns id-type]
+  (fn [subscriber]
+    (= (:id pns) (if-let [id (id-type subscriber)]
+                   (.toString id)
+                   nil))))
+
+(defn notify-deletion [pns subscribers]
+  (log/info "\n\nDeleting: \n" pns "\n\n" subscribers)
+  (let [send-fn
+        (fn [{:keys [email contact_person] :as sub}]
+          (send-message {:to email
+                         :from "procurement@cnmipss.org"
+                         :subject (str (if (-> sub :rfp_id some?)
+                                         "RFP#"
+                                         "IFB#")
+                                       (if (-> sub :rfp_id some?)
+                                         (:rfp_no pns)
+                                         (:ifb_no pns))
+                                       " " (:title pns)
+                                       "has been DELETED")
+                         :body [{:type "text/html"
+                                 :content (html
+                                           [:html
+                                            [:body
+                                             [:p (str "Greetings " contact_person ",")]
+                                             [:p (str "We would like to notify you that "
+                                                      (if (-> sub :rfp_id some?)
+                                                        "RFP#"
+                                                        "IFB#")
+                                                      (if (-> sub :rfp_id some?)
+                                                        (:rfp_no pns)
+                                                        (:ifb_no pns))
+                                                      " " (:title pns)
+                                                      " has been withdrawn from the CNMI PSS website along with any addenda or other documentation.  You will not receive any further emails regarding this matter.")]
+                                             [:br]
+                                             [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                             [:br]
+                                             [:p "Thank you,"]
+                                             [:p "Kimo Rosario"]
+                                             [:p "Procurement & Supply Officer"]
+                                             [:p "CNMI PSS"]]])}]}))]
+    (mapv send-fn subscribers)))
+
+(defn notify-addenda [pns addendum subscribers]
+  (println "\n\n" pns "\n\n" addendum "\n\n" subscribers)
+  (let [send-fn
+        (fn [{:keys [email contact_person] :as sub}]
+          (send-message {:to email
+                         :from "procurement@cnmipss.org"
+                         :subject (str "Addendum added to "
+                                       (if (-> sub :rfp_id some?)
+                                         "RFP#"
+                                         "IFB#")
+                                       (if (-> sub :rfp_id some?)
+                                         (:rfp_no pns)
+                                         (:ifb_no pns))
+                                       " " (:title pns))
+                         :body [{:type "text/html"
+                                 :content (html
+                                           [:html
+                                            [:body
+                                             [:p (str "Greetings " contact_person ",")]
+                                             [:p (str "We would like to notify you that an addendum has been added to "
+                                                      (if (-> sub :rfp_id some?)
+                                                        "RFP#"
+                                                        "IFB#")
+                                                      (if (-> sub :rfp_id some?)
+                                                        (:rfp_no pns)
+                                                        (:ifb_no pns))
+                                                      " " (:title pns)
+                                                      ".  You may access the full content of this addendum through ")
+                                              [:a {:href (:file_link addendum)}
+                                               "this link."]]
+                                             [:br]
+                                             [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                             [:br]
+                                             [:p "Thank you,"]
+                                             [:p "Kimo Rosario"]
+                                             [:p "Procurement & Supply Officer"]
+                                             [:p "CNMI PSS"]]])}]}))]
+    (mapv send-fn subscribers)))
+
 (defn notify-subscribers [event k data]
   (let [procurement-data {:rfps (map stringify-procurement (db/get-all-rfps))
                           :ifbs (map stringify-procurement (db/get-all-ifbs))
                           :addenda (db/get-all-addenda)
                           :subscriptions (db/get-all-subscriptions)}
+        id-type (id-key k)
         s-data (stringify-procurement data)
         s-orig (->> procurement-data k (filter #(= (:id s-data) (:id %))) first)
-        changes (take 2 (clojure.data/diff s-data s-orig))]
+        changes (take 2 (diff s-data s-orig))]
     (case event
       :update
       (when (every? some? changes)
-        (notify-changes s-orig changes (->> procurement-data
-                                            :subscriptions
-                                            (filter #(= (:id s-data) (if-let [id ((id-key k) %)]
-                                                                       (.toString id)
-                                                                       nil))))))
+        (notify-changes s-orig changes (->> (:subscriptions procurement-data)
+                                            (filter (match-subscriber s-data id-type)))))
       :delete
-      (println data (k procurement-data)))))
+      (notify-deletion s-orig (->> (:subscriptions procurement-data)
+                                   (filter (match-subscriber s-data id-type))))
+      :addenda
+      (do
+        (print "\n\n" id-type)
+        (notify-addenda s-orig data (->> (:subscriptions procurement-data)
+                                         (filter (match-subscriber s-orig id-type))))))))

@@ -180,7 +180,7 @@
         (let [rfp (-> body
                       (db/make-sql-date :open_date)
                       (db/make-sql-datetime :close_date))]
-          (query-route db/get-all-rfps
+          (query-route get-all-procurement
                        (email/notify-subscribers :update :rfps rfp)
                        (db/update-rfp rfp))))
 
@@ -193,12 +193,12 @@
         (let [ifb (-> body
                       (db/make-sql-date :open_date)
                       (db/make-sql-datetime :close_date))]
-          (query-route db/get-all-ifbs
+          (query-route get-all-procurement
                        (email/notify-subscribers :update :ifbs ifb)
                        (db/update-ifb ifb))))
 
   (POST "/api/delete-ifb" {:keys [body]}
-        (query-route db/get-all-ifbs
+        (query-route get-all-procurement
                      (email/notify-subscribers :delete :ifbs body)
                      (clear-procurement :ifb body))))
 

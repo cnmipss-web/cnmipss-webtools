@@ -11,6 +11,7 @@
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.wordpress-api :as wp]
+            [webtools.email :as email]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce]
             [clj-time.format :as f])
@@ -265,6 +266,10 @@
         existing-addenda (cond
                            (= "RFP" type) (db/get-rfp-addenda {:rfp_id uuid})
                            (= "IFB" type) (db/get-ifb-addenda {:ifb_id uuid}))]
+    (email/notify-subscribers :addenda (cond
+                                         (= "RFP" type) :rfps
+                                         (= "IFB" type) :ifbs) {:file_link file_link
+                                                                :id (.toString uuid)})
     (db/create-addendum! {:id slug
                           :file_link file_link
                           :rfp_id (if (= "RFP" type) uuid)
