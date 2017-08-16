@@ -66,7 +66,8 @@
       ((del-fn type) body))))
 
 (def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address."
-                 :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance."})
+                :other-sql "Error performing SQL transaction."
+                :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance."})
 
 (defroutes api-routes
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
@@ -98,9 +99,11 @@
                    (catch java.sql.BatchUpdateException e
                      (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_(rfp|ifb)_id_key"))]
                        (json-response resp/internal-server-error {:message (:duplicate error-msg)})
-                       (json-response resp/internal-server-error {:message (:unknown error-msg)})))
+                       (json-response resp/internal-server-error {:message (str (:other-sql error-msg) " "
+                                                                                (.getMessage e))})))
                    (catch Exception e
-                     (json-response resp/internal-server-error {:message (:unknown error-msg)})))))
+                     (json-response resp/internal-server-error {:message (str (:unknown error-msg) " "
+                                                                              (.getMessage e))})))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
