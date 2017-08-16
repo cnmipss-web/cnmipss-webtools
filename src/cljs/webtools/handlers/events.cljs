@@ -111,16 +111,15 @@
                           :handler ajax-handlers/all-procurement}))))
 
 (defn delete-procurement [item]
-  (let [type (-> item procurement-type name)]
+  (let [type (-> item procurement-type name)
+        type-caps (clojure.string/upper-case type)]
     (fn [e]
       (.preventDefault e)
-      (if (js/confirm (str "WARNING: Deleting this "
-                           (clojure.string/upper-case type)
-                           " will delete ALL related data including addendums and contractor subscriptions.  "
-                           "The data will be permanently deleted.  "
-                           "Are you sure you want to delete this "
-                           (clojure.string/upper-case type)
-                           "?"))
+      (if (js/confirm (str "WARNING: Deleting this " type-caps
+                           " will delete ALL related data including pdf documents, addendums,"
+                           " and records of contractor subscriptions.  The data will be permanently"
+                           " deleted.  Make sure you have saved any data you wish to keep before deleting this "
+                           type-caps ".  Are you sure you want to delete this " type-caps "?"))
         (ajax/ajax-request {:uri (str "/webtools/api/delete-" type)
                             :method :post
                             :format (ajax/json-request-format)

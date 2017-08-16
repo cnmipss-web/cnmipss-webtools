@@ -2,7 +2,8 @@
   (:require [re-frame.core :as rf]
             [webtools.constants :as const]
             [webtools.util :as util]
-            [ajax.core :as ajax]))
+            [ajax.core :as ajax]
+            [klang.core :refer-macros [info!]]))
 
 (def jq js/jQuery)
 
@@ -38,6 +39,7 @@
 (defn all-procurement
   [[ok response]]
   (let [{:keys [body]} response]
+    (println "\n\nReceived all-procurement response" response)
     (if ok
       (rf/dispatch [:store-procurement-list (clojure.walk/keywordize-keys body)])
       (println response))))
