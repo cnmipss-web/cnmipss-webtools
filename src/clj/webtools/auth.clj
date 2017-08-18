@@ -51,22 +51,22 @@
         res (post (str host endpoint-token) (refresh-token-request-params config refresh-token))]
     (:body res)))
 
-(defmacro  with-tokens 
-  "Executes API call in the body with the tokens passed.
-  Expects a tokens-atom as a map with keys :access_token and :refresh_token.
-  Binds the access-token to the access-token-name you pass it.
-  Will refresh the access_token on time-out and set the new value in the tokens-atom."
-  [access-token-name tokens-atom config & body]
-  `(try
-    (let [~access-token-name (:access_token @~tokens-atom)]
-      ~@body)
-    (catch Exception e# ; TODO check for 401 invalid token in exception
-      (let [new-tokens# (refresh-tokens ~config (:refresh_token @~tokens-atom))
-            access_token# (:access_token new-tokens#)]
-        (when access_token#
-          (swap! ~tokens-atom assoc :access_token access_token#)
-          (let [~access-token-name (:access_token @~tokens-atom)]
-            ~@body))))))
+;; (defmacro  with-tokens 
+;;   "Executes API call in the body with the tokens passed.
+;;   Expects a tokens-atom as a map with keys :access_token and :refresh_token.
+;;   Binds the access-token to the access-token-name you pass it.
+;;   Will refresh the access_token on time-out and set the new value in the tokens-atom."
+;;   [access-token-name tokens-atom config & body]
+;;   `(try
+;;     (let [~access-token-name (:access_token @~tokens-atom)]
+;;       ~@body)
+;;     (catch Exception e# ; TODO check for 401 invalid token in exception
+;;       (let [new-tokens# (refresh-tokens ~config (:refresh_token @~tokens-atom))
+;;             access_token# (:access_token new-tokens#)]
+;;         (when access_token#
+;;           (swap! ~tokens-atom assoc :access_token access_token#)
+;;           (let [~access-token-name (:access_token @~tokens-atom)]
+;;             ~@body))))))
 
 (def all-scopes {:email "https://www.googleapis.com/auth/userinfo.email"
                  :spreadsheet "https://spreadsheets.google.com/feeds"
