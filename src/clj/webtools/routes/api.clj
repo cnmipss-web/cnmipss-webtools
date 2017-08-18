@@ -2,7 +2,6 @@
   (:require [compojure.core :refer [defroutes GET POST]]
             [ring.util.http-response :as resp]
             [clojure.data.json :as json]
-            [try-let :refer [try-let]]
             [webtools.db.core :as db]
             [webtools.email :as email]
             [webtools.config :refer [env]]
@@ -11,6 +10,7 @@
             [webtools.layout :refer [error-page]]
             [webtools.constants :refer [max-cookie-age]  :as const]
             [webtools.wordpress-api :as wp]
+            [webtools.procurement :refer :all]
             [clojure.tools.logging :as log]))
 
 (def truthy (comp some? #{"true" true}))
@@ -50,7 +50,7 @@
   [type {:keys [id] :as body}]
   (let [get-fn ({:ifb db/get-ifb-addenda
                   :rfp db/get-rfp-addenda} type)
-        uuid (java.util.UUID/fromString id)
+        uuid (make-uuid id)
         del-fn {:ifb db/delete-ifb!
                 :rfp db/delete-rfp!}
         query-map {:rfp_id uuid :ifb_id uuid}]
@@ -67,7 +67,7 @@
 
 (def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address."
                 :other-sql "Error performing SQL transaction."
-                :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance."})
+                :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance. "})
 
 (defroutes api-routes
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
@@ -78,32 +78,32 @@
 
   (POST "/api/subscribe-procurement" {:keys [body] :as request}
         (let [{:keys [company person email tel rfp_id ifb_id]} (-> body json->edn)
-              existing-subs (db/get-subscriptions {:rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
-                                                   :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))})
+              existing-subs (db/get-subscriptions {:rfp_id (make-uuid rfp_id)
+                                                   :ifb_id (make-uuid rfp_id)})
               subscription {:id (java.util.UUID/randomUUID)
-                            :rfp_id (if rfp_id (java.util.UUID/fromString rfp_id))
-                            :ifb_id (if ifb_id (java.util.UUID/fromString ifb_id))
+                            :rfp_id (make-uuid rfp_id)
+                            :ifb_id (make-uuid ifb_id)
                             :company_name company
                             :contact_person person
                             :email email
                             :telephone (read-string (clojure.string/replace tel #"\D" ""))
                             :subscription_number (count existing-subs)}]
-          (try-let [created (db/create-subscription! subscription)]
-                   (try-let [pns (cond
-                                   rfp_id (db/get-rfp {:id (java.util.UUID/fromString rfp_id)})
-                                   ifb_id (db/get-ifb {:id (java.util.UUID/fromString ifb_id)}))]
-                            (email/confirm-subscription subscription pns)
-                            (catch Exception e
-                              (println e)))
-                   (json-response resp/ok created)
-                   (catch java.sql.BatchUpdateException e
-                     (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_(rfp|ifb)_id_key"))]
-                       (json-response resp/internal-server-error {:message (:duplicate error-msg)})
-                       (json-response resp/internal-server-error {:message (str (:other-sql error-msg) " "
-                                                                                (.getMessage e))})))
-                   (catch Exception e
-                     (json-response resp/internal-server-error {:message (str (:unknown error-msg) " "
-                                                                              (.getMessage e))})))))
+          (try
+            (let [created (db/create-subscription! subscription)
+                  pns (get-pns-from-db (or (make-uuid rfp_id)
+                                           (make-uuid ifb_id)))]
+              (email/confirm-subscription subscription pns)
+              (json-response resp/ok created))
+
+            (catch java.sql.BatchUpdateException e
+              (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_(rfp|ifb)_id_key"))]
+                (json-response resp/internal-server-error {:message (:duplicate error-msg)})
+                (json-response resp/internal-server-error {:message (str (:other-sql error-msg)
+                                                                         (.getMessage e))})))
+
+            (catch Exception e
+              (json-response resp/internal-server-error {:message (str (:unknown error-msg)
+                                                                       (.getMessage e))})))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
@@ -142,12 +142,6 @@
   
   (GET "/api/all-users" [] (query-route db/get-all-users))
   
-  (POST "/api/update-user" request
-        (let [{:keys [email roles admin]} (request :body)]
-          (query-route db/get-all-users
-                       (db/set-user-roles! (keyed [email roles]))
-                       (db/set-user-admin! (keyed [email admin])))))
-  
   (POST "/api/create-user" request
         (let [{:keys [email roles]} (request :body)
               admin (-> (get-in request [:body :admin]) truthy)
@@ -156,6 +150,12 @@
           (query-route db/get-all-users
                        (db/create-user! user)
                        (email/invite user))))
+  
+  (POST "/api/update-user" request
+        (let [{:keys [email roles admin]} (request :body)]
+          (query-route db/get-all-users
+                       (db/set-user-roles! (keyed [email roles]))
+                       (db/set-user-admin! (keyed [email admin])))))
   
   (POST "/api/delete-user" request
         (let [{:keys [email]} (request :body)]
@@ -180,25 +180,22 @@
                      (db/delete-jva! body)))
 
   (POST "/api/update-rfp" {:keys [body]}
-        (let [rfp (-> body
-                      (db/make-sql-date :open_date)
-                      (db/make-sql-datetime :close_date))]
+        (let [rfp (pns-from-map body)]
           (query-route get-all-procurement
                        (email/notify-subscribers :update :rfps rfp)
-                       (db/update-rfp rfp))))
+                       (change-in-db rfp))))
 
   (POST "/api/delete-rfp" {:keys [body]}
-        (query-route get-all-procurement
-                     (email/notify-subscribers :delete :rfps body)
-                     (clear-procurement :rfp body)))
+        (let [rfp (pns-from-map body)]
+          (query-route get-all-procurement
+                       (email/notify-subscribers :delete :rfps rfp)
+                       (clear-procurement :rfp rfp))))
 
   (POST "/api/update-ifb" {:keys [body]}
-        (let [ifb (-> body
-                      (db/make-sql-date :open_date)
-                      (db/make-sql-datetime :close_date))]
+        (let [ifb (pns-from-map body)]
           (query-route get-all-procurement
                        (email/notify-subscribers :update :ifbs ifb)
-                       (db/update-ifb ifb))))
+                       (change-in-db ifb))))
 
   (POST "/api/delete-ifb" {:keys [body]}
         (query-route get-all-procurement

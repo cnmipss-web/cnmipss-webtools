@@ -11,5 +11,8 @@
 
 (def max-cookie-age 900)
 
-(def procurement-datetime-re #"(\w+\s\d+,\s\d{4} at \d+\:\d\d\s\w{2})")
+(def date-string "MMMM dd, YYYY")
+
+(def procurement-date-format date-string)
 (def procurement-datetime-format "MMMM dd, YYYY 'at' h:mm a")
+(def procurement-datetime-re #"(\w+\s\d+,\s\d{4} at \d+\:\d\d\s\w{2})")

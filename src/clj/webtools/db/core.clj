@@ -87,19 +87,25 @@
 
 (defn make-sql-date
   [m k]
-  (assoc m k (try (->> (get m k)
-                       (f/parse (f/formatter "MMMM dd, YYYY"))
-                       (c/to-sql-date))
-                  (catch Exception e
-                    nil))))
+  (if (= java.lang.String (type (get m k)))
+    (assoc m k (try (->> (get m k)
+                         (f/parse (f/formatter "MMMM dd, YYYY"))
+                         (c/to-sql-date))
+                    (catch Exception e
+                      nil)))
+    m))
 
 (defn make-sql-datetime
   [m k]
-  (assoc m k (try (->> (get m k)
-                       (re-find const/procurement-datetime-re)
-                       (second)
-                       ((fn [date-time]
-                          (let [f-date-time (partial f/parse (f/formatter const/procurement-datetime-format))]
-                            (-> date-time f-date-time c/to-sql-time)))))
-                  (catch Exception e
-                    (println e)))))
+  (if (= java.lang.String (type (get m k)))
+    (assoc m k (try (->> (get m k)
+                         (re-find const/procurement-datetime-re)
+                         (second)
+                         ((fn [date-time]
+                            (let [f-date-time (partial f/parse (f/formatter const/procurement-datetime-format))]
+                              (-> date-time f-date-time c/to-sql-time)))))
+                    (catch Exception e
+                      (println e))))
+    m))
+
+

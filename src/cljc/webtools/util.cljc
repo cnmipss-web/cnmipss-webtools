@@ -1,4 +1,6 @@
-(ns webtools.util)
+(ns webtools.util
+  (:require [clj-time.core :as time]
+            [clj-time.coerce :as coerce]))
 
 (let [transforms {:keys keyword
                   :strs str
@@ -38,3 +40,48 @@
      (if (> area-code 0)
        (str "(" area-code ") "))
      prefix "-" suffix)))
+
+(defn select-non-nil
+  [a b]
+  (or a b))
+
+(defn line-parser
+  [re line]
+  (if-let [match (peek (re-find re line))]
+    (clojure.string/trim match)
+    nil))
+
+(defn make-status
+  [record]
+  (let [{:keys [close_date]} record
+        today (time/now)
+        end (coerce/from-date close_date)]
+    (if (nil? end)
+      (assoc record :status true)
+      (if (time/before? today end)
+        (assoc record :status true)
+        (assoc record :status false)))))
+
+(defmacro try-let
+  [bindings & body]
+  (assert (even? (count bindings))
+          "try-let needs an even number of forms in binding vector")
+  (let [bindings-ls (take-nth 2 bindings)
+        gensyms (take (count bindings-ls) (repeatedly gensym))
+        [thens stanzas] (split-with #(not (and (list? %) (= (first %) 'catch))) body)]
+    `(let [[ok# ~@gensyms]
+           (try
+             (let [~@bindings] [true ~@bindings-ls])
+             ~@(map
+                (fn [stanza]
+                  (assert (>= (count stanza) 3)
+                          "Malformed stanza")
+                  (let [[x y z & body] stanza]
+                    (assert (= x 'catch)
+                            "Only catch stanzas are allowed")
+                    `(~x ~y ~z [false (do ~@body)])))
+                stanzas))]
+       (if ok#
+         (let [~@(interleave bindings-ls gensyms)]
+           ~@thens)
+         ~(first gensyms)))))

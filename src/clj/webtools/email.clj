@@ -1,6 +1,7 @@
 (ns webtools.email
   (:require [webtools.config :refer [env]]
             [webtools.db.core :as db]
+            [webtools.procurement :refer :all]
             [clj-time.coerce :as c]
             [clj-time.format :as f]
             [postal.core :refer [send-message]]
@@ -17,7 +18,7 @@
                   (clojure.string/join " "))
         {:keys [wp-host wp-un server-uri]} env]    
     (send-message {:from "webmaster@cnmipss.org"
-                   :to [email]
+                   :to email
                    :subject "Invitation to CNMI PSS Webtools"
                    :body [{:type "text/html"
                             :content (html
@@ -55,7 +56,7 @@
 (defn confirm-subscription [subscription pns]
   (let [{:keys [email contact_person company_name]} subscription]
     (send-message {:from "procurement@cnmipss.org"
-                   :to [email]
+                   :to email
                    :subject "Subscription Confirmed"
                    :body [{:type "text/html"
                            :content (html
@@ -100,76 +101,16 @@
       (f/parse (f/formatters :date-time))
       (f/unparse time-format)))
 
-(defn notify-changes [data [new orig] subscribers]
-  (println "\n\nChanging: " data new orig subscribers)
-  (let [send-fn
+(defn notify-changes [new orig subscribers]
+  (let [title-string (str (-> new :type name clojure.string/upper-case)
+                            "# " (:number new) " " (:title new))
+        send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (send-message {:to email
                          :from "procurement@cnmipss.org"
-                         :subject (str "Changes to "
-                                       (if (-> sub :rfp_id some?)
-                                         "RFP#"
-                                         "IFB#")
-                                       (if (-> sub :rfp_id some?)
-                                         (:rfp_no data)
-                                         (:ifb_no data))
-                                       " " (:title data))
+                         :subject (str "Changes to " title-string)
                          :body [{:type "text/html"
-                                 :content (html
-                                           [:html
-                                            [:body
-                                             [:p (str "Greetings " contact_person ",")]
-                                             [:p (str "We would like to notify you that details of "
-                                                      (if (-> sub :rfp_id some?)
-                                                        "RFP#"
-                                                        "IFB#")
-                                                      (if (-> sub :rfp_id some?)
-                                                        (:rfp_no data)
-                                                        (:ifb_no data))
-                                                      " " (:title data)
-                                                      " have been changed.")]
-                                             (if (some? (:open_date new))
-                                               [:p (str "The window for submissions will now begin on "
-                                                        (print-date (:open_date new))
-                                                        ".  ")])
-                                             (if (some? (:close_date new))
-                                               [:p (str "The window for submissions will now close at "
-                                                        (print-datetime (:close_date new))
-                                                        ".  ")])
-                                             (if (some? (:rfp_no new))
-                                               [:p (str "The RFP# of this request has been changed to "
-                                                        (:rfp_no new)
-                                                        ".  ")])
-                                             (if (some? (:ifb_no new))
-                                               [:p (str "The IFB# of this invitation has been changed to "
-                                                        (:ifb_no new)
-                                                        ".  ")])
-                                             (if (some? (:title new))
-                                               [:p
-                                                (str "The title of this "
-                                                     (if (-> sub :rfp_id some?)
-                                                       "request"
-                                                       "invitation")
-                                                     " has been changed to: ")
-                                                [:em (:title new)]
-                                                ".  "])
-                                             (if (some? (:description new))
-                                               [:p
-                                                (str "The description of this "
-                                                     (if (-> sub :rfp_id some?)
-                                                       "request"
-                                                       "invitation")
-                                                     " has been change to the following: ")
-                                                [:br]
-                                                [:br]
-                                                (:description new)])
-                                             [:br]
-                                             [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-                                             [:br]
-                                             [:p "Thank you,"]
-                                             [:p "Kimo Rosario"]
-                                             [:p "Procurement & Supply Officer"]
-                                             [:p "CNMI PSS"]]])}]}))]
+                                 :content (html (changes-email orig new sub))}]}))]
     (mapv send-fn subscribers)))
 
 (defn id-key [k]
@@ -178,9 +119,7 @@
 (defn match-subscriber
   [pns id-type]
   (fn [subscriber]
-    (= (:id pns) (if-let [id (id-type subscriber)]
-                   (.toString id)
-                   nil))))
+    (= (:id pns) (-> subscriber id-type make-uuid))))
 
 (defn notify-deletion [pns subscribers]
   (log/info "\n\nDeleting: \n" pns "\n\n" subscribers)
@@ -258,25 +197,17 @@
                                              [:p "CNMI PSS"]]])}]}))]
     (mapv send-fn subscribers)))
 
-(defn notify-subscribers [event k data]
-  (let [procurement-data {:rfps (map stringify-procurement (db/get-all-rfps))
-                          :ifbs (map stringify-procurement (db/get-all-ifbs))
-                          :addenda (db/get-all-addenda)
-                          :subscriptions (db/get-all-subscriptions)}
+(defn notify-subscribers [event k new]
+  (let [subscriptions (db/get-all-subscriptions)
+        addenda (db/get-all-addenda)
         id-type (id-key k)
-        s-data (stringify-procurement data)
-        s-orig (->> procurement-data k (filter #(= (:id s-data) (:id %))) first)
-        changes (take 2 (diff s-data s-orig))]
+        orig (get-pns-from-db (:id new))
+        changes (take 2 (diff new orig))]
     (case event
       :update
       (when (every? some? changes)
-        (notify-changes s-orig changes (->> (:subscriptions procurement-data)
-                                            (filter (match-subscriber s-data id-type)))))
+        (notify-changes new orig (filter (match-subscriber new id-type) subscriptions)))
       :delete
-      (notify-deletion s-orig (->> (:subscriptions procurement-data)
-                                   (filter (match-subscriber s-data id-type))))
+      (notify-deletion orig (filter (match-subscriber new id-type) subscriptions))
       :addenda
-      (do
-        (print "\n\n" id-type)
-        (notify-addenda s-orig data (->> (:subscriptions procurement-data)
-                                         (filter (match-subscriber s-orig id-type))))))))
+      (notify-addenda (get-pns-from-db (id-type new)) new (filter (match-subscriber orig id-type) subscriptions)))))

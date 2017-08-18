@@ -11,12 +11,14 @@
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.wordpress-api :as wp]
+            [webtools.procurement :refer :all]
             [webtools.email :as email]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce]
             [clj-time.format :as f])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
-           [org.apache.pdfbox.text PDFTextStripper]))
+           [org.apache.pdfbox.text PDFTextStripper]
+           [webtools.procurement PSAnnouncement]))
 
 (defn create-new-cert
   [current]
@@ -110,31 +112,10 @@
    :salary #"(?i)SALARY\s*:\s*(.*\S)"
    :location #"(?i)^LOCATION\s*:\s*(.*\w)"})
 
-(defn select-non-nil
-  [a b]
-  (or a b))
-
-(defn line-parser
-  [re line]
-  (if-let [match (peek (re-find re line))]
-    (clojure.string/trim match)
-    nil))
-
 (defn jva-reducer
   [jva next-line]
   (let [this-line (reduce merge (map (fn [[k re]] {k (line-parser re next-line)}) jva-regexes))]
     (merge-with select-non-nil this-line jva)))
-
-(defn make-status
-  [record]
-  (let [{:keys [close_date]} record
-        today (t/now)
-        end (coerce/from-date close_date)]
-    (if (nil? end)
-      (assoc record :status true)
-      (if (t/before? today end)
-        (assoc record :status true)
-        (assoc record :status false)))))
 
 (defn jva-desc
   [jva]
@@ -200,58 +181,17 @@
            (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/header "Content-Type" "application/json"))
        (catch Exception e#
-         (println (.getMessage e#))
+         ;(println (.getMessage e#))
          (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role))
              (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
-
-(def procurement-regexes
-  {:ifb_no #"(?i)PSS IFB\#\:\s*(\d{2}\-\d{3})"
-   :rfp_no #"(?i)PSS RFP\#\:\s*(\d{2}\-\d{3})"
-   :open_date #"(?i)^(\.*OPEN\:\s*)(\w+\s\d{2},\s\d{4})"
-   :close_date #"(?i)^(\.*CLOSE\:\s*)(\w+\s\d{2},\s\d{4}\s+at\s+\d{1,2}\:\d{2}\s+am|pm)"
-   :title #"(?i)Title\:\s*([\p{L}\p{Z}\p{M}\p{P}\p{N}]+)"})
-
-(defn procurement-reducer [rfp next-line]
-  (let [this-line (reduce merge (map (fn [[k re]] {k (line-parser re next-line)}) procurement-regexes))]
-    (merge-with select-non-nil this-line rfp)))
 
 (defn process-procurement-pdf
   [params]
   (let [{:keys [file]} params]
     (if (= (type file) clojure.lang.PersistentArrayMap)
-      (let [{:keys [tempfile size filename]} file
-            announcement (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-            desc (-> (re-find #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/" announcement)
-                     (last)
-                     (clojure.string/trim))
-            lines (split announcement #"\n")
-            record (as->
-                       (reduce procurement-reducer {} lines) rec
-                     (filter (comp some? val) rec)
-                     (map (fn [[k v]] [k (clojure.string/replace v #"\s+" " ")]) rec)
-                     (into {} rec)
-                     (assoc rec :description desc)
-                     (db/make-sql-date rec :open_date)
-                     (db/make-sql-datetime rec :close_date)
-                     (make-status rec)
-                     (assoc rec :id (java.util.UUID/randomUUID))
-                     (assoc rec :file_link
-                            (wp/create-media filename tempfile
-                                             :title (:title rec)
-                                             :alt_text (str "Announcement for "
-                                                            (if (some? (:rfp_no rec))
-                                                              (str "RFP# " (:rfp_no rec))
-                                                              (str "IFB# " (:ifb_no rec)))
-                                                            " " (:title rec))
-                                             :description (-> (:description rec)
-                                                              (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
-                                                              (last)
-                                                              (cemerick.url/url-encode))
-                                             :slug (:id rec))))]
-        (if (some? (:rfp_no record))
-          (db/create-rfp! record)
-          (db/create-ifb! record)))
+      (let [pns (create-pns-from-file file)]
+        (save-to-db pns))
       (mapv (comp process-procurement-pdf #(into {} [[:file %]])) file))))
 
 (defn process-procurement-addendum
