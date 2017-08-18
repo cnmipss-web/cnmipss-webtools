@@ -5,12 +5,15 @@
             [clojure.java.io :refer [file]]
             [clj-fuzzy.metrics :as measure]
             [ring.mock.request :as mock]
+            [bond.james :refer [calls with-spy with-stub!]]
+            [clj-time.format :as f]
             [webtools.handler :refer :all]
             [webtools.util :refer :all]
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.db.core :as db]
-            [webtools.test.constants :as c-t]
+            [webtools.constants :as const]
+            [webtools.test.constants :as test-const]
             [webtools.test.fixtures :as fixtures]
             [webtools.test.tools :refer [auth-req equal-props? not-equal-props?]]
             [webtools.wordpress-api :as wp]
@@ -84,35 +87,62 @@
         (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal)))))
 
   (testing "POST /upload/jva-pdf"
-    (println "\nWARNING: POST /upload/jva-pdf is untested"))
+    (with-stub! [[wp/create-media (constantly nil)]]
+      (let [pdf (file "test/clj/webtools/test/jva-sample.pdf")
+            {:keys [status body headers]}
+            (auth-req :post "/upload/jva-pdf"
+                      (assoc :params {:file {:tempfile pdf :filename "jva-sample.pdf" :size (.length pdf)}}))]
+        (testing "should redirect after successful upload"
+          (is (= 302 status)))
+
+        (testing "should store jva info in DB"
+          (let [jva (db/get-jva {:announce_no "PSS-2017-041"})
+                parse-date (partial f/parse (f/formatter const/date-string))]
+            (is (= (parse-date "August 4, 2017") (:open_date jva)))
+            (is (= (parse-date "August 18, 2017") (:close_date jva)))))
+
+        (testing "should create wp media"
+          (is (= 1 (-> wp/create-media calls count)))
+          (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))))
 
   (testing "POST /upload/procurement-pdf"
-    (testing "should handle uploaded rfps"
-      (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
-          {:keys [status body headers error params] :as response}
-          (auth-req :post "/upload/procurement-pdf"
-                    (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}}))]
-      (testing "should redirect after successful upload"
-        (is (= 302 status))
-        (is (nil? error))
-        (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
-      (testing "should store rfp info in postgres database"
-        (let [rfp (db/get-rfp-by-no {:rfp_no "17-041"})]
-          (is (some? rfp))
-          (is (= "Training on the Foundations of Reading and Guided Reading" (:title rfp)))
-          (wp/delete-media (.toString (:id rfp)))))))
+    (with-stub! [[wp/create-media (constantly nil)]]
+      (testing "should handle uploaded rfps"
+        (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
+              {:keys [status body headers error params] :as response}
+              (auth-req :post "/upload/procurement-pdf"
+                        (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}}))]
 
-    (testing "should handle uploaded ifbs"
-          (let [pdf (file "test/clj/webtools/test/ifb-sample.pdf")
-          {:keys [status body headers error params] :as response}
-          (auth-req :post "/upload/procurement-pdf"
-                    (assoc :params {:file {:tempfile pdf :filename "sample-ifb.pdf" :size (.length pdf)}}))]
-      (testing "should redirect after successful upload"
-        (is (= 302 status))
-        (is (nil? error))
-        (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
-      (testing "should store ifb info in postgres database"
-        (let [ifb (db/get-ifb-by-no {:ifb_no "17-051"})]
-          (is (some? ifb))
-          (is (= "Purchase of 1 (One) Riding Mower for the Public School System" (:title ifb)))
-          (wp/delete-media (.toString (:id ifb)))))))))
+          (testing "should redirect after successful upload"
+            (is (= 302 status))
+            (is (nil? error))
+            (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
+
+          (testing "should store rfp info in postgres database"
+            (let [rfp (db/get-rfp-by-no {:rfp_no "17-041"})]
+              (is (some? rfp))
+              (is (= "Training on the Foundations of Reading and Guided Reading" (:title rfp)))))
+
+          (testing "should create wp media"
+            (is (= 1 (-> wp/create-media calls count)))
+            (is (= java.util.UUID (-> wp/create-media calls first :args last type))))))
+
+      (testing "should handle uploaded ifbs"
+        (let [pdf (file "test/clj/webtools/test/ifb-sample.pdf")
+              {:keys [status body headers error params] :as response}
+              (auth-req :post "/upload/procurement-pdf"
+                        (assoc :params {:file {:tempfile pdf :filename "sample-ifb.pdf" :size (.length pdf)}}))]
+
+          (testing "should redirect after successful upload"
+            (is (= 302 status))
+            (is (nil? error))
+            (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
+
+          (testing "should store ifb info in postgres database"
+            (let [ifb (db/get-ifb-by-no {:ifb_no "17-051"})]
+              (is (some? ifb))
+              (is (= "Purchase of 1 (One) Riding Mower for the Public School System" (:title ifb)))))
+
+          (testing "should create wp media"
+            (is (= 2 (-> wp/create-media calls count)))
+            (is (= java.util.UUID (-> wp/create-media calls second :args last type)))))))))

@@ -5,11 +5,14 @@
             [clojure.java.io :refer [file]]
             [clj-fuzzy.metrics :as measure]
             [ring.mock.request :as mock]
+            [bond.james :refer [calls with-spy with-stub!]]
             [webtools.handler :refer :all]
             [webtools.util :refer :all]
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.db.core :as db]
+            [webtools.email :as email]
+            [webtools.procurement :refer :all]
             [webtools.test.constants :as c-t]
             [webtools.test.fixtures :as fixtures]
             [webtools.test.tools :refer [auth-req equal-props? not-equal-props?]]
@@ -70,7 +73,7 @@
                           (-> % :addendum_number int?)
                           (or (-> % :rfp_id some?)
                               (-> % :ifb_id some?))) addenda))
-        (is (= 2 (count subscriptions)))
+        (is (= 4 (count subscriptions)))
         (is (every? #(and (-> % :company_name string?)
                           (-> % :contact_person string?)
                           (-> % :email string?)
@@ -79,26 +82,74 @@
                               (-> % :ifb_id some?))) subscriptions)))))
 
   (testing "POST /api/subscribe-procurement"
-    (let [subscriptions
-          (db/get-subscriptions {:rfp_id nil
-                                 :ifb_id (java.util.UUID/fromString "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
-        (is (= 0 (count subscriptions))))
-    (let [{:keys [status headers body] :as response}
-          ((app) (-> (mock/request :post "/api/subscribe-procurement")
-                     (assoc :body (edn->json {:company "Test Centers of America"
-                                              :person "TV's Adam West"
-                                              :email "iambatman@gotham.tv"
-                                              :tel "+1 (670) 555-6666"
-                                              :ifb_id "cf82deed-c84f-446c-a3f0-0d826428ddbd"}))))]
-      (is (= 200 status))
-      (is (= "application/json" (get headers "Content-Type")))
-      (let [subscriptions
-            (db/get-subscriptions {:rfp_id nil
-                                   :ifb_id (java.util.UUID/fromString "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
-        (is (= 1 (count subscriptions)))
-        (is (= "Test Centers of America" (-> subscriptions first :company_name)))
-        (is (= "TV's Adam West" (-> subscriptions first :contact_person)))
-        (is (= 16705556666 (-> subscriptions first :telephone))))))
+    (with-stub! [[email/confirm-subscription (constantly nil)]]
+      (testing "should handle subscriptions to rfps"
+        (let [subscriber {:company "Test Centers of America"
+                          :person "TV's Adam West"
+                          :email "iambatman@gotham.tv"
+                          :tel "+1 (670) 555-6666"
+                          :rfp_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
+              {:keys [status headers body] :as response}
+              ((app) (-> (mock/request :post "/api/subscribe-procurement")
+                         (assoc :body (edn->json subscriber))))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+          
+          (testing "should return JSON"
+            (is (= "application/json" (get headers "Content-Type"))))
+          
+          (testing "should add subscription to the DB"
+            (let [subscriptions
+                  (db/get-subscriptions {:ifb_id nil
+                                         :rfp_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
+              (is (= 4 (count subscriptions)))
+              (is (= "Test Centers of America" (-> subscriptions last :company_name)))
+              (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
+              (is (= 16705556666 (-> subscriptions last :telephone)))))
+
+          (testing "should send confirmation email to subscriber"
+            (is (= 1 (-> email/confirm-subscription calls count)))
+            (is (= 2 (-> email/confirm-subscription calls first :args count)))
+            (let [contact (-> email/confirm-subscription calls first :args first)]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))))
+      
+      (testing "should handle subscriptions to ifbs"
+        (let [subscriber {:company "Test Centers of America"
+                          :person "TV's Adam West"
+                          :email "iambatman@gotham.tv"
+                          :tel "+1 (670) 555-6666"
+                          :rfp_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
+              {:keys [status headers body] :as response}
+              ((app) (-> (mock/request :post "/api/subscribe-procurement")
+                         (assoc :body (edn->json {:company "Test Centers of America"
+                                                  :person "TV's Adam West"
+                                                  :email "iambatman@gotham.tv"
+                                                  :tel "+1 (670) 555-6666"
+                                                  :ifb_id "cf82deed-c84f-446c-a3f0-0d826428ddbd"}))))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+          
+          (testing "should return JSON"
+            (is (= "application/json" (get headers "Content-Type"))))
+          
+          (testing "should add subscription to the DB"
+            (let [subscriptions
+                  (db/get-subscriptions {:rfp_id nil
+                                         :ifb_id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
+              (is (= 2 (count subscriptions)))
+              (is (= "Test Centers of America" (-> subscriptions last :company_name)))
+              (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
+              (is (= 16705556666 (-> subscriptions last :telephone)))))
+
+          (testing "should send confirmation email to subscriber"
+            (is (= 2 (-> email/confirm-subscription calls count)))
+            (is (= 2 (-> email/confirm-subscription calls first :args count)))
+            (let [contact (-> email/confirm-subscription calls first :args first)]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))))))
 
   (testing "POST /api/verify-token"
     (testing "should respond 403 to any request without wt-token cookie"
@@ -159,20 +210,207 @@
                             (or (-> % :roles string?)
                                 (-> % :roles nil?))) (json->edn body))))))
 
-    (testing "POST /api/create-user")
+    (testing "POST /api/create-user"
+      (with-stub! [[email/invite (constantly nil)]]
+        (let [{:keys [status body header]}
+              (auth-req :post "/api/create-user"
+                        (assoc :body {:email "test@test.com"
+                                      :admin "true"
+                                      :roles "Testing"}))]
 
-    (testing "POST /api/delete-user")
+          (testing "should return status 200"
+            (is (= 200 status)))
 
-    (testing "POST /api/delete-user")
+          (testing "should add a record of user to DB"
+            (let [user (db/get-user-info {:email "test@test.com"})]
+              (is (= true (:admin user)))
+              (is (= "Testing" (:roles user)))))
 
-    (testing "POST /api/update-jva")
+          (testing "should email user a notification that they have been invited"
+            (let [user (db/get-user-info {:email "test@test.com"})]
+              (is (= 1 (-> email/invite calls count)))
+              (is (= (dissoc user :token) (-> email/invite calls first :args first))))))))
 
-    (testing "POST /api/delete-jva")
+    (testing "POST /api/update-user"
+      (let [{:keys [status body headers]}
+            (auth-req :post "/api/update-user"
+                      (assoc :body {:email "john.doe@cnmipss.org"
+                                    :admin true
+                                    :roles nil}))]
 
-    (testing "POST /api/update-rfp")
+        (testing "should return status 200"
+          (is (= 200 status)))
 
-    (testing "POST /api/delete-rfp")
+        (testing "should update user in DB"
+          (let [user (db/get-user-info {:email "john.doe@cnmipss.org"})]
+            (is (:admin user))
+            (is (nil? (:roles user)))))))
 
-    (testing "POST /api/update-ifb")
+    (testing "POST /api/delete-user"
+      (let [{:keys [status body headers]}
+            (auth-req :post "/api/delete-user"
+                      (assoc :body {:email "test@test.com"}))]
+        (testing "should return status 200"
+          (is (= 200 status)))
 
-    (testing "POST /api/delete-ifb")))
+        (testing "should remove user from db"
+          (let [user (db/get-user-info {:email "test@test.com"})]
+            (is (nil? user))))))
+
+    (testing "POST /api/update-jva"
+      (let [{:keys [status body headers]}
+            (auth-req :post "/api/update-jva"
+                      (assoc :body {:id "8d893df0-1afc-4dd6-8e20-eb74a6e4e50b"
+                                    :announce_no "PSS-2015-311"
+                                    :position "New Job Title"
+                                    :status true
+                                    :open_date "December 22, 2016"
+                                    :close_date nil
+                                    :salary "Moolah"
+                                    :location "Remote"
+                                    :file_link "dummyli.nk"}))]
+
+        (testing "should return status 200"
+          (is (= 200 status)))
+
+        (testing "should modify the jva record in DB"
+          (let [jva (db/get-jva {:announce_no "PSS-2015-311"})]
+            (is (= "New Job Title" (:position jva)))
+            (is (= nil (:close_date jva)))
+            (is (= "Moolah" (:salary jva)))
+            (is (= "Remote" (:location jva)))))))
+
+    (testing "POST /api/delete-jva"
+      (with-stub! [[wp/delete-media (constantly nil)]]
+        (let [{:keys [status body headers]}
+              (auth-req :post "/api/delete-jva"
+                        (assoc :body {:announce_no "PSS-2015-311"}))]
+
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should remove record of jva from DB"
+            (let [jva (db/get-jva {:announce_no "PSS-2015-311"})]
+              (is (nil? jva))))
+
+          (testing "should delete related media"
+            (is (= 1 (-> wp/delete-media calls count)))
+            (is (= "8d893df0-1afc-4dd6-8e20-eb74a6e4e50b" (-> wp/delete-media
+                                                              ((comp first calls))
+                                                              ((comp first :args)))))))))
+
+    (testing "POST /api/update-rfp"
+      (with-stub! [[email/notify-subscribers (constantly nil)]]
+        (let [new-title "New Title for Proposal #2"
+              new-desc "The description of this proposal has changed."
+              rfp (-> (get-pns-from-db "d0002906-6432-42b5-b82b-35f0d710f827")
+                      (#(into {} %))
+                      (assoc :title new-title)
+                      (assoc :description new-desc))
+              {:keys [status body headers]}
+              (auth-req :post "/api/update-rfp"
+                        (assoc :body rfp))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should alter record of rfp in the database"
+            (let [new (get-pns-from-db "d0002906-6432-42b5-b82b-35f0d710f827")]
+              (is (= new-title (:title new)))
+              (is (= new-desc (:description new)))))
+
+          (testing "should notify subscribers of the updated rfp"
+            (is (= 1 (-> email/notify-subscribers calls count)))
+            (is (= :update (-> email/notify-subscribers calls first :args first)))
+            (is (= :rfps (-> email/notify-subscribers calls first :args second)))
+            (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last)))))))
+
+    (testing "POST /api/delete-rfp"
+      (with-stub! [[email/notify-subscribers (constantly nil)]
+                   [wp/delete-media (constantly nil)]]
+        (let [rfp (into {} (get-pns-from-db "d0002906-6432-42b5-b82b-35f0d710f827"))
+              {:keys [status body headers]}
+              (auth-req :post "/api/delete-rfp"
+                        (assoc :body rfp))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should remove record of rfp from the database"
+            (let [rfp (get-pns-from-db "d0002906-6432-42b5-b82b-35f0d710f827")]
+              (is (nil? rfp))
+              (is (= 2 (count (db/get-all-rfps))))))
+
+          (testing "should notify subscribers that rfp has been deleted"
+            (is (= 1 (-> email/notify-subscribers calls count)))
+            (is (= :delete (-> email/notify-subscribers calls first :args first)))
+            (is (= :rfps (-> email/notify-subscribers calls first :args second)))
+            (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))
+
+          (testing "should delete related addenda"
+            (let [addenda (db/get-rfp-addenda {:rfp_id (:id rfp) :ifb_id nil})]
+              (is (empty? addenda))))
+
+          (testing "should delete related subscribers"
+            (let [subscribers (db/get-subscriptions {:rfp_id (:id rfp) :ifb_id nil})]
+              (is (empty? subscribers))))
+
+          (testing "should delete related media"
+            (is (= 1 (-> wp/delete-media calls count)))
+            (is (= (:id rfp) (-> wp/delete-media calls first :args first)))))))
+
+    (testing "POST /api/update-ifb"
+      (with-stub! [[email/notify-subscribers (constantly nil)]]
+        (let [new-title "New Title for Invitation #2"
+              new-desc "The description of this invitation has changed."
+              ifb (-> (get-pns-from-db "2fa4e278-f022-4361-b69a-0063a387933a")
+                      (#(into {} %))
+                      (assoc :title new-title)
+                      (assoc :description new-desc))
+              {:keys [status body headers]}
+              (auth-req :post "/api/update-ifb"
+                        (assoc :body ifb))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should alter record of ifb in the database"
+            (let [new (get-pns-from-db "2fa4e278-f022-4361-b69a-0063a387933a")]
+              (is (= new-title (:title new)))
+              (is (= new-desc (:description new)))))
+
+          (testing "should notify subscribers of the updated rfp"
+            (is (= 1 (-> email/notify-subscribers calls count)))
+            (is (= :update (-> email/notify-subscribers calls first :args first)))
+            (is (= :ifbs (-> email/notify-subscribers calls first :args second)))
+            (is (= (pns-from-map ifb) (-> email/notify-subscribers calls first :args last)))))))
+
+    (testing "POST /api/delete-ifb"
+      (with-stub! [[email/notify-subscribers (constantly nil)]
+                   [wp/delete-media (constantly nil)]]
+        (let [ifb (into {} (get-pns-from-db "cf82deed-c84f-446c-a3f0-0d826428ddbd"))
+              {:keys [status body headers]}
+              (auth-req :post "/api/delete-ifb"
+                        (assoc :body ifb))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should remove record of ifb from the database"
+            (let [ifb (get-pns-from-db "cf82deed-c84f-446c-a3f0-0d826428ddbd")]
+              (is (nil? ifb))
+              (is (= 2 (count (db/get-all-ifbs))))))
+
+          (testing "should notify subscribers that ifb has been deleted"
+            (is (= 1 (-> email/notify-subscribers calls count)))
+            (is (= :delete (-> email/notify-subscribers calls first :args first)))
+            (is (= :ifbs (-> email/notify-subscribers calls first :args second)))
+            (is (= ifb (-> email/notify-subscribers calls first :args last))))
+
+          (testing "should delete related addenda"
+            (let [addenda (db/get-rfp-addenda {:rfp_id nil :ifb_id (:id ifb)})]
+              (is (empty? addenda))))
+
+          (testing "should delete related subscribers"
+            (let [subscribers (db/get-subscriptions {:rfp_id nil :ifb_id (:id ifb)})]
+              (is (empty? subscribers))))
+
+          (testing "should delete related media"
+            (is (= 1 (-> wp/delete-media calls count)))
+            (is (= (:id ifb) (-> wp/delete-media calls first :args first)))))))))

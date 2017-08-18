@@ -1,6 +1,7 @@
 (ns webtools.db.core-test
   (:require [webtools.config :refer [env]]
             [webtools.db.core :as db]
+            [webtools.procurement :refer [make-uuid]]
             [webtools.test.constants :as c-t]
             [webtools.test.fixtures :as fixtures]
             [clojure.test :refer :all]
@@ -19,8 +20,8 @@
     (db/delete-user! {:email "tony.stark@cnmipss.org"})
     (db/delete-cert! {:cert_no "BI-003-2006"})
     (db/delete-jva! {:announce_no "PSS-2015-311"})
-    (db/delete-rfp! {:rfp_no "15-010"})
-    (db/delete-ifb! {:ifb_no "15-007"})
+    (db/delete-rfp! {:id (make-uuid "1174a9a8-b45a-422a-bb46-574f814c2550")})
+    (db/delete-ifb! {:id (make-uuid "2fa4e278-f022-4361-b69a-0063a387933a")})
     (is (= (- c-t/user-seed-count 1)
            (count (db/get-all-users))))
     (is (= (- c-t/cert-seed-count 1) 
