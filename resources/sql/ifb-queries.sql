@@ -7,7 +7,7 @@ values (:id, :ifb_no, :open_date, :close_date, :title, :description, :file_link)
 -- :name delete-ifb! :! :n
 -- :doc deletes an existing record of a Request for Proposal
 delete from ifbs
-where ifb_no = :ifb_no
+where id = :id
 
 -- :name update-ifb :! :1
 -- :doc updates an existing record of a Request for Proposal

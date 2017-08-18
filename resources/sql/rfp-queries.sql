@@ -7,7 +7,7 @@ values (:id, :rfp_no, :open_date, :close_date, :title, :description, :file_link)
 -- :name delete-rfp! :! :n
 -- :doc deletes an existing record of a Request for Proposal
 delete from rfps
-where rfp_no = :rfp_no
+where id = :id
 
 -- :name update-rfp :! :1
 -- :doc updates an existing record of a Request for Proposal
