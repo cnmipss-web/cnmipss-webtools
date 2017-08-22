@@ -181,10 +181,7 @@
                                                       (if (-> sub :rfp_id some?)
                                                         "RFP#"
                                                         "IFB#")
-                                                      (if (-> sub :rfp_id some?)
-                                                        (:rfp_no pns)
-                                                        (:ifb_no pns))
-                                                      " " (:title pns)
+                                                      (:number pns) " " (:title pns)
                                                       ".  You may access the full content of this addendum through ")
                                               [:a {:href (:file_link addendum)}
                                                "this link."]]
@@ -210,4 +207,4 @@
       :delete
       (notify-deletion orig (filter (match-subscriber new id-type) subscriptions))
       :addenda
-      (notify-addenda (get-pns-from-db (id-type new)) new (filter (match-subscriber orig id-type) subscriptions)))))
+      (notify-addenda (get-pns-from-db (:id new)) new (filter (match-subscriber orig id-type) subscriptions)))))
