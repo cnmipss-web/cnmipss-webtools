@@ -69,3 +69,8 @@
                       (assoc a sched
                              (dissoc s-fns this))))
         (throw (Exception. (str "Function " this " is not currently scheduled to run " sched)))))))
+
+(defn unschedule-all []
+  (doseq [set (vals @jobs)]
+    (doseq [f (vals set)] (f)))
+  (reset! jobs {}))

@@ -208,3 +208,30 @@
       (notify-deletion orig (filter (match-subscriber new id-type) subscriptions))
       :addenda
       (notify-addenda (get-pns-from-db (:id new)) new (filter (match-subscriber orig id-type) subscriptions)))))
+
+(defn warning-24hr [pns {:keys [email contact_person] :as sub}]
+  (send-message {:to email
+                 :from "procurement@cnmipss.org"
+                 :subject (str "24-hour Notice: Submissions for "
+                               (-> pns :type name clojure.string/upper-case) "# "
+                               (:number pns)
+                               " are due.")
+                 :body [{:type "text/html"
+                         :content (html
+                                   [:html
+                                    [:body
+                                     [:p (str "Greetings " contact_person ",")]
+                                     [:p (str "We would like to notify you that all submissions for "
+                                              (-> pns :type name clojure.string/upper-case) "# "
+                                              (:number pns)
+                                              " " (:title pns)
+                                              " must be turned in to the PSS Procurement office no later than "
+                                              (f/unparse (f/formatter "MMMM dd, YYYY 'at' h:mm a") (:close_date pns)))]
+                                     [:p "Any submissions turned in after that time will not be considered."]
+                                     [:br]
+                                     [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                     [:br]
+                                     [:p "Thank you,"]
+                                     [:p "Kimo Rosario"]
+                                     [:p "Procurement & Supply Officer"]
+                                     [:p "CNMI PSS"]]])}]}))

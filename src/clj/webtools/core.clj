@@ -2,6 +2,7 @@
   (:require [webtools.config :refer [env]]
             [webtools.db.core :as db]
             [webtools.handler :as handler]
+            [webtools.cron.config :as cron]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]
@@ -33,6 +34,13 @@
                 :stop
                 (when repl-server
                   (repl/stop repl-server)))
+
+(mount/defstate ^{:on-reload :noop}
+                 cron-tasks
+                 :start
+                 (cron/init!)
+                 :stop
+                 (cron/stop!))
 
 
 (defn stop-app []
