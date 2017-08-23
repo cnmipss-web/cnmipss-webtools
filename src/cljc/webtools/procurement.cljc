@@ -20,6 +20,7 @@
   (make-uuid [id] "Convert an id to uuid class"))
 
 (defprotocol create-procurement
+  "Method to convert simply map to PSAnnouncement"
   (pns-from-map [pns]))
 
 (defrecord PSAnnouncement
@@ -226,8 +227,12 @@
           (dissoc :rfp_no)
           (assoc :type :rfp)
           (assoc :id (-> pns :id make-uuid))
-          (assoc :open_date (-> pns :open_date ((partial f/parse (f/formatter "MMMM dd, YYYY")))))
-          (assoc :close_date (-> pns :close_date ((partial f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a")))))
+          (assoc :open_date (if (string? (:open_date pns))
+                              (-> pns :open_date ((partial f/parse (f/formatter "MMMM dd, YYYY"))))
+                              (:open_date pns)))
+          (assoc :close_date (if (string? (:close_date pns))
+                               (-> pns :close_date ((partial f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a"))))
+                               (:close_date pns)))
           (map->PSAnnouncement))
       
       (some? (:ifb_no pns))
@@ -236,8 +241,12 @@
           (dissoc :ifb_no)
           (assoc :type :ifb)
           (assoc :id (-> pns :id make-uuid))
-          (assoc :open_date (-> pns :open_date ((partial f/parse (f/formatter "MMMM dd, YYYY")))))
-          (assoc :close_date (-> pns :close_date ((partial f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a")))))
+          (assoc :open_date (if (string? (:open_date pns))
+                              (-> pns :open_date ((partial f/parse (f/formatter "MMMM dd, YYYY"))))
+                              (:open_date pns)))
+          (assoc :close_date (if (string? (:close_date pns))
+                               (-> pns :close_date ((partial f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a"))))
+                               (:close_date pns)))
           (map->PSAnnouncement))
 
       (every? some? [(:number pns) (:type pns)])
