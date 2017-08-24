@@ -250,3 +250,33 @@
                                        [:p "CNMI PSS"]]])}]})
     (catch Exception e
       (log/error e))))
+
+(defn notify-pns-closed [pns {:keys [email contact_person :as sub]}]
+  (try
+    (send-message {:to email
+                   :from "procurement@cnmipss.org"
+                   :subject (str "CLOSED: Deadline for submissions for "
+                                 (-> pns :type name clojure.string/upper-case) "# "
+                                 (:number pns)
+                                 " has passed.")
+                   :body [{:type "text/html"
+                           :content (html
+                                     [:html
+                                      [:body
+                                       [:p (str "Greetings " contact_person ",")]
+                                       [:p (str "We would like to notify you that the deadline to submit a response for "
+                                                (-> pns :type name clojure.string/upper-case) "# "
+                                                (:number pns)
+                                                " " (:title pns)
+                                                " has passed as of "
+                                                (f/unparse (f/formatter "MMMM dd, YYYY 'at' h:mm a") (:close_date pns))
+                                                ".  No further submissions will be accepted after this time.")]
+                                       [:br]
+                                       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                       [:br]
+                                       [:p "Thank you,"]
+                                       [:p "Kimo Rosario"]
+                                       [:p "Procurement & Supply Officer"]
+                                       [:p "CNMI PSS"]]])}]})
+    (catch Exception e
+      (log/error e))))
