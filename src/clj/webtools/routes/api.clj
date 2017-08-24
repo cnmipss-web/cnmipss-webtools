@@ -149,7 +149,7 @@
               user (keyed [email admin roles id])]
           (query-route db/get-all-users
                        (db/create-user! user)
-                       (email/invite user))))
+                       (future (email/invite user)))))
   
   (POST "/api/update-user" request
         (let [{:keys [email roles admin]} (request :body)]
@@ -182,24 +182,24 @@
   (POST "/api/update-rfp" {:keys [body]}
         (let [rfp (pns-from-map body)]
           (query-route get-all-procurement
-                       (email/notify-subscribers :update :rfps rfp)
+                       (future (email/notify-subscribers :update :rfps rfp))
                        (change-in-db rfp))))
 
   (POST "/api/delete-rfp" {:keys [body]}
         (let [rfp (pns-from-map body)]
           (query-route get-all-procurement
-                       (email/notify-subscribers :delete :rfps rfp)
+                       (future (email/notify-subscribers :delete :rfps rfp))
                        (clear-procurement :rfp rfp))))
 
   (POST "/api/update-ifb" {:keys [body]}
         (let [ifb (pns-from-map body)]
           (query-route get-all-procurement
-                       (email/notify-subscribers :update :ifbs ifb)
+                       (future (email/notify-subscribers :update :ifbs ifb))
                        (change-in-db ifb))))
 
   (POST "/api/delete-ifb" {:keys [body]}
         (query-route get-all-procurement
-                     (email/notify-subscribers :delete :ifbs body)
+                     (future (email/notify-subscribers :delete :ifbs body))
                      (clear-procurement :ifb body))))
 
 
