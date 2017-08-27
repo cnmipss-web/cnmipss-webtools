@@ -3,7 +3,6 @@
             [clj-time.core :as t]
             [webtools.cron.jobs :as jobs]
             [webtools.email :as email]
-            [webtools.procurement :as p]
             [webtools.db.core :as db]
             [webtools.test.fixtures :as fixtures]
             [bond.james :refer [calls with-spy with-stub with-stub!]]))

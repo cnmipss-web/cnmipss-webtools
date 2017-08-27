@@ -1,7 +1,7 @@
 (ns webtools.db.core-test
   (:require [webtools.config :refer [env]]
             [webtools.db.core :as db]
-            [webtools.procurement :refer [make-uuid]]
+            [webtools.procurement.core :refer [make-uuid]]
             [webtools.test.constants :as const]
             [webtools.test.fixtures :as fixtures]
             [clojure.test :refer :all]

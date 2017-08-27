@@ -71,7 +71,8 @@
             [lein-cprop "1.0.3"]
             [lein-immutant "2.1.0"]
             [lein-sassc "0.10.4"]
-            [migratus-lein "0.4.9"]]
+            [migratus-lein "0.4.9"]
+            [lein-doo "0.1.7"]]
 
   :sassc
   [{:src "resources/scss/screen.scss"

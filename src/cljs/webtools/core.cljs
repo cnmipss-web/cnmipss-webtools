@@ -12,6 +12,7 @@
             [webtools.util :as util]
             [webtools.timeout :as timeout]
             [webtools.cookies :refer [get-cookie] :as cookies]
+            webtools.procurement.front-end
             [cemerick.url :refer [url-decode]]
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]

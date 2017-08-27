@@ -39,7 +39,7 @@
 (defn all-procurement
   [[ok response]]
   (let [{:keys [body]} response]
-    (println "\n\nReceived all-procurement response" response)
     (if ok
       (rf/dispatch [:store-procurement-list (clojure.walk/keywordize-keys body)])
       (println response))))
+ 

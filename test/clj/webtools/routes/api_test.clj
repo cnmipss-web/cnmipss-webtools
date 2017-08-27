@@ -12,7 +12,7 @@
             [webtools.config :refer [env]]
             [webtools.db.core :as db]
             [webtools.email :as email]
-            [webtools.procurement :refer :all]
+            [webtools.procurement.core :refer :all]
             [webtools.test.constants :as c-t]
             [webtools.test.fixtures :as fixtures]
             [webtools.test.tools :refer [auth-req equal-props? not-equal-props?]]

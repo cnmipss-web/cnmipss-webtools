@@ -1,7 +1,8 @@
 (ns webtools.email
   (:require [webtools.config :refer [env]]
             [webtools.db.core :as db]
-            [webtools.procurement :refer :all]
+            [webtools.procurement.core :refer :all]
+            [webtools.procurement.server :refer :all]
             [clj-time.coerce :as c]
             [clj-time.format :as f]
             [postal.core :refer [send-message]]

@@ -1,106 +1,65 @@
-(ns webtools.procurement
-  (:require [webtools.db.core :as db]
+(ns webtools.procurement.server
+  (:require [webtools.procurement.core :refer :all]
+            [webtools.db.core :as db]
             [webtools.wordpress-api :as wp]
             [webtools.constants :as const]
             [webtools.util :refer :all]
             [clj-time.format :as f])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
-           [org.apache.pdfbox.text PDFTextStripper]))
+           [org.apache.pdfbox.text PDFTextStripper])) 
 
-(defprotocol process-procurement
-  "Methods for manipulating procurement records"
-  (save-to-db [a] "Save a record to the DB")
-  (change-in-db [a] "Update a record in the DB")
-  (changes-email [orig new sub] "Create hiccup markup for an email notifying subscribers about changes")
-  (delete-from-db [a] "Delete a record from the DB"))
+(extend-type webtools.procurement.core.PSAnnouncement
+    process-procurement
+    (save-to-db [pnsa]
+      (db/create-pnsa! pnsa))
 
-(defprotocol retrieve-procurement
-  "Methods to retrive procurement records from DB"
-  (get-pns-from-db [id] "Retrieve an rfp or ifb based on its id")
-  (make-uuid [id] "Convert an id to uuid class"))
-
-(defprotocol create-procurement
-  "Method to convert simply map to PSAnnouncement"
-  (pns-from-map [pns]))
-
-(defrecord PSAnnouncement
-    [id
-     type
-     number
-     open_date
-     close_date
-     title
-     description
-     file_link]
-
-  process-procurement
-  (save-to-db [pnsa]
-    (db/create-pnsa! pnsa))
-
-  (change-in-db [pnsa]
-    (db/update-pnsa! pnsa))
+    (change-in-db [pnsa]
+      (db/update-pnsa! pnsa))
   
-  (delete-from-db [pnsa]
-    (db/delete-pnsa! pnsa))
+    (delete-from-db [pnsa]
+      (db/delete-pnsa! pnsa))
 
-  (changes-email [orig new sub]
-    (let [title-string (str (-> new :type name clojure.string/upper-case)
-                            "# " (:number new) " " (:title new))
-          referent-term (if (= :rfp (:type new)) "request" "invitation")
-          time-format (f/formatter const/procurement-datetime-format)
-          date-format (f/formatter const/procurement-date-format)
-          print-date (comp (partial f/unparse date-format))
-          print-datetime (comp (partial f/unparse time-format))]
-      [:html
-       [:body
-        [:p (str "Greetings " (:contact_person sub) ",")]
-        [:p (str "We would like to notify you that details of " title-string " have been changed.")]
+    (changes-email [orig new sub]
+      (let [title-string (str (-> new :type name clojure.string/upper-case)
+                              "# " (:number new) " " (:title new))
+            referent-term (if (= :rfp (:type new)) "request" "invitation")
+            time-format (f/formatter const/procurement-datetime-format)
+            date-format (f/formatter const/procurement-date-format)
+            print-date (comp (partial f/unparse date-format))
+            print-datetime (comp (partial f/unparse time-format))]
+        [:html
+         [:body
+          [:p (str "Greetings " (:contact_person sub) ",")]
+          [:p (str "We would like to notify you that details of " title-string " have been changed.")]
 
-        (if (not= (:open_date orig) (:open_date new))
-          [:p (str "The window for submissions will now begin on " (print-date (:open_date new)) ".  ")])
+          (if (not= (:open_date orig) (:open_date new))
+            [:p (str "The window for submissions will now begin on " (print-date (:open_date new)) ".  ")])
 
-        (if (not= (:close_date orig) (:close_date new))
-          [:p (str "The window for submissions will now close at " (print-datetime (:close_date new)) ".  ")])
+          (if (not= (:close_date orig) (:close_date new))
+            [:p (str "The window for submissions will now close at " (print-datetime (:close_date new)) ".  ")])
 
-        (if (not= (:number orig) (:number new))
-          [:p (str "The " (-> new :type name clojure.string/upper-case) "# of this request has been changed to "
-                   (:number new) ".  ")])
+          (if (not= (:number orig) (:number new))
+            [:p (str "The " (-> new :type name clojure.string/upper-case) "# of this request has been changed to "
+                     (:number new) ".  ")])
 
-        (if (not= (:title orig) (:title new))
-          [:p (str "The title of this " referent-term " has been changed to: ")
-           [:em (:title new)] ".  "])
+          (if (not= (:title orig) (:title new))
+            [:p (str "The title of this " referent-term " has been changed to: ")
+             [:em (:title new)] ".  "])
 
-        (if (not= (:description orig) (:description new))
-          [:p
-           (str "The description of this " referent-term " has been change to the following: ")
-           [:br]
-           [:br]
-           (:description new)])
+          (if (not= (:description orig) (:description new))
+            [:p
+             (str "The description of this " referent-term " has been change to the following: ")
+             [:br]
+             [:br]
+             (:description new)])
 
-        [:br]
-        [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-        [:br]
-        [:p "Thank you,"]
-        [:p "Kimo Rosario"]
-        [:p "Procurement & Supply Officer"]
-        [:p "CNMI PSS"]]])))
-
-(defrecord Addendum
-    [id
-     type
-     target
-     file_link
-     addendum_number])
-
-(defrecord Subscription
-    [id
-     type
-     target
-     subscription_number
-     company_name
-     contact_person
-     email
-     telephone])
+          [:br]
+          [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+          [:br]
+          [:p "Thank you,"]
+          [:p "Kimo Rosario"]
+          [:p "Procurement & Supply Officer"]
+          [:p "CNMI PSS"]]])))
 
 (def procurement-regexes
   {:type #"(RFP|IFB)"

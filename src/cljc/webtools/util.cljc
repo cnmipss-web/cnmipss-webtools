@@ -1,6 +1,8 @@
 (ns webtools.util
-  (:require [clj-time.core :as time]
-            [clj-time.coerce :as coerce]))
+  #?(:clj  (:require [clj-time.core :as time]
+                     [clj-time.coerce :as coerce])
+     :cljs (:require [cljs-time.core :as time]
+                     [cljs-time.coerce :as coerce])))
 
 (let [transforms {:keys keyword
                   :strs str

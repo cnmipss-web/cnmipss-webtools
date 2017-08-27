@@ -1,7 +1,7 @@
 (ns webtools.email-test
   (:require [clojure.test :refer :all]
             [webtools.email :as email :refer [notify-changes notify-deletion notify-addenda]]
-            [webtools.procurement :refer :all]
+            [webtools.procurement.core :refer :all]
             [webtools.db.core :as db]
             [webtools.test.constants :as c-t]
             [webtools.test.fixtures :as fixtures]
@@ -53,7 +53,7 @@
                         :company_name "Reader's Digest"}
           open_date (f/parse (f/formatter "MMMM dd, YYYY") "August 3, 2000")
           close_date (f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a") "August 3, 2100 at 10:00 pm")
-          pns (webtools.procurement.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
+          pns (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
                                                          :rfp "123" open_date close_date
                                                          "Title" "D" "L")]
       (email/confirm-subscription subscription pns)
@@ -109,10 +109,10 @@
     (let [open_date (f/parse (f/formatter "MMMM dd, YYYY") "August 3, 2000")
           close_date (f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a") "August 3, 2100 at 10:00 pm")
           new_date (f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a") "August 3, 2100 at 10:00 am")
-          original (webtools.procurement.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
+          original (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
                                                          :rfp "123" open_date close_date
                                                          "Title" "D" "L")
-          new-vers (webtools.procurement.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
+          new-vers (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
                                                          :rfp "123" open_date new_date
                                                          "New Title" "D" "L")
           subscribers [{:rfp_id "9d3ee41e-f79f-4e91-8a9a-535d959ba374"

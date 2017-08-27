@@ -11,14 +11,15 @@
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.wordpress-api :as wp]
-            [webtools.procurement :refer :all]
+            [webtools.procurement.core :refer :all]
+            [webtools.procurement.server :refer [create-pns-from-file]]
             [webtools.email :as email]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce]
             [clj-time.format :as f])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper]
-           [webtools.procurement PSAnnouncement]))
+           [webtools.procurement.core PSAnnouncement]))
 
 (defn create-new-cert
   [current]

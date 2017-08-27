@@ -98,7 +98,7 @@
 
 (defn procurement-row [item]
   [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
-   [:td.custom-col-1 (or (:rfp_no item) (:ifb_no item))]
+   [:td.custom-col-1 (:number item)]
    [:td.custom-col-2 (:open_date item)]
    [:td.custom-col-2 (:close_date item)]
    [:td.custom-col-4 (:title item)]
@@ -109,7 +109,7 @@
                                          :data-toggle "modal"
                                          :data-target "#pns-subscriber-modal"
                                          :aria-controls "pns-subscriber-modal"} [:i.fa.fa-envelope]]]
-    [:a {:href (item :file_link)}
+    [:a {:href (:file_link item)}
      [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
     [:a {:on-click (fn [] (rf/dispatch [:set-procurement-modal item]))}
        [:button.btn.btn-warning.file-link {:title "Edit"
@@ -145,8 +145,7 @@
   (let [{:keys [id]} pns-item
         addenda (->> @(rf/subscribe [:procurement-list])
                     :addenda
-                    (filter #(or (= id (:rfp_id %))
-                                 (= id (:ifb_id %)))))]
+                    (filter #(= id (:proc_id %))))]
     [:table#existing-addenda.text-center
      [:caption "Existing Addendums"]
      [:thead

@@ -1,6 +1,6 @@
 (ns webtools.cron.jobs
   (:require [webtools.db.core :as db]
-            [webtools.procurement :refer :all]
+            [webtools.procurement.core :refer :all]
             [webtools.email :as email]
             [clj-time.core :as t]))
 
@@ -13,7 +13,6 @@
 
 (defn check-notify-subscribers-24hr
   "Function to check all rfps/ifbs for any that are between 24-23 hours of expiring.
-
    If found, all subscribers to that rfp/ifb are notified by email"
   []
   (let [next-day (t/interval (t/plus (t/now) (t/hours 23))
@@ -22,7 +21,6 @@
 
 (defn notify-subscribers-closed
   "Function to check all rfps/ifbs that have closed in the last hours.
-
    If found, all subscribers to that rfp/ifb are notified by email."
   []
   (let [last-hour (t/interval (t/minus (t/now) (t/hours 1))

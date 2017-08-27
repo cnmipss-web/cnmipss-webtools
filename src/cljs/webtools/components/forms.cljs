@@ -177,8 +177,7 @@
 (defn rfp-ifb-search [] [:div])
 
 (def procurement-fields
-  {:rfp_no "Number"
-   :ifb_no "Number"
+  {:number "Number"
    :status "Status"
    :open_date "Opening Date"
    :close_date "Closing Date"
@@ -193,9 +192,9 @@
   [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)}
    (for [[key val] (->> item
                         (filter (fn [[key val]] (not= key :file_link)))
+                        (filter (fn [[key val]] (not= key :type)))
                         (sort-by (fn [[key val]] (case key
-                                                   :rfp_no 0
-                                                   :ifb_no 0
+                                                   :number 0
                                                    :title 1
                                                    :open_date 2
                                                    :close_date 3

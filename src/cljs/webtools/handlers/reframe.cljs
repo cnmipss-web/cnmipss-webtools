@@ -3,6 +3,7 @@
             [webtools.constants :as const]
             [webtools.util :as util]
             [webtools.handlers.api :as ajax-handlers]
+            [webtools.procurement.core :as p]
             [re-frame.core :refer [dispatch reg-event-db]]
             [ajax.core :as ajax]))
 
@@ -122,8 +123,16 @@
 
 (reg-event-db
  :store-procurement-list
-(fn [db [_ list]]
-  (assoc db :procurement-list list)))
+ (fn [db [_ list]]
+  (println )
+  (assoc db :procurement-list {:rfps (->> (:pnsa list)
+                                          (filter #(= "rfp" (:type %)))
+                                          (map p/pns-from-map))
+                               :ifbs (->> (:pnsa list)
+                                          (filter #(= "ifb" (:type %)))
+                                          (map p/pns-from-map))
+                               :addenda (:addenda list)
+                               :subscriptions (:subscriptions list)})))
 
 (reg-event-db
  :set-procurement-modal
@@ -148,8 +157,7 @@
 
 (reg-event-db :set-subscriber-modal
  (fn [db [_ {:keys [id] :as item}]]
-   (let [subscriptions (filter #(or (= id (:rfp_id %))
-                                    (= id (:ifb_id %))) (get-in db [:procurement-list :subscriptions]))]
+   (let [subscriptions (filter #(= id (:proc_id %)) (get-in db [:procurement-list :subscriptions]))]
      (assoc db :subscriber-modal [item subscriptions]))))
 
 (reg-event-db :clear-subscriber-modal

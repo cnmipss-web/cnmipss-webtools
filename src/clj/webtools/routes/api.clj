@@ -10,7 +10,8 @@
             [webtools.layout :refer [error-page]]
             [webtools.constants :refer [max-cookie-age]  :as const]
             [webtools.wordpress-api :as wp]
-            [webtools.procurement :refer :all]
+            [webtools.procurement.core :refer :all]
+            [webtools.procurement.server :refer :all]
             [clojure.tools.logging :as log]))
 
 (def truthy (comp some? #{"true" true}))
