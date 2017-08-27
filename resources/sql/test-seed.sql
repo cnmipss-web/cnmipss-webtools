@@ -2,8 +2,7 @@
 -- :doc create tables in database
 delete from procurement_addenda where true;
 delete from procurement_subscriptions where true;
-delete from ifbs where true;
-delete from rfps where true;
+delete from procurement_rfps_and_ifbs where true;
 delete from jvas where true;
 delete from certifications where true;
 delete from users where true;
@@ -64,56 +63,52 @@ delete from jvas where true;
 
 -- :name seed-rfps :! :n
 -- :doc seed the database with dummy rfps
-insert into rfps (id, rfp_no, open_date, close_date, title, description, file_link)
-values ('1174a9a8-b45a-422a-bb46-574f814c2550', '15-010', '2015-01-20', '2015-06-06 12:00:00.0', 'Test Request for Proposal #1', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
+insert into procurement_rfps_and_ifbs (id, type, number, open_date, close_date, title, description, file_link)
+values ('1174a9a8-b45a-422a-bb46-574f814c2550', 'rfp', '15-010', '2015-01-20', '2015-06-06 12:00:00.0', 'Test Request for Proposal #1', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
 
 Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec consequat ex eu lectus dictum imperdiet vel ut quam. Cras quis euismod neque, sit amet finibus arcu. Mauris placerat urna augue, eget vestibulum enim cursus et. Donec dapibus risus at augue sagittis sagittis. Donec faucibus, tortor sit amet sagittis iaculis, sem quam fringilla nulla, in lobortis elit arcu sit amet arcu. Aenean et purus in tortor rhoncus pretium. Donec mollis neque mauris. Vestibulum ac erat mi. Quisque ac gravida nibh. Curabitur facilisis velit nec faucibus consectetur. Donec molestie egestas velit, vel eleifend metus rhoncus id. Maecenas est diam, volutpat non urna nec, luctus blandit neque. Donec ut tincidunt nisl.', 'http://dummy-link/file');
 
-insert into rfps (id, rfp_no, open_date, close_date, title, description, file_link)
-values ('d0002906-6432-42b5-b82b-35f0d710f827', '16-099', '2016-11-20', '2016-02-14 09:00:00.0', 'Test Request for Proposal #2', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
+insert into procurement_rfps_and_ifbs (id, type, number, open_date, close_date, title, description, file_link)
+values ('d0002906-6432-42b5-b82b-35f0d710f827', 'rfp', '16-099', '2016-11-20', '2016-02-14 09:00:00.0', 'Test Request for Proposal #2', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
 
 Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec consequat ex eu lectus dictum imperdiet vel ut quam. Cras quis euismod neque, sit amet finibus arcu. Mauris placerat urna augue, eget vestibulum enim cursus et. Donec dapibus risus at augue sagittis sagittis. Donec faucibus, tortor sit amet sagittis iaculis, sem quam fringilla nulla, in lobortis elit arcu sit amet arcu. Aenean et purus in tortor rhoncus pretium. Donec mollis neque mauris. Vestibulum ac erat mi. Quisque ac gravida nibh. Curabitur facilisis velit nec faucibus consectetur. Donec molestie egestas velit, vel eleifend metus rhoncus id. Maecenas est diam, volutpat non urna nec, luctus blandit neque. Donec ut tincidunt nisl.', 'http://dummy-link/file');
 
-insert into rfps (id, rfp_no, open_date, close_date, title, description, file_link)
-values ('d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', '17-015', '2017-03-12', '2217-12-15 16:30:00.0', 'Test Request for Proposal #3', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
+insert into procurement_rfps_and_ifbs (id, type, number, open_date, close_date, title, description, file_link)
+values ('d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 'rfp', '17-015', '2017-03-12', '2217-12-15 16:30:00.0', 'Test Request for Proposal #3', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
 
 Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec consequat ex eu lectus dictum imperdiet vel ut quam. Cras quis euismod neque, sit amet finibus arcu. Mauris placerat urna augue, eget vestibulum enim cursus et. Donec dapibus risus at augue sagittis sagittis. Donec faucibus, tortor sit amet sagittis iaculis, sem quam fringilla nulla, in lobortis elit arcu sit amet arcu. Aenean et purus in tortor rhoncus pretium. Donec mollis neque mauris. Vestibulum ac erat mi. Quisque ac gravida nibh. Curabitur facilisis velit nec faucibus consectetur. Donec molestie egestas velit, vel eleifend metus rhoncus id. Maecenas est diam, volutpat non urna nec, luctus blandit neque. Donec ut tincidunt nisl.', 'http://dummy-link/file');
-
--- :name clear-rfps :! :n
--- :doc clear the db of all rfp records
-delete from rfps where true;
 
 -- :name seed-ifbs :! :n
 -- :doc seed the database with dummy ifbs
-insert into ifbs (id, ifb_no, open_date, close_date, title, description, file_link)
-values ('cf82deed-c84f-446c-a3f0-0d826428ddbd', '15-007', '2015-01-11', '2379-03-06 09:30:00.0', 'Test Invitation for Bid #1', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
+insert into procurement_rfps_and_ifbs (id, type, number, open_date, close_date, title, description, file_link)
+values ('cf82deed-c84f-446c-a3f0-0d826428ddbd', 'ifb', '15-007', '2015-01-11', '2379-03-06 09:30:00.0', 'Test Invitation for Bid #1', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
 
 Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec consequat ex eu lectus dictum imperdiet vel ut quam. Cras quis euismod neque, sit amet finibus arcu. Mauris placerat urna augue, eget vestibulum enim cursus et. Donec dapibus risus at augue sagittis sagittis. Donec faucibus, tortor sit amet sagittis iaculis, sem quam fringilla nulla, in lobortis elit arcu sit amet arcu. Aenean et purus in tortor rhoncus pretium. Donec mollis neque mauris. Vestibulum ac erat mi. Quisque ac gravida nibh. Curabitur facilisis velit nec faucibus consectetur. Donec molestie egestas velit, vel eleifend metus rhoncus id. Maecenas est diam, volutpat non urna nec, luctus blandit neque. Donec ut tincidunt nisl.', 'http://dummy-link/file');
 
-insert into ifbs (id, ifb_no, open_date, close_date, title, description, file_link)
-values ('2fa4e278-f022-4361-b69a-0063a387933a', '16-229', '2016-12-31', '2016-05-05 08:00:00.0', 'Test Invitation for Bid #2', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
+insert into procurement_rfps_and_ifbs (id, type, number, open_date, close_date, title, description, file_link)
+values ('2fa4e278-f022-4361-b69a-0063a387933a', 'ifb', '16-229', '2016-12-31', '2016-05-05 08:00:00.0', 'Test Invitation for Bid #2', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
 
 Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec consequat ex eu lectus dictum imperdiet vel ut quam. Cras quis euismod neque, sit amet finibus arcu. Mauris placerat urna augue, eget vestibulum enim cursus et. Donec dapibus risus at augue sagittis sagittis. Donec faucibus, tortor sit amet sagittis iaculis, sem quam fringilla nulla, in lobortis elit arcu sit amet arcu. Aenean et purus in tortor rhoncus pretium. Donec mollis neque mauris. Vestibulum ac erat mi. Quisque ac gravida nibh. Curabitur facilisis velit nec faucibus consectetur. Donec molestie egestas velit, vel eleifend metus rhoncus id. Maecenas est diam, volutpat non urna nec, luctus blandit neque. Donec ut tincidunt nisl.', 'http://dummy-link/file');
 
-insert into ifbs (id, ifb_no, open_date, close_date, title, description, file_link)
-values ('5c052995-12c5-4fcc-b57e-bcbf7323f174', '17-105', '2017-07-12', '2017-12-15 10:00:00.0', 'Test Invitation for Bid #3', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
+insert into procurement_rfps_and_ifbs (id, type, number, open_date, close_date, title, description, file_link)
+values ('5c052995-12c5-4fcc-b57e-bcbf7323f174', 'ifb', '17-105', '2017-07-12', '2017-12-15 10:00:00.0', 'Test Invitation for Bid #3', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue non magna eu rutrum. Maecenas ligula mi, interdum nec massa eget, consectetur semper lacus. Quisque viverra ac enim sit amet euismod. Nulla blandit placerat nisl. Sed sed risus sit amet metus scelerisque ultricies. Mauris dignissim lacus sit amet leo dictum pharetra. Quisque varius tellus nisi, non malesuada felis scelerisque sed. Nam aliquam eleifend turpis. Cras tristique pretium viverra. Nullam maximus, sapien vel laoreet porta, tellus felis ullamcorper eros, in tristique enim eros non eros. Aenean rutrum elementum massa a laoreet.
 
 Vestibulum a ullamcorper odio, at eleifend tellus. Aliquam ut enim arcu. Donec consequat ex eu lectus dictum imperdiet vel ut quam. Cras quis euismod neque, sit amet finibus arcu. Mauris placerat urna augue, eget vestibulum enim cursus et. Donec dapibus risus at augue sagittis sagittis. Donec faucibus, tortor sit amet sagittis iaculis, sem quam fringilla nulla, in lobortis elit arcu sit amet arcu. Aenean et purus in tortor rhoncus pretium. Donec mollis neque mauris. Vestibulum ac erat mi. Quisque ac gravida nibh. Curabitur facilisis velit nec faucibus consectetur. Donec molestie egestas velit, vel eleifend metus rhoncus id. Maecenas est diam, volutpat non urna nec, luctus blandit neque. Donec ut tincidunt nisl.', 'http://dummy-link/file');
 
--- :name clear-ifbs :! :n
+-- :name clear-pnsa :! :n
 -- :doc clear the db of all ifb records
-delete from ifbs where true;
+delete from procurement_rfps_and_ifbs where true;
 
 -- :name seed-addenda :! :n
 -- :doc seed the database with dummy addenda to procurement announcements
-insert into procurement_addenda (id, file_link, rfp_id, ifb_id, addendum_number)
-values ('b0e0ed24-7e5a-425a-9c13-fbfe14e8e532', 'http://dummlink.id', null, '5c052995-12c5-4fcc-b57e-bcbf7323f174', 0);
+insert into procurement_addenda (id, file_link, proc_id, addendum_number)
+values ('b0e0ed24-7e5a-425a-9c13-fbfe14e8e532', 'http://dummlink.id', '5c052995-12c5-4fcc-b57e-bcbf7323f174', 0);
 
-insert into procurement_addenda (id, file_link, rfp_id, ifb_id, addendum_number)
-values ('388a3e90-adef-470c-96a3-4707e05c2610', 'http://dummlink.id', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 0);
+insert into procurement_addenda (id, file_link, proc_id, addendum_number)
+values ('388a3e90-adef-470c-96a3-4707e05c2610', 'http://dummlink.id', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 0);
 
-insert into procurement_addenda (id, file_link, rfp_id, ifb_id, addendum_number)
-values ('89ebc5a8-2809-4948-a43b-644098ed040d', 'http://dummlink.id', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 1);
+insert into procurement_addenda (id, file_link, proc_id, addendum_number)
+values ('89ebc5a8-2809-4948-a43b-644098ed040d', 'http://dummlink.id', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 1);
 
 -- :name clear-addenda :! :n
 --:doc clear the db of all procurement addenda
@@ -121,17 +116,17 @@ delete from procurement_addenda where true;
 
 -- :name seed-subscriptions :! :n
 -- :doc seed the database with dummy subscriptions to procurement announcements.
-insert into procurement_subscriptions (id, rfp_id, ifb_id, subscription_number, company_name, contact_person, email, telephone)
-values ('8fd0eb24-82d5-4d79-ae44-676694e3b555', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 0, 'Simple Construction', 'John Doe', 'john.doe@notarealdomain.org', 16705555550);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
+values ('8fd0eb24-82d5-4d79-ae44-676694e3b555', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 0, 'Simple Construction', 'John Doe', 'john.doe@notarealdomain.org', 16705555550);
 
-insert into procurement_subscriptions (id, rfp_id, ifb_id, subscription_number, company_name, contact_person, email, telephone)
-values ('7cb66ca0-8741-4067-a9a3-993d93c42e69', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 1, 'Complected Construction', 'Juan Tzu', 'j.tzu@complect.thisdomainisfake', 16705505550);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
+values ('7cb66ca0-8741-4067-a9a3-993d93c42e69', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 1, 'Complected Construction', 'Juan Tzu', 'j.tzu@complect.thisdomainisfake', 16705505550);
 
-insert into procurement_subscriptions (id, rfp_id, ifb_id, subscription_number, company_name, contact_person, email, telephone)
-values ('8eb76ca0-8751-4561-a9a3-903d93a42f65', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', null, 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 456123);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
+values ('8eb76ca0-8751-4561-a9a3-903d93a42f65', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 456123);
 
-insert into procurement_subscriptions (id, rfp_id, ifb_id, subscription_number, company_name, contact_person, email, telephone)
-values ('2af76ca0-3711-7551-a9a3-903d93a42f65', null, 'cf82deed-c84f-446c-a3f0-0d826428ddbd', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 456123);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
+values ('2af76ca0-3711-7551-a9a3-903d93a42f65', 'cf82deed-c84f-446c-a3f0-0d826428ddbd', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 456123);
 
 -- :name clear-subscriptions :! :n
 -- :doc clear the db of all procurement subscriptions

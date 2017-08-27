@@ -66,8 +66,8 @@
                  [notify-addenda (constantly nil)]]
       (let [rfp (get-pns-from-db (make-uuid "d0002906-6432-42b5-b82b-35f0d710f827"))
             new-rfp (assoc rfp :title "New Title")
-            rfp-addendum (db/get-rfp-addenda {:rfp_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})
-            ifb-addendum (db/get-ifb-addenda {:ifb_id (make-uuid "5c052995-12c5-4fcc-b57e-bcbf7323f174")})]
+            rfp-addendum (db/get-addenda {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})
+            ifb-addendum (db/get-addenda {:proc_id (make-uuid "5c052995-12c5-4fcc-b57e-bcbf7323f174")})]
         (testing ":update event"
           (email/notify-subscribers :update :rfps new-rfp)
 
@@ -86,7 +86,7 @@
 
           (testing "should call notify-addendum"
             (is (= 1 (-> notify-addenda calls count)))
-            (is (= (-> rfp-addendum first :rfp_id get-pns-from-db) (-> notify-addenda calls first :args first)))
+            (is (= (-> rfp-addendum first :proc_id get-pns-from-db) (-> notify-addenda calls first :args first)))
             (is (= (first rfp-addendum) (-> notify-addenda calls first :args second)))))
 
         (testing ":addenda :ifbs event"
@@ -94,7 +94,7 @@
 
           (testing "should call notify-addendum"
             (is (= 2 (-> notify-addenda calls count)))
-            (is (= (-> ifb-addendum first :ifb_id get-pns-from-db) (-> notify-addenda calls second :args first)))
+            (is (= (-> ifb-addendum first :proc_id get-pns-from-db) (-> notify-addenda calls second :args first)))
             (is (= (first ifb-addendum) (-> notify-addenda calls second :args second)))))
 
         (testing ":delete event"
@@ -132,16 +132,14 @@
   (with-stub! [[send-message (constantly nil)]]
     (let [rfp (get-pns-from-db (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"))
           addenda {:id "84ee3bd5-9077-449f-a576-08eec5b26028"
-                   :rfp_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
-          subscribers (db/get-subscriptions {:rfp_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
-                                             :ifb_id nil})]
+                   :proc_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
+          subscribers (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
       (notify-addenda rfp addenda subscribers)
       (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))
 
 (deftest test-notify-deletion
   (with-stub! [[send-message (constantly nil)]]
     (let [rfp (get-pns-from-db (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"))
-          subscribers (db/get-subscriptions {:rfp_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
-                                             :ifb_id nil})]
+          subscribers (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
       (notify-deletion rfp subscribers)
       (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))

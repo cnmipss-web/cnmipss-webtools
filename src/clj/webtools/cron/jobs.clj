@@ -6,16 +6,10 @@
 
 (defn- -deadline-notifier
   [interval mailer]
-  (doseq [rfp (mapv pns-from-map (db/get-all-rfps))]
-    (if (t/within? interval (:close_date rfp))
-      (let [subscribers (db/get-subscriptions {:rfp_id (:id rfp)
-                                               :ifb_id nil})]
-        (mapv (partial mailer rfp) subscribers))))
-  (doseq [ifb (mapv pns-from-map (db/get-all-ifbs))]
-    (if (t/within? interval (:close_date ifb))
-      (let [subscribers (db/get-subscriptions {:ifb_id (:id ifb)
-                                               :rfp_id nil})]
-        (mapv (partial mailer ifb) subscribers)))))
+  (doseq [pnsa (mapv pns-from-map (db/get-all-pnsa))]
+    (if (t/within? interval (:close_date pnsa))
+      (let [subscribers (db/get-subscriptions {:proc_id (:id pnsa)})]
+        (mapv (partial mailer pnsa) subscribers)))))
 
 (defn check-notify-subscribers-24hr
   "Function to check all rfps/ifbs for any that are between 24-23 hours of expiring.

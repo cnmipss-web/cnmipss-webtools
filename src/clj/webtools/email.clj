@@ -168,7 +168,7 @@
     (mapv send-fn subscribers)))
 
 (defn notify-addenda [pns addendum subscribers]
-  (println "\n\n" pns "\n\n" addendum "\n\n" subscribers)
+  ;n(println "\n\nNotify-Addenda:\n\n" pns "\n\n" addendum "\n\n" subscribers)
   (let [send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (try
@@ -219,7 +219,7 @@
       :delete
       (notify-deletion orig (filter (match-subscriber new id-type) subscriptions))
       :addenda
-      (notify-addenda (get-pns-from-db (:id new)) new (filter (match-subscriber orig id-type) subscriptions)))))
+      (notify-addenda (get-pns-from-db (:proc_id new)) new (filter (match-subscriber orig id-type) subscriptions)))))
 
 (defn warning-24hr [pns {:keys [email contact_person] :as sub}]
   (try

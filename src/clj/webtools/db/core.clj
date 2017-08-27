@@ -28,10 +28,9 @@
 
 (conman/bind-connection *db*
                         "sql/test-seed.sql"
+                        "sql/procurement-queries.sql"
                         "sql/procurement-addenda-queries.sql"
                         "sql/subscription-queries.sql"
-                        "sql/ifb-queries.sql"
-                        "sql/rfp-queries.sql"
                         "sql/jva-queries.sql"
                         "sql/user-queries.sql" 
                         "sql/cert-queries.sql")
@@ -80,6 +79,8 @@
                  (.writeString jg (f/unparse (f/formatter const/procurement-datetime-format) date)))))
 
 (extend-protocol jdbc/ISQLValue
+  clojure.lang.Keyword
+  (sql-value [value] (name value))
   IPersistentMap
   (sql-value [value] (to-pg-json value))
   IPersistentVector

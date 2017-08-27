@@ -53,33 +53,27 @@
 
   (testing "GET /api/all-procurement"
     (let [{:keys [status headers body] :as response} ((app) (mock/request :get "/api/all-procurement"))
-          {:keys [rfps ifbs subscriptions addenda] :as edn-body} (json->edn body)]
+          {:keys [pnsa subscriptions addenda] :as edn-body} (json->edn body)]
       (testing "should return a map of all lists of rfps, ifbs, addenda, and subscriptions from DB"
         (is (= 200 status))
         (is (= "application/json" (get headers "Content-Type")))
         (is (= clojure.lang.PersistentArrayMap (type edn-body)))
-        (is (= 3 (count rfps)))
-        (is (every? #(and (-> % :rfp_no string?)
+        (is (= 6 (count pnsa)))
+        (is (every? #(and (-> % :type string?)
+                          (-> % :number string?)
                           (-> % :open_date string?)
                           (-> % :description string?)
-                          (-> % :title string?)) rfps))
-        (is (= 3 (count ifbs)))
-        (is (every? #(and (-> % :ifb_no string?)
-                          (-> % :open_date string?)
-                          (-> % :description string?)
-                          (-> % :title string?)) ifbs))
+                          (-> % :title string?)) pnsa))
         (is (= 3 (count addenda)))
         (is (every? #(and (-> % :file_link string?)
                           (-> % :addendum_number int?)
-                          (or (-> % :rfp_id some?)
-                              (-> % :ifb_id some?))) addenda))
+                          (-> % :proc_id some?)) addenda))
         (is (= 4 (count subscriptions)))
         (is (every? #(and (-> % :company_name string?)
                           (-> % :contact_person string?)
                           (-> % :email string?)
                           (-> % :telephone int?)
-                          (or (-> % :rfp_id some?)
-                              (-> % :ifb_id some?))) subscriptions)))))
+                          (-> % :proc_id some?)) subscriptions)))))
 
   (testing "POST /api/subscribe-procurement"
     (with-stub! [[email/confirm-subscription (constantly nil)]]
@@ -88,7 +82,7 @@
                           :person "TV's Adam West"
                           :email "iambatman@gotham.tv"
                           :tel "+1 (670) 555-6666"
-                          :rfp_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
+                          :proc_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
               {:keys [status headers body] :as response}
               ((app) (-> (mock/request :post "/api/subscribe-procurement")
                          (assoc :body (edn->json subscriber))))]
@@ -100,8 +94,7 @@
           
           (testing "should add subscription to the DB"
             (let [subscriptions
-                  (db/get-subscriptions {:ifb_id nil
-                                         :rfp_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
+                  (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
               (is (= 4 (count subscriptions)))
               (is (= "Test Centers of America" (-> subscriptions last :company_name)))
               (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
@@ -127,7 +120,7 @@
                                                   :person "TV's Adam West"
                                                   :email "iambatman@gotham.tv"
                                                   :tel "+1 (670) 555-6666"
-                                                  :ifb_id "cf82deed-c84f-446c-a3f0-0d826428ddbd"}))))]
+                                                  :proc_id "cf82deed-c84f-446c-a3f0-0d826428ddbd"}))))]
           (testing "should return status 200"
             (is (= 200 status)))
           
@@ -136,8 +129,7 @@
           
           (testing "should add subscription to the DB"
             (let [subscriptions
-                  (db/get-subscriptions {:rfp_id nil
-                                         :ifb_id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
+                  (db/get-subscriptions {:proc_id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
               (is (= 2 (count subscriptions)))
               (is (= "Test Centers of America" (-> subscriptions last :company_name)))
               (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
@@ -336,8 +328,8 @@
 
           (testing "should remove record of rfp from the database"
             (let [rfp (get-pns-from-db "d0002906-6432-42b5-b82b-35f0d710f827")]
-              (is (nil? rfp))
-              (is (= 2 (count (db/get-all-rfps))))))
+              (is (every? nil? (vals rfp)))
+              (is (= 2 (count (filter #(= "rfp" (:type %)) (db/get-all-pnsa)))))))
 
           (testing "should notify subscribers that rfp has been deleted"
             (is (= 1 (-> email/notify-subscribers calls count)))
@@ -346,11 +338,11 @@
             (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))
 
           (testing "should delete related addenda"
-            (let [addenda (db/get-rfp-addenda {:rfp_id (:id rfp) :ifb_id nil})]
+            (let [addenda (db/get-addenda {:proc_id (:id rfp)})]
               (is (empty? addenda))))
 
           (testing "should delete related subscribers"
-            (let [subscribers (db/get-subscriptions {:rfp_id (:id rfp) :ifb_id nil})]
+            (let [subscribers (db/get-subscriptions {:proc_id (:id rfp)})]
               (is (empty? subscribers))))
 
           (testing "should delete related media"
@@ -394,8 +386,8 @@
 
           (testing "should remove record of ifb from the database"
             (let [ifb (get-pns-from-db "cf82deed-c84f-446c-a3f0-0d826428ddbd")]
-              (is (nil? ifb))
-              (is (= 2 (count (db/get-all-ifbs))))))
+              (is (every? nil? (vals ifb)))
+              (is (= 2 (count (filter #(= "ifb" (:type %)) (db/get-all-pnsa)))))))
 
           (testing "should notify subscribers that ifb has been deleted"
             (is (= 1 (-> email/notify-subscribers calls count)))
@@ -404,11 +396,11 @@
             (is (= ifb (-> email/notify-subscribers calls first :args last))))
 
           (testing "should delete related addenda"
-            (let [addenda (db/get-rfp-addenda {:rfp_id nil :ifb_id (:id ifb)})]
+            (let [addenda (db/get-addenda {:proc_id (:id ifb)})]
               (is (empty? addenda))))
 
           (testing "should delete related subscribers"
-            (let [subscribers (db/get-subscriptions {:rfp_id nil :ifb_id (:id ifb)})]
+            (let [subscribers (db/get-subscriptions {:proc_id (:id ifb)})]
               (is (empty? subscribers))))
 
           (testing "should delete related media"

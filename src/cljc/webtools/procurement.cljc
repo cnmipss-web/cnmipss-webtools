@@ -32,49 +32,16 @@
      title
      description
      file_link]
+
   process-procurement
-  (save-to-db [a]
-    (case type
-      :rfp
-      (db/create-rfp! {:id id
-                       :rfp_no number
-                       :open_date open_date
-                       :close_date close_date
-                       :title title
-                       :description description
-                       :file_link file_link})
-      :ifb
-      (db/create-ifb! {:id id
-                       :ifb_no number
-                       :open_date open_date
-                       :close_date close_date
-                       :title title
-                       :description description
-                       :file_link file_link})))
-  (change-in-db [a]
-    (case type
-      :rfp
-      (db/update-rfp {:id id
-                      :rfp_no number
-                      :open_date open_date
-                      :close_date close_date
-                      :title title
-                      :description description
-                      :file_link file_link})
-      :ifb
-      (db/update-ifb {:id id
-                      :ifb_no number
-                      :open_date open_date
-                      :close_date close_date
-                      :title title
-                      :description description
-                      :file_link file_link})))
-  (delete-from-db [a]
-    (case type
-      :rfp
-      (db/delete-rfp! {:rfp_no number})
-      :ifb
-      (db/delete-ifb! {:ifb_no number})))
+  (save-to-db [pnsa]
+    (db/create-pnsa! pnsa))
+
+  (change-in-db [pnsa]
+    (db/update-pnsa! pnsa))
+  
+  (delete-from-db [pnsa]
+    (db/delete-pnsa! pnsa))
 
   (changes-email [orig new sub]
     (let [title-string (str (-> new :type name clojure.string/upper-case)
@@ -181,40 +148,19 @@
 (extend-type java.lang.String
   retrieve-procurement
   (get-pns-from-db [id]
-    (let [uuid (java.util.UUID/fromString id)
-          rfp (db/get-rfp {:id uuid})
-          ifb (db/get-ifb {:id uuid})]
-      (cond
-        (some? rfp) (-> rfp
-                        (assoc :number (:rfp_no rfp))
-                        (dissoc :rfp_no)
-                        (assoc :type :rfp)
-                        (map->PSAnnouncement))
-        (some? ifb) (-> ifb
-                        (assoc :number (:ifb_no ifb))
-                        (dissoc :ifb_no)
-                        (assoc :type :ifb)
-                        (map->PSAnnouncement))
-        :default nil)))
+    (-> {:id (make-uuid id)}         
+         (db/get-single-pnsa)
+         (map->PSAnnouncement)))
+  
   (make-uuid [id] (java.util.UUID/fromString id)))
 
 (extend-type java.util.UUID
   retrieve-procurement
   (get-pns-from-db [uuid]
-    (let [rfp (db/get-rfp {:id uuid})
-          ifb (db/get-ifb {:id uuid})]
-      (cond
-        (some? rfp) (-> rfp
-                        (assoc :number (:rfp_no rfp))
-                        (dissoc :rfp_no)
-                        (assoc :type :rfp)
-                        (map->PSAnnouncement))
-        (some? ifb) (-> ifb
-                        (assoc :number (:ifb_no ifb))
-                        (dissoc :ifb_no)
-                        (assoc :type :ifb)
-                        (map->PSAnnouncement))
-        :default nil)))
+    (-> {:id uuid}
+         (db/get-single-pnsa)
+         (map->PSAnnouncement)))
+  
   (make-uuid [id] id))
 
 (extend-type clojure.lang.PersistentArrayMap

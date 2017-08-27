@@ -203,9 +203,7 @@
         file_link (wp/create-media filename tempfile
                               :title (str "Addendum for " type "# " number)
                               :slug slug)
-        existing-addenda (cond
-                           (= "RFP" type) (db/get-rfp-addenda {:rfp_id uuid})
-                           (= "IFB" type) (db/get-ifb-addenda {:ifb_id uuid}))]
+        existing-addenda (db/get-all-addenda)]
     (email/notify-subscribers :addenda (cond
                                          (= "RFP" type) :rfps
                                          (= "IFB" type) :ifbs) {:file_link file_link

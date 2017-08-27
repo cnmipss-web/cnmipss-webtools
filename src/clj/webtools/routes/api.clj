@@ -41,29 +41,24 @@
 
 (defn get-all-procurement
   []
-  {:rfps (db/get-all-rfps)
-   :ifbs (db/get-all-ifbs)
+  {:pnsa (db/get-all-pnsa)
    :addenda (db/get-all-addenda)
    :subscriptions (db/get-all-subscriptions)})
 
 (defn clear-procurement
   [type {:keys [id] :as body}]
-  (let [get-fn ({:ifb db/get-ifb-addenda
-                  :rfp db/get-rfp-addenda} type)
-        uuid (make-uuid id)
-        del-fn {:ifb db/delete-ifb!
-                :rfp db/delete-rfp!}
-        query-map {:rfp_id uuid :ifb_id uuid}]
+  (let [uuid (make-uuid id)
+        query-map {:proc_id uuid}]
     (try
       (wp/delete-media id)
       (catch Exception e
         (log/error e)))
-    (let [addenda (get-fn query-map)
+    (let [addenda (db/get-addenda query-map)
           subscriptions (db/get-subscriptions query-map)]
       (mapv db/delete-subscription! subscriptions)
       (mapv db/delete-addendum! addenda)
       (mapv (comp wp/delete-media :id) addenda)
-      ((del-fn type) body))))
+      (db/delete-pnsa! body))))
 
 (def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address."
                 :other-sql "Error performing SQL transaction."
@@ -77,12 +72,10 @@
   (GET "/api/all-procurement" [] (query-route get-all-procurement))
 
   (POST "/api/subscribe-procurement" {:keys [body] :as request}
-        (let [{:keys [company person email tel rfp_id ifb_id]} (-> body json->edn)
-              existing-subs (db/get-subscriptions {:rfp_id (make-uuid rfp_id)
-                                                   :ifb_id (make-uuid rfp_id)})
+        (let [{:keys [company person email tel proc_id]} (-> body json->edn)
+              existing-subs (db/get-subscriptions {:proc_id (make-uuid proc_id)})
               subscription {:id (java.util.UUID/randomUUID)
-                            :rfp_id (make-uuid rfp_id)
-                            :ifb_id (make-uuid ifb_id)
+                            :proc_id (make-uuid proc_id)
                             :company_name company
                             :contact_person person
                             :email email
@@ -90,8 +83,7 @@
                             :subscription_number (count existing-subs)}]
           (try
             (let [created (db/create-subscription! subscription)
-                  pns (get-pns-from-db (or (make-uuid rfp_id)
-                                           (make-uuid ifb_id)))]
+                  pns (get-pns-from-db (make-uuid proc_id))]
               (future (email/confirm-subscription subscription pns))
               (json-response resp/ok created))
 

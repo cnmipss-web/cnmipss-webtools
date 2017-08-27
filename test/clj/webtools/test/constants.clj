@@ -24,7 +24,8 @@
                  :expiry_date "The Ides of March"})
 
 (def dummy-rfp {:id (java.util.UUID/randomUUID)
-                :rfp_no "17-001"
+                :type :rfp
+                :number "17-001"
                 :open_date (java.sql.Date. -6106017600000)
                 :close_date (java.sql.Date. -6105931200000)
                 :title "Dummy RFP"
@@ -32,7 +33,8 @@
                 :file_link "http://link-to-dummy-rfp/rfp"})
 
 (def dummy-ifb {:id (java.util.UUID/randomUUID)
-                :ifb_no "17-001"
+                :type :ifb
+                :number "17-001"
                 :open_date (java.sql.Date. -6106017600000)
                 :close_date (java.sql.Date. -6105931200000)
                 :title "Dummy IFB"
@@ -41,8 +43,7 @@
 
 (def user-seed-count 5)
 (def cert-seed-count 4)
+(def pnsa-seed-count 6)
 (def jva-seed-count 3)
-(def rfp-seed-count 3)
-(def ifb-seed-count 3)
 
 (def auth-token "ya29.GluTBHe_gy2R2PBdSedi3oZKT64AltZN7EfIQKReuLOWcdMjySQnh5VeSCLC8-_aG1wdhaBrT4baVSvWnrDoiK5z3_nJkdKpfAhiXI1c2cenTSJyd8sx-dpqBm0B")

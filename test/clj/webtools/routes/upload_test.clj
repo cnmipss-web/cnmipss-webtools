@@ -119,7 +119,7 @@
             (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
 
           (testing "should store rfp info in postgres database"
-            (let [rfp (db/get-rfp-by-no {:rfp_no "17-041"})]
+            (let [rfp (db/get-pnsa-by-no {:number "17-041"})]
               (is (some? rfp))
               (is (= "Training on the Foundations of Reading and Guided Reading" (:title rfp)))))
 
@@ -139,7 +139,7 @@
             (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
 
           (testing "should store ifb info in postgres database"
-            (let [ifb (db/get-ifb-by-no {:ifb_no "17-051"})]
+            (let [ifb (db/get-pnsa-by-no {:number "17-051"})]
               (is (some? ifb))
               (is (= "Purchase of 1 (One) Riding Mower for the Public School System" (:title ifb)))))
 
