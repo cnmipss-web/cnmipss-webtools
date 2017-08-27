@@ -1,0 +1,28 @@
+{
+  "name": "cnmipss-webtools",
+  "version": "0.2.0",
+  "description": "NPM Deps for CNMI Webtools Clojure/CLJS SPA",
+  "main": "null",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tjscollins/cnmipss-webtools.git"
+  },
+  "author": "Tyler Collins",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/tjscollins/cnmipss-webtools/issues"
+  },
+  "homepage": "https://github.com/tjscollins/cnmipss-webtools#readme",
+  "devDependencies": {
+    "karma": "^1.7.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-cljs-test": "^0.1.0",
+    "karma-safari-launcher": "^1.0.0"
+  }
+}
