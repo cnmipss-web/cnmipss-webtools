@@ -78,7 +78,7 @@
   [{:src "resources/scss/screen.scss"
     :output-to "resources/public/css/screen.css"
     :style "nested"
-    :import-path "resources/scss"}]
+    :import-path "resources/scss"}] 
   
   :auto
   {"sassc" {:file-pattern #"\.(scss|sass)$" :paths ["resources/scss"]}} 
@@ -139,15 +139,25 @@
                      :figwheel {:on-jsload "webtools.core/mount-components"}
                      :compiler
                      {:preloads [devtools.preload]
+                      :npm-deps {}
                       :main "webtools.app"
                       :asset-path "/webtools/js/out"
                       :output-to "target/cljsbuild/public/js/app.js"
                       :output-dir "target/cljsbuild/public/js/out"
                       :source-map true
                       :optimizations :none
+                      :pretty-print true}}
+                    :test
+                    {:source-paths ["src/cljc" "src/cljs" "test/cljs" "env/test/cljs"]
+                     :compiler
+                     {:output-to "target/test.js"
+                      :main "webtools.doo-runner"
+                      :optimizations :whitespace
                       :pretty-print true}}}}
-                                    
-                  :doo {:build "test"}
+                  
+                  :doo {:alias {:default [:phantom] 
+                                :all [:chrome :firefox :safari]}
+                        :build "test"}
                   :source-paths ["env/dev/clj"]
                   :resource-paths ["env/dev/resources"]
                   :repl-options {:init-ns user
@@ -163,8 +173,6 @@
                      {:output-to "target/test.js"
                       :main "webtools.doo-runner"
                       :optimizations :whitespace
-                      :pretty-print true}}}}
-                  
-                  }
+                      :pretty-print true}}}}}
    :profiles/dev {}
    :profiles/test {}})
