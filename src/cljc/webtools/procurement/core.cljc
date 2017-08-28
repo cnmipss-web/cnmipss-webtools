@@ -1,6 +1,6 @@
 (ns webtools.procurement.core
   (:require [clojure.spec.alpha :as s]
-            [clojure.spec.test.alpha :as stest]))
+            [clojure.spec.gen.alpha :as gen]))
 
 (defprotocol process-procurement
   "Methods for manipulating procurement records"
@@ -47,12 +47,17 @@
      telephone])
 
 (s/def ::not-nil some?)
-(s/def ::id (partial instance? #?(:clj  java.util.UUID
-                                  :cljs cljs.core/UUID)))
+(s/def ::id (s/with-gen
+              #(instance? #?(:clj  java.util.UUID
+                             :cljs cljs.core/UUID) %)
+              gen/uuid))
+
 (s/def ::type keyword?)
 (s/def ::number string?)
-(s/def ::date (partial instance? #?(:clj org.joda.time.DateTime
-                                         :cljs js/Function)))
+(s/def ::date (s/with-gen
+                (partial instance? #?(:clj org.joda.time.DateTime
+                                      :cljs js/Function))
+                (fn [] (gen/fmap #(org.joda.time.DateTime. %) (s/gen pos-int?)))))
 (s/def ::title string?)
 (s/def ::desc string?)
 (s/def ::link string?)
@@ -69,7 +74,6 @@
                      :close_date ::date
                      :title ::title
                      :description ::desc
-                     :file_link ::link))
-
-(if (:dev webtools.config/env)
-  (stest/instrument `->PSAnnouncement))
+                     :file_link ::link)
+        :ret (partial instance? webtools.procurement.core.PSAnnouncement)
+        :fn (s/and #(= (-> % :ret :id) (-> % :args :id))))
