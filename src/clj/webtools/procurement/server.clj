@@ -3,7 +3,7 @@
             [webtools.db.core :as db]
             [webtools.wordpress-api :as wp]
             [webtools.constants :as const]
-            [webtools.util :refer :all]
+            [webtools.util :refer :all :as util]
             [clj-time.format :as f])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper])) 
@@ -103,39 +103,35 @@
                               :slug (:id rec)))
       (map->PSAnnouncement rec))))
 
-
-(extend-type java.lang.String
-  retrieve-procurement
+(extend-protocol retrieve-procurement
+  java.lang.String
   (get-pns-from-db [id]
     (-> {:id (make-uuid id)}         
-         (db/get-single-pnsa)
-         (map->PSAnnouncement)))
-  
-  (make-uuid [id] (java.util.UUID/fromString id)))
+        (db/get-single-pnsa)
+        (map->PSAnnouncement)))
+  (make-uuid [id] (java.util.UUID/fromString id))
 
-(extend-type java.util.UUID
-  retrieve-procurement
+  java.util.UUID
   (get-pns-from-db [uuid]
     (-> {:id uuid}
          (db/get-single-pnsa)
          (map->PSAnnouncement)))
+  (make-uuid [id] id)
   
-  (make-uuid [id] id))
-
-(extend-protocol create-procurement
-  clojure.lang.PersistentArrayMap
-  (pns-from-map [pns]
-    (if (every? some? [(:number pns) (:type pns) (:id pns)])
-      (-> (assoc pns :id (-> pns :id make-uuid))
-          map->PSAnnouncement)))
-
-  clojure.lang.PersistentHashMap
-  (pns-from-map [pns]
-    (if (every? some? [(:number pns) (:type pns) (:id pns)])
-      (-> (assoc pns :id (-> pns :id make-uuid))
-          map->PSAnnouncement))))
-
-(extend-type nil
-  retrieve-procurement
+  nil
   (get-pns-from-db [id] nil)
   (make-uuid [id] nil))
+
+
+(let [f (fn [pns]
+          (if (every? some? [(:number pns) (:type pns) (:id pns)])
+            (-> (assoc pns :id (-> pns :id make-uuid))
+                (assoc :open_date (-> pns :open_date util/parse-date))
+                (assoc :close_date (-> pns :close_date util/parse-date))
+                map->PSAnnouncement)))]
+  (extend-protocol create-procurement
+    clojure.lang.PersistentArrayMap
+    (pns-from-map [pns] (f pns))
+
+    clojure.lang.PersistentHashMap
+    (pns-from-map [pns] (f pns))))

@@ -3,6 +3,7 @@
             [webtools.db.core :as db]
             [webtools.procurement.core :refer :all]
             [webtools.procurement.server :refer :all]
+            [webtools.util :as util]
             [clj-time.coerce :as c]
             [clj-time.format :as f]
             [postal.core :refer [send-message]]
@@ -240,7 +241,7 @@
                                                 (:number pns)
                                                 " " (:title pns)
                                                 " must be turned in to the PSS Procurement office no later than "
-                                                (f/unparse (f/formatter "MMMM dd, YYYY 'at' h:mm a") (:close_date pns)))]
+                                                (util/print-datetime (:close_date pns)))]
                                        [:p "Any submissions turned in after that time will not be considered."]
                                        [:br]
                                        [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]

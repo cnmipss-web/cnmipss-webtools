@@ -5,7 +5,8 @@
             [webtools.handlers.api :as ajax-handlers]
             [webtools.procurement.core :as p]
             [re-frame.core :refer [dispatch reg-event-db]]
-            [ajax.core :as ajax]))
+            [ajax.core :as ajax]
+            [klang.core :as log]))
 
 (defn ajax-get
   [opts]
@@ -124,7 +125,6 @@
 (reg-event-db
  :store-procurement-list
  (fn [db [_ list]]
-  (println )
   (assoc db :procurement-list {:rfps (->> (:pnsa list)
                                           (filter #(= "rfp" (:type %)))
                                           (map p/pns-from-map))
@@ -142,7 +142,22 @@
 (reg-event-db
  :edit-procurement
  (fn [{:keys [procurement-modal] :as db} [_ key val]]
-   (assoc db :procurement-modal (assoc procurement-modal key val))))
+   (case key
+     :open_date
+     (try
+       (let [date (util/parse-date val)]
+         (assoc db :procurement-modal (assoc procurement-modal key date)))
+       (catch :default e
+         (log/erro! e)
+         db))
+     :close_date
+     (try
+       (let [date (util/parse-date val)]
+         (assoc db :procurement-modal (assoc procurement-modal key date)))
+       (catch :default e
+         (log/erro! e)
+         db))
+     (assoc db :procurement-modal (assoc procurement-modal key val)))))
 
 (reg-event-db :error-list
  (fn [db [_ errors]]
@@ -157,7 +172,7 @@
 
 (reg-event-db :set-subscriber-modal
  (fn [db [_ {:keys [id] :as item}]]
-   (let [subscriptions (filter #(= id (:proc_id %)) (get-in db [:procurement-list :subscriptions]))]
+   (let [subscriptions (filter #(= id (-> % :proc_id p/make-uuid)) (get-in db [:procurement-list :subscriptions]))]
      (assoc db :subscriber-modal [item subscriptions]))))
 
 (reg-event-db :clear-subscriber-modal

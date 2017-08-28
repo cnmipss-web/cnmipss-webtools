@@ -1,31 +1,31 @@
 (ns webtools.core
   (:require [ajax.core :as ajax]
             cljsjs.jquery
+            [webtools.handlers.reframe]
+            [webtools.handlers.reframe-subs]
+            [reagent.core :as r]
+            [re-frame.core :as rf]
             [webtools.ajax :refer [load-interceptors!]]
             [webtools.handlers.api :as ajax-handlers]
             [webtools.components.forms :as forms]
             [webtools.components.nav :as nav]
-            [webtools.handlers.reframe]
-            [webtools.handlers.reframe-subs]
             [webtools.components.roles :as roles]
             [webtools.components.modals :refer [all-modals]]
             [webtools.util :as util]
             [webtools.timeout :as timeout]
             [webtools.cookies :refer [get-cookie] :as cookies]
-            webtools.procurement.front-end
+            [webtools.procurement.front-end]
             [cemerick.url :refer [url-decode]]
             [goog.events :as events]
             [goog.history.EventType :as HistoryEventType]
             [markdown.core :refer [md->html]]
-            [reagent.core :as r]
-            [re-frame.core :as rf]
             [secretary.core :as secretary])
   (:import goog.History))
 
 (defn main-view [& children]
   [:main#main-container {:on-click #(if @(rf/subscribe [:show-roles?])
                                       (rf/dispatch [:hide-roles]))}
-   [:div.container 
+   [:div.container
     (map-indexed #(with-meta %2 {:key (str "main-view-children-" %1)})  children)]])
 
 (defn login-page []

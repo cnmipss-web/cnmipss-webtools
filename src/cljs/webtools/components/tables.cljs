@@ -1,9 +1,10 @@
 (ns webtools.components.tables
   (:require [re-frame.core :as rf]
             [cljs-time.core :as time]
-            [cljs-time.format :as format]
+            [cljs-time.format :as f]
             [webtools.components.forms :as forms]
             [webtools.handlers.events :as events]
+            [webtools.procurement.core :as p]
             [webtools.constants :as const]
             [webtools.util :as util]))
 
@@ -23,19 +24,11 @@
     (for [user (sort-by :email users)]
       ^{:key (str "user-" (user :email))} [user-row user])]])
 
-(defn parse-date
-  [date]
-  (if (some? (re-find #"at" date))
-    (format/parse (format/formatter "MMMM dd, YYYY h:mm A") (-> date
-                                                                (clojure.string/replace #"at" "")
-                                                                (clojure.string/replace #"\s+" " ")))
-    (format/parse (format/formatter "MMMM dd, YYYY") date)))
-
 (defn force-close?
   [{:keys [status close_date]}]
   (or (not status)
       (and close_date
-           (time/after? (time/now) (parse-date close_date)))))
+           (time/after? (time/now) close_date))))
 
 (defn jva-row [jva]
   (let [{:keys [status close_date]} jva]
@@ -99,8 +92,8 @@
 (defn procurement-row [item]
   [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
    [:td.custom-col-1 (:number item)]
-   [:td.custom-col-2 (:open_date item)]
-   [:td.custom-col-2 (:close_date item)]
+   [:td.custom-col-2 (util/print-date (:open_date item))]
+   [:td.custom-col-2 (util/print-datetime (:close_date item))]
    [:td.custom-col-4 (:title item)]
    [:td.custom-col-8.text-left (-> item :description (subs 0 140) (str "..."))]
    [:td.custom-col-3
@@ -145,7 +138,7 @@
   (let [{:keys [id]} pns-item
         addenda (->> @(rf/subscribe [:procurement-list])
                     :addenda
-                    (filter #(= id (:proc_id %))))]
+                    (filter #(= id (-> % :proc_id p/make-uuid))))]
     [:table#existing-addenda.text-center
      [:caption "Existing Addendums"]
      [:thead

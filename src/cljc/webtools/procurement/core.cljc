@@ -1,4 +1,6 @@
-(ns webtools.procurement.core)
+(ns webtools.procurement.core
+  (:require [clojure.spec.alpha :as s]
+            [clojure.spec.test.alpha :as stest]))
 
 (defprotocol process-procurement
   "Methods for manipulating procurement records"
@@ -30,16 +32,44 @@
 (defrecord Addendum
     [id
      type
-     target
+     proc_id
      file_link
-     addendum_number])
+     addend_number])
 
 (defrecord Subscription
     [id
      type
-     target
+     proc_id
      subscription_number
      company_name
      contact_person
      email
      telephone])
+
+(s/def ::not-nil some?)
+(s/def ::id (partial instance? #?(:clj  java.util.UUID
+                                  :cljs cljs.core/UUID)))
+(s/def ::type keyword?)
+(s/def ::number string?)
+(s/def ::date (partial instance? #?(:clj org.joda.time.DateTime
+                                         :cljs js/Function)))
+(s/def ::title string?)
+(s/def ::desc string?)
+(s/def ::link string?)
+(s/def ::company_name string?)
+(s/def ::contact_person string?)
+(s/def ::email #(some? (re-find #"^(([^<>()\[\]\\.,;:\s@\"]+(\.[^<>()\[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$" %)))
+(s/def ::telephone #(some? (re-find #"^(\+\d{1,2}\s)?(\(?\d{3}\)?)?[\s.-]?\d{3}[\s.-]?\d{4}$" %)))
+
+(s/fdef ->PSAnnouncement
+        :args (s/cat :id ::id
+                     :type ::type
+                     :number ::number
+                     :open_date ::date
+                     :close_date ::date
+                     :title ::title
+                     :description ::desc
+                     :file_link ::link))
+
+(if (:dev webtools.config/env)
+  (stest/instrument `->PSAnnouncement))

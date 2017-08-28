@@ -35,6 +35,7 @@
                  [org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/clojurescript "1.9.671" :scope "provided"]
                  [org.clojure/data.csv "0.1.4"]
+                 [org.clojure/test.check "0.10.0-alpha2"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.flatland/useful "0.11.5"]

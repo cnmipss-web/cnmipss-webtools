@@ -188,6 +188,13 @@
   [item]
   (fn [] ))
 
+(defn update-pns-val
+  [key]
+  (fn []
+    (->> (-> (str "#" (name key)) jq .val)
+         (conj [:edit-procurement key])
+         (rf/dispatch))))
+
 (defn edit-rfp-ifb [item]
   [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)}
    (for [[key val] (->> item
@@ -200,27 +207,32 @@
                                                    :close_date 3
                                                    :description 4
                                                    5))))]
-     (let [field-name (key procurement-fields)]
+     (let [field-name (key procurement-fields)
+           opts-map {:type "text"
+                     :id (name key)
+                     :name field-name
+                     :on-blur (update-pns-val key)}]
        (case key
          :status [:div {:key (str key (.random js/Math))}]
          :id [:div {:key (str key (.random js/Math))}]
          :description [:div.form-group {:key (str key)}
                        [:label.bold {:for field-name} field-name]
-                       [:textarea.form-control {:id (name key)
-                                                :name field-name
-                                                :value val
-                                                :on-change #(->> (-> (str "#" (name key)) jq .val)
-                                                                 (conj [:edit-procurement key])
-                                                                 (rf/dispatch))}]] 
+                       [:textarea.form-control (-> opts-map
+                                                   (assoc :default-value val)
+                                                   (dissoc :type))]]
+         :open_date
          [:div.form-group {:key (str key)}
           [:label.bold {:for field-name} field-name]
-          [:input.form-control {:type "text"
-                                :id (name key)
-                                :name field-name
-                                :value val
-                                :on-change #(->> (-> (str "#" (name key)) jq .val)
-                                                 (conj [:edit-procurement key])
-                                                 (rf/dispatch))}]])))])
+          [:input.form-control (assoc opts-map :default-value (util/print-date val))]]
+         
+         :close_date
+         [:div.form-group {:key (str key)}
+          [:label.bold {:for field-name} field-name]
+          [:input.form-control (assoc opts-map :default-value (util/print-datetime val))]]
+         
+         [:div.form-group {:key (str key)}
+          [:label.bold {:for field-name} field-name]
+          [:input.form-control (assoc opts-map :default-value val)]])))])
 
 (defn procurement-addendum
   [item]

@@ -3,7 +3,8 @@
             [ajax.core :as ajax]
             [webtools.handlers.api :as ajax-handlers]
             [webtools.util :as util]
-            [webtools.constants :as const]))
+            [webtools.constants :as const]
+            [webtools.procurement.core :as p]))
 
 (def jq js/jQuery)
 
@@ -106,7 +107,7 @@
       (ajax/ajax-request {:uri (str "/webtools/api/update-" (name type))
                           :method :post
                           :format (ajax/json-request-format)
-                          :params item
+                          :params (p/for-json item)
                           :response-format (util/full-response-format ajax/json-response-format)
                           :handler ajax-handlers/all-procurement}))))
 
