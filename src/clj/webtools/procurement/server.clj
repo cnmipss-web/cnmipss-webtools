@@ -122,43 +122,18 @@
   
   (make-uuid [id] id))
 
-(extend-type clojure.lang.PersistentArrayMap
-  create-procurement
+(extend-protocol create-procurement
+  clojure.lang.PersistentArrayMap
   (pns-from-map [pns]
-    (cond
-      (some? (:rfp_no pns))
-      (-> pns
-          (assoc :number (:rfp_no pns))
-          (dissoc :rfp_no)
-          (assoc :type :rfp)
-          (assoc :id (-> pns :id make-uuid))
-          (assoc :open_date (if (string? (:open_date pns))
-                              (-> pns :open_date ((partial f/parse (f/formatter "MMMM dd, YYYY"))))
-                              (:open_date pns)))
-          (assoc :close_date (if (string? (:close_date pns))
-                               (-> pns :close_date ((partial f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a"))))
-                               (:close_date pns)))
-          (map->PSAnnouncement))
-      
-      (some? (:ifb_no pns))
-      (-> pns
-          (assoc :number (:ifb_no pns))
-          (dissoc :ifb_no)
-          (assoc :type :ifb)
-          (assoc :id (-> pns :id make-uuid))
-          (assoc :open_date (if (string? (:open_date pns))
-                              (-> pns :open_date ((partial f/parse (f/formatter "MMMM dd, YYYY"))))
-                              (:open_date pns)))
-          (assoc :close_date (if (string? (:close_date pns))
-                               (-> pns :close_date ((partial f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a"))))
-                               (:close_date pns)))
-          (map->PSAnnouncement))
-
-      (every? some? [(:number pns) (:type pns)])
+    (if (every? some? [(:number pns) (:type pns) (:id pns)])
       (-> (assoc pns :id (-> pns :id make-uuid))
-          map->PSAnnouncement)
+          map->PSAnnouncement)))
 
-      :default nil)))
+  clojure.lang.PersistentHashMap
+  (pns-from-map [pns]
+    (if (every? some? [(:number pns) (:type pns) (:id pns)])
+      (-> (assoc pns :id (-> pns :id make-uuid))
+          map->PSAnnouncement))))
 
 (extend-type nil
   retrieve-procurement

@@ -5,15 +5,16 @@
   (save-to-db [a] "Save a record to the DB")
   (change-in-db [a] "Update a record in the DB")
   (changes-email [orig new sub] "Create hiccup markup for an email notifying subscribers about changes")
-  (delete-from-db [a] "Delete a record from the DB"))
+  (delete-from-db [a] "Delete a record from the DB")
+  (for-json [a] "Prep a record to be converted to JSON"))
 
 (defprotocol retrieve-procurement
   "Methods to retrive procurement records from DB"
-  (get-pns-from-db [id] "Retrieve an rfp or ifb based on its id")
-  (make-uuid [id] "Convert an id to uuid class"))
+  (make-uuid [id] "Convert an id to uuid class")
+  (get-pns-from-db [id] "Retrieve an rfp or ifb based on its id"))
 
 (defprotocol create-procurement
-  "Method to convert simply map to PSAnnouncement"
+  "Method to convert simply map to PSAnnouncement with relevant type checks"
   (pns-from-map [pns]))
 
 (defrecord PSAnnouncement
