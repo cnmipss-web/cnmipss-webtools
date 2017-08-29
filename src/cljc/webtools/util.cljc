@@ -111,3 +111,10 @@
          (let [~@(interleave bindings-ls gensyms)]
            ~@thens)
          ~(first gensyms)))))
+
+(defn capitalize-words 
+  "Capitalize every word in a string"
+  [s]
+  (->> (clojure.string/split (str s) #"\b") 
+       (map clojure.string/capitalize)
+       clojure.string/join))
