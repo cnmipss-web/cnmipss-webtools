@@ -25,8 +25,9 @@
 (defroutes download-routes
   (GET "/download/subscribers/:id" [id]
        (let [uuid (java.util.UUID/fromString id)
-             subscriptions (->> (db/get-subscriptions {:rfp_id uuid :ifb_id uuid})
-                               (mapv #(assoc % :telephone (format-tel-num (:telephone %)))))
+             subscriptions (->> (db/get-subscriptions {:proc_id uuid})
+                                (mapv #(assoc % :telephone (format-tel-num (:telephone %)))))
+             x (println subscriptions)
              columns (->> subscriptions
                           first
                           keys
@@ -34,7 +35,8 @@
                           (mapv #(capitalize-words (clojure.string/replace % #"_" " "))))
              rows (mapv vals subscriptions)
              data (->> (cons columns rows)
-                       (mapv #(drop 4 %)))]
+                       (mapv #(drop 2 %))
+                       (mapv #(take 4 %)))]
          (with-open [temp (io/writer "temp.csv")]
            (csv/write-csv temp data))
          (-> (response/file-response "temp.csv")
