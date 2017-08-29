@@ -93,26 +93,19 @@
   (let [searches (-> "#search-jvas" jq .val (clojure.string/split #" "))]
     (rf/dispatch [:set-jva-searches searches])))
 
-(defn procurement-type
-  [item]
-  (if (:rfp_no item)
-    :rfp
-    :ifb))
- 
 (defn edit-procurement [item]
-  (let [type (procurement-type item)]
-    (fn [e]
-      (.preventDefault e)
-      (println "Setting: " item)
-      (ajax/ajax-request {:uri (str "/webtools/api/update-" (name type))
-                          :method :post
-                          :format (ajax/json-request-format)
-                          :params (p/for-json item)
-                          :response-format (util/full-response-format ajax/json-response-format)
-                          :handler ajax-handlers/all-procurement}))))
+  (fn [e]
+    (.preventDefault e)
+    (println "Setting: " item)
+    (ajax/ajax-request {:uri (str "/webtools/api/update-" (-> item :type name))
+                        :method :post
+                        :format (ajax/json-request-format)
+                        :params (p/for-json item)
+                        :response-format (util/full-response-format ajax/json-response-format)
+                        :handler ajax-handlers/all-procurement})))
 
 (defn delete-procurement [item]
-  (let [type (-> item procurement-type name)
+  (let [type (-> item :type name)
         type-caps (clojure.string/upper-case type)]
     (fn [e]
       (.preventDefault e)

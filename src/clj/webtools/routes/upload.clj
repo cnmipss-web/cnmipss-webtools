@@ -5,6 +5,7 @@
             [clojure.data.json :as json]
             [clojure.data.csv :as csv]
             [clojure.string :refer [split]]
+            [clojure.tools.logging :as log]
             [clj-fuzzy.metrics :as measure]
             [webtools.db.core :as db]
             [webtools.util :refer :all]
@@ -110,7 +111,7 @@
    :position #"(?i)(POSITION/TITLE)\s*:\s*(.*\S)"
    :open_date #"(?i)OPEN(ING)?\s*DATE\s*:\s*(.*)\s*CL"
    :close_date #"(?i)CLOSE?(ING)?\s*DATE:\s*(.*\S)"
-   :salary #"(?i)SALARY\s*:\s*(.*\S)"
+   :salary #"(?i)(SALARY|DIFFERENTIAL)\s*:\s*(.*\S)"
    :location #"(?i)^LOCATION\s*:\s*(.*\w)"})
 
 (defn jva-reducer
@@ -141,11 +142,14 @@
                          (assoc jva :file_link
                                 (wp/create-media filename tempfile
                                                  :title (:position jva)
-                                                 :alt_text (str "Job Vacancy Announcement for"
+                                                 :alt_text (str "Job Vacancy Announcement for "
                                                                 (:position jva))
                                                  :description (jva-desc jva)
                                                  :slug (:id jva))))]
-        (db/create-jva! jva-record))
+        (try
+          (db/create-jva! jva-record)
+          (catch java.sql.BatchUpdateException e
+            (log/error e))))
       (mapv (comp process-jva-pdf #(into {} [[:file %]])) file))))
 
 (defn process-reannouncement
@@ -199,21 +203,23 @@
   [params]
   (let [{:keys [file id number type]} params
         {:keys [tempfile size filename]} file
-        uuid (java.util.UUID/fromString id)
+        uuid (make-uuid id)
         slug (java.util.UUID/randomUUID)
+        existing-addenda (filter #(= id (:proc_id %)) (db/get-all-addenda))
         file_link (wp/create-media filename tempfile
-                              :title (str "Addendum for " type "# " number)
-                              :slug slug)
-        existing-addenda (db/get-all-addenda)]
-    (email/notify-subscribers :addenda (cond
-                                         (= "RFP" type) :rfps
-                                         (= "IFB" type) :ifbs) {:file_link file_link
-                                                                :id (.toString uuid)})
-    (db/create-addendum! {:id slug
-                          :file_link file_link
-                          :rfp_id (if (= "RFP" type) uuid)
-                          :ifb_id (if (= "IFB" type) uuid)
-                          :number (count existing-addenda)})))
+                                   :title (str "Addendum " (inc (count existing-addenda))
+                                               " for "
+                                               (clojure.string/upper-case (name type))
+                                               " " number)
+                              :slug slug)]
+    (when (some? file_link)
+      (future (email/notify-subscribers :addenda (get-pns-from-db uuid) {:file_link file_link
+                                                                         :proc_id uuid}))
+      (db/create-addendum! {:id slug
+                            :file_link file_link
+                            :proc_id uuid
+                            :number (inc (count existing-addenda))}))
+    (if (nil? file_link) (throw (Exception. "Error uploading addendum to Wordpress")))))
 
 (defroutes upload-routes
   (POST "/upload/certification-csv" req

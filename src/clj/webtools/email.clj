@@ -70,8 +70,9 @@
                                         [:body
                                          [:p (str "Greetings " contact_person ",")]
                                          [:p (str "This email is your confirmation that you have registered to receive updates and information regarding "
-                                                  (if (:rfp_no pns) (str "Request for Proposal " (:rfp_no pns)))
-                                                  (if (:ifb_no pns) (str "Invitation for Bid " (:ifb_no pns)))
+                                                  (case (:type pns)
+                                                    "rfp" "Request for Proposal "
+                                                    "ifb" "Invitation for Bid ")
                                                   ": " (:title pns) ".")]
                                          [:p (str "You will be contacted as additional information is published.  If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org")]
                                          [:br]
@@ -110,6 +111,7 @@
       (f/unparse time-format)))
 
 (defn notify-changes [new orig subscribers]
+  (println "Notify changes called")
   (let [title-string (str (-> new :type name clojure.string/upper-case)
                             "# " (:number new) " " (:title new))
         send-fn
@@ -125,9 +127,9 @@
   (->> k name drop-last (apply str) (#(str % "_id")) keyword))
 
 (defn match-subscriber
-  [pns id-type]
+  [pns]
   (fn [subscriber]
-    (= (:id pns) (-> subscriber id-type make-uuid))))
+    (= (:id pns) (-> subscriber :proc_id make-uuid))))
 
 (defn notify-deletion [pns subscribers]
   (log/info "\n\nDeleting: \n" pns "\n\n" subscribers)
@@ -169,8 +171,8 @@
               (log/error e))))]
     (mapv send-fn subscribers)))
 
-(defn notify-addenda [pns addendum subscribers]
-  ;n(println "\n\nNotify-Addenda:\n\n" pns "\n\n" addendum "\n\n" subscribers)
+(defn notify-addenda [addendum pns subscribers]
+  (log/info "\n\nNotify-Addenda:\n\nPNS: " pns "\n\nAdd: " addendum "\n\nSubs: " subscribers)
   (let [send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (try
@@ -208,20 +210,19 @@
               (log/error e))))]
     (mapv send-fn subscribers)))
 
-(defn notify-subscribers [event k new]
+(defn notify-subscribers [event orig new]
+  (println "\n\nNotifying subscribers" event new orig)
   (let [subscriptions (db/get-all-subscriptions)
         addenda (db/get-all-addenda)
-        id-type (id-key k)
-        orig (get-pns-from-db (:id new))
         changes (take 2 (diff new orig))]
     (case event
       :update
       (when (every? some? changes)
-        (notify-changes new orig (filter (match-subscriber new id-type) subscriptions)))
+        (notify-changes new orig (filter (match-subscriber new) subscriptions)))
       :delete
-      (notify-deletion orig (filter (match-subscriber new id-type) subscriptions))
+      (notify-deletion orig (filter (match-subscriber new) subscriptions))
       :addenda
-      (notify-addenda (get-pns-from-db (:proc_id new)) new (filter (match-subscriber orig id-type) subscriptions)))))
+      (notify-addenda new orig (filter (match-subscriber orig) subscriptions)))))
 
 (defn warning-24hr [pns {:keys [email contact_person] :as sub}]
   (try

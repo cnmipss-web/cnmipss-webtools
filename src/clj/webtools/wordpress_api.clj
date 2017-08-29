@@ -31,14 +31,14 @@
       (let [{:keys [wp-host]} env
             {:keys [body status error]}
             (http/post (str wp-host wp-media-route query-string)
-                       {:headers {"Content-Type" "mulitpart/form-data"
+                       {:headers {"Content-Type" "multipart/form-data"
                                   "Content-Disposition" (str "attachment; filename=\"" filename "\"")
                                   "Authorization" (wp-auth-token)}
                         :multipart [{:name "file" :content (clojure.java.io/file file)}]})]
         (if error (throw error))
         (-> body json->edn :source_url))
       (catch Exception e
-        (println e)))))
+        (println "Error creating wp-media: " (.getMessage e))))))
 
 (defn delete-media
   [slug]

@@ -46,6 +46,8 @@
      email
      telephone])
 
+;;Specs
+
 (s/def ::not-nil some?)
 (s/def ::id (s/with-gen
               #(instance? #?(:clj  java.util.UUID
@@ -57,7 +59,8 @@
 (s/def ::date (s/with-gen
                 (partial instance? #?(:clj org.joda.time.DateTime
                                       :cljs js/Function))
-                (fn [] (gen/fmap #(org.joda.time.DateTime. %) (s/gen pos-int?)))))
+                (fn [] (gen/fmap #(#?(:clj clj-time.core/date-time
+                                      :cljs cljs-time.core/date-time) %) (s/gen pos-int?)))))
 (s/def ::title string?)
 (s/def ::desc string?)
 (s/def ::link string?)

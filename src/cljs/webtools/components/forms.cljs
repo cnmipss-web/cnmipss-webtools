@@ -243,11 +243,8 @@
     [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple false}]]
    [:div.form-group.sr-only
     [:input.form-control {:type "text" :name "id" :value (:id item)}]
-    [:input.form-control {:type "text" :name "number" :value (or (:rfp_no item)
-                                                             (:ifb_no item))}]
-    [:input.form-control {:type "text" :name "type" :value (if (:rfp_no item)
-                                                             "RFP"
-                                                             "IFB")}]]
+    [:input.form-control {:type "text" :name "number" :value (:number item)}]
+    [:input.form-control {:type "text" :name "type" :value (:type item)}]]
    [:div.form-group 
     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value ""}  ]
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
