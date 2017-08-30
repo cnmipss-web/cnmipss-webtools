@@ -283,3 +283,27 @@
                                        [:p "CNMI PSS"]]])}]})
     (catch Exception e
       (log/error e))))
+
+(defn notify-procurement [{:keys [company_name contact_person email telephone] :as sub}
+                          {:keys [type number title]}]
+  (doseq [user (db/get-proc-users)]
+    (let [title-string (str (-> type name clojure.string/upper-case) "# " number " " title)]
+      (try
+        (send-message {:to (:email user)
+                       :from "no-reply@cnmipss.org"
+                       :subject (str company_name " has requested information regarding " title-string)
+                       :body [{:type "text/html"
+                               :content (html
+                                         [:html
+                                          [:body
+                                           [:p (str contact_person " at " company_name
+                                                    " has subscribed to receive more information regarding "
+                                                    title-string)]
+                                           [:p (str "They may be contact by email at " email
+                                                    " or by telephone at " (util/format-tel-num telephone))]
+                                           [:p (str "They will be automatically notified by email regarding any changes or updates made to "
+                                                    title-string " via CNMI PSS Webtools.")]]])}]})
+        (println "\nemail sent to: " user)
+        (println "\nregarding: " sub)
+        (catch Exception e
+          (log/error e))))))

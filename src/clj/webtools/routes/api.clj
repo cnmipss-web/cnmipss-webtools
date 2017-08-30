@@ -86,6 +86,7 @@
             (let [created (db/create-subscription! subscription)
                   pns (get-pns-from-db (make-uuid proc_id))]
               (future (email/confirm-subscription subscription pns))
+              (future (email/notify-procurement subscription pns))
               (json-response resp/ok created))
 
             (catch java.sql.BatchUpdateException e

@@ -21,6 +21,11 @@ order by email
 select email, roles, admin from users
 where true
 
+-- :name get-proc-users :? :*
+-- :doc Retrieve users with roles containing 'Procurement'
+select email from users
+where roles like 'Procurement';
+
 -- :name get-user-token :? :1
 -- :doc retrieve a user's auth token given the email
 select token from users
@@ -28,7 +33,7 @@ where email = :email
 
 -- :name is-user-admin? :? :1
 -- :doc return user admin status
-select "admin" from users
+select admin from users
 where email = :email
 
 -- :name get-user-roles :? :1
