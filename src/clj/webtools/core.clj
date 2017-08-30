@@ -1,5 +1,6 @@
 (ns webtools.core
-  (:require [webtools.config :refer [env]]
+  (:require [webtools.spec.core]
+            [webtools.config :refer [env]]
             [webtools.db.core :as db]
             [webtools.handler :as handler]
             [webtools.cron.config :as cron]

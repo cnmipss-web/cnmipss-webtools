@@ -51,6 +51,7 @@
                  [ring/ring-core "1.6.1"]
                  [ring/ring-defaults "0.3.0"]
                  [ring/ring-json "0.4.0"]
+                 [ring/ring-spec "0.0.3"]
                  [secretary "1.2.3"]
                  [selmer "1.10.8"]
                  [stuarth/clj-oauth2 "0.3.2"]

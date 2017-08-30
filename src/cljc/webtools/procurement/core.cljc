@@ -59,8 +59,9 @@
 (s/def ::date (s/with-gen
                 (partial instance? #?(:clj org.joda.time.DateTime
                                       :cljs js/Function))
-                (fn [] (gen/fmap #(#?(:clj clj-time.core/date-time
-                                      :cljs cljs-time.core/date-time) %) (s/gen pos-int?)))))
+                (fn [] (gen/fmap #(apply #?(:clj clj-time.core/date-time
+                                            :cljs cljs-time.core/date-time) %)
+                                 (gen/tuple (gen/choose 2000 2100) (gen/choose 1 12) (gen/choose 1 28))))))
 (s/def ::title string?)
 (s/def ::desc string?)
 (s/def ::link string?)
