@@ -27,22 +27,23 @@
     (changes-email [orig new sub]
       (let [title-string (str (-> new proc-type name clojure.string/upper-case)
                               "# " (:number new) " " (:title new))
-            referent-term (if (= :rfp (proc-type new)) "request" "invitation")
-            print-date (comp (partial f/unparse const/date-formatter))
-            print-datetime (comp (partial f/unparse const/date-at-time-formatter))]
+            referent-term (if (= :rfp (proc-type new)) "request" "invitation")]
         [:html
          [:body
           [:p (str "Greetings " (:contact_person sub) ",")]
           [:p (str "We would like to notify you that details of " title-string " have been changed.")]
 
           (if (not= (:open_date orig) (:open_date new))
-            [:p (str "The window for submissions will now begin on " (print-date (:open_date new)) ".  ")])
+            [:p (str "The window for submissions will now begin on "
+                     (util-dates/print-date (:open_date new)) ".  ")])
 
           (if (not= (:close_date orig) (:close_date new))
-            [:p (str "The window for submissions will now close at " (print-datetime (:close_date new)) ".  ")])
+            [:p (str "The window for submissions will now close at "
+                     (util-dates/print-date-at-time (:close_date new)) ".  ")])
 
           (if (not= (:number orig) (:number new))
-            [:p (str "The " (-> new :type name clojure.string/upper-case) "# of this request has been changed to "
+            [:p (str "The " (-> new :type name clojure.string/upper-case)
+                     "# of this request has been changed to "
                      (:number new) ".  ")])
 
           (if (not= (:title orig) (:title new))
