@@ -3,6 +3,7 @@
             [webtools.constants :as const]
             [webtools.handlers.events :as event-handlers]
             [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
             [webtools.cookies :as cookies]))
 
 (def jq js/jQuery)
@@ -195,8 +196,9 @@
          (conj [:edit-procurement key])
          (rf/dispatch))))
 
-(defn edit-rfp-ifb [item]
-  [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)}
+(defn edit-procurement [item]
+  [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)
+                                      :key (random-uuid)} ;;HACK: key forces :default-values to update
    (for [[key val] (->> item
                         (filter (fn [[key val]] (not= key :file_link)))
                         (filter (fn [[key val]] (not= key :type)))
@@ -214,21 +216,24 @@
                      :on-blur (update-pns-val key)}]
        (case key
          :status [:div {:key (str key (.random js/Math))}]
+
          :id [:div {:key (str key (.random js/Math))}]
-         :description [:div.form-group {:key (str key)}
-                       [:label.bold {:for field-name} field-name]
-                       [:textarea.form-control (-> opts-map
-                                                   (assoc :default-value val)
-                                                   (dissoc :type))]]
+
+         :description
+         [:div.form-group {:key (str key)}
+          [:label.bold {:for field-name} field-name]
+          [:textarea.form-control (-> opts-map
+                                      (assoc :default-value val)
+                                      (dissoc :type))]]
          :open_date
          [:div.form-group {:key (str key)}
           [:label.bold {:for field-name} field-name]
-          [:input.form-control (assoc opts-map :default-value (util/print-date val))]]
+          [:input.form-control (assoc opts-map :default-value (util-dates/print-date val))]]
          
          :close_date
          [:div.form-group {:key (str key)}
           [:label.bold {:for field-name} field-name]
-          [:input.form-control (assoc opts-map :default-value (util/print-datetime val))]]
+          [:input.form-control (assoc opts-map :default-value (util-dates/print-date-at-time val))]]
          
          [:div.form-group {:key (str key)}
           [:label.bold {:for field-name} field-name]

@@ -2,11 +2,11 @@
   (:require [webtools.db :as db]
             [webtools.constants :as const]
             [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
             [webtools.handlers.api :as ajax-handlers]
             [webtools.procurement.core :as p]
             [re-frame.core :refer [dispatch reg-event-db]]
-            [ajax.core :as ajax]
-            [klang.core :as log]))
+            [ajax.core :as ajax]))
 
 (defn ajax-get
   [opts]
@@ -145,17 +145,17 @@
    (case key
      :open_date
      (try
-       (let [date (util/parse-date val)]
+       (let [date (util-dates/parse-date val)]
          (assoc db :procurement-modal (assoc procurement-modal key date)))
        (catch :default e
-         (log/erro! e)
+         (.error js/console e)
          db))
      :close_date
      (try
-       (let [date (util/parse-date val)]
+       (let [date (util-dates/parse-date-at-time val)]
          (assoc db :procurement-modal (assoc procurement-modal key date)))
        (catch :default e
-         (log/erro! e)
+         (.error js/console e)
          db))
      (assoc db :procurement-modal (assoc procurement-modal key val)))))
 

@@ -1,12 +1,16 @@
 (ns webtools.components.tables
   (:require [re-frame.core :as rf]
+            [cljs.spec.alpha :as s]
             [cljs-time.core :as time]
             [cljs-time.format :as f]
             [webtools.components.forms :as forms]
             [webtools.handlers.events :as events]
             [webtools.procurement.core :as p]
             [webtools.constants :as const]
-            [webtools.util :as util]))
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
+            [webtools.spec.procurement]
+            [webtools.spec.subscription]))
 
 (defn user-row [user]
   [:tr.row.user-list-row
@@ -89,11 +93,15 @@
 
 (def key->name {:rfps "Requests for Proposal" :ifbs "Invitations for Bid"})
 
+(s/fdef procurement-row
+        :args :webtools.spec.procurement/record
+        :ret vector?)
+
 (defn procurement-row [item]
   [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
    [:td.custom-col-1 (:number item)]
-   [:td.custom-col-2 (util/print-date (:open_date item))]
-   [:td.custom-col-2 (util/print-datetime (:close_date item))]
+   [:td.custom-col-2 (util-dates/print-date (:open_date item))]
+   [:td.custom-col-2 (util-dates/print-date-at-time (:close_date item))]
    [:td.custom-col-4 (:title item)]
    [:td.custom-col-8.text-left (-> item :description (subs 0 140) (str "..."))]
    [:td.custom-col-3
@@ -105,14 +113,14 @@
     [:a {:href (:file_link item)}
      [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
     [:a {:on-click (fn [] (rf/dispatch [:set-procurement-modal item]))}
-       [:button.btn.btn-warning.file-link {:title "Edit"
-                                           :data-toggle "modal"
-                                           :data-target "#procurement-modal"
-                                           :aria-controls "procurement-modal"} [:i.fa.fa-pencil]]]
+     [:button.btn.btn-warning.file-link {:title "Edit"
+                                         :data-toggle "modal"
+                                         :data-target "#procurement-modal"
+                                         :aria-controls "procurement-modal"} [:i.fa.fa-pencil]]]
     [:a {:on-click (events/delete-procurement item)}
-       [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
+     [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
 
-(defn procurement-table [k m]
+(defn procurement-table [k m] 
   [:div.procurement-table-box.col-xs-12
    [:h2.procurement-title.text-center (key->name k)]
    [:table.procurement-list
@@ -181,7 +189,10 @@
         ^{:key (str (* 100000000 (.random js/Math)))} [:div.container-fluid
                                                        [cert-row (first certs)]
                                                        [cert-row (second certs)]]))]]) 
-
+(s/fdef subscriber-row
+        :args :webtools.spec.subscription/record
+        :ret vector?)
+ 
 (defn subscriber-row [subscriber]
   [:tr
    [:td (:company_name subscriber)]

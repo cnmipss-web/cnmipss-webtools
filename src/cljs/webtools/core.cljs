@@ -26,7 +26,8 @@
   [:main#main-container {:on-click #(if @(rf/subscribe [:show-roles?])
                                       (rf/dispatch [:hide-roles]))}
    [:div.container
-    (map-indexed #(with-meta %2 {:key (str "main-view-children-" %1)})  children)]])
+    (for [[i child] (map-indexed vector children)]
+      [:div {:key (random-uuid)} child])]])
 
 (defn login-page []
   [:main#main-container

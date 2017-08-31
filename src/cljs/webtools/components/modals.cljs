@@ -32,7 +32,7 @@
 
 (defn procurement-type
   [item]
-  (if (:rfp_no item)
+  (if (= :rfp (:type item))
     "Request for Proposal"
     "Invitation for Bid"))
 
@@ -53,7 +53,7 @@
         [:div
          [tables/existing-addenda item]
          [forms/procurement-addendum item]]
-        [forms/edit-rfp-ifb item])]
+        [forms/edit-procurement item])]
      [:div.modal-footer
       [:div.col-xs-2
        (if (not @(rf/subscribe [:add-addendum]))

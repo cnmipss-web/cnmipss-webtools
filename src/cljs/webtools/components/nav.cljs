@@ -36,8 +36,10 @@
      [:nav#nav-sidebar.sidebar.col-sm-3 {:style (if @(rf/subscribe [:show-roles?])
                                       {}
                                       {:left "-300px"})}
-      (doall (for [role role-list]
-               [:div.row>div.col-xs-12 {:key (str "role-" role)}
-                (if (or (some #{role} roles)
-                        admin)
-                  (side-bar-btn role (= active role)))]))]))
+      (doall
+       (for [role role-list]
+         [:div.row {:key (random-uuid)}
+          [:div.col-xs-12
+           (if (or (some #{role} roles)
+                   admin)
+             (side-bar-btn role (= active role)))]]))]))

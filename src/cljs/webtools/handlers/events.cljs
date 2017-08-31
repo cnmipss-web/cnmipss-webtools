@@ -97,7 +97,7 @@
   (fn [e]
     (.preventDefault e)
     (println "Setting: " item)
-    (ajax/ajax-request {:uri (str "/webtools/api/update-" (-> item :type name))
+    (ajax/ajax-request {:uri "/webtools/api/update-procurement"
                         :method :post
                         :format (ajax/json-request-format)
                         :params (p/for-json item)
