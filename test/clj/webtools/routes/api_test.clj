@@ -291,7 +291,7 @@
                                                               ((comp first calls))
                                                               ((comp first :args)))))))))
 
-    (testing "POST /api/update-rfp"
+    (testing "POST /api/update-procurement"
       (with-stub! [[email/notify-subscribers (constantly nil)]]
         (let [new-title "New Title for Proposal #2"
               new-desc "The description of this proposal has changed."
@@ -299,8 +299,9 @@
                       (#(into {} %))
                       (assoc :title new-title)
                       (assoc :description new-desc))
+              orig (get-pns-from-db (:id rfp))
               {:keys [status body headers]}
-              (auth-req :post "/api/update-rfp"
+              (auth-req :post "/api/update-procurement"
                         (assoc :body rfp))]
           (testing "should return status 200"
             (is (= 200 status)))
@@ -313,8 +314,33 @@
           (testing "should notify subscribers of the updated rfp"
             (is (= 1 (-> email/notify-subscribers calls count)))
             (is (= :update (-> email/notify-subscribers calls first :args first)))
-            (is (= :rfps (-> email/notify-subscribers calls first :args second)))
-            (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last)))))))
+            (is (= orig (-> email/notify-subscribers calls first :args second)))
+            (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))))
+
+      (with-stub! [[email/notify-subscribers (constantly nil)]]
+        (let [new-title "New Title for Invitation #2"
+              new-desc "The description of this invitation has changed."
+              ifb (-> (get-pns-from-db "2fa4e278-f022-4361-b69a-0063a387933a")
+                      (#(into {} %))
+                      (assoc :title new-title)
+                      (assoc :description new-desc))
+              orig (get-pns-from-db (:id ifb))
+              {:keys [status body headers]}
+              (auth-req :post "/api/update-procurement"
+                        (assoc :body ifb))]
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should alter record of ifb in the database"
+            (let [new (get-pns-from-db "2fa4e278-f022-4361-b69a-0063a387933a")]
+              (is (= new-title (:title new)))
+              (is (= new-desc (:description new)))))
+
+          (testing "should notify subscribers of the updated rfp"
+            (is (= 1 (-> email/notify-subscribers calls count)))
+            (is (= :update (-> email/notify-subscribers calls first :args first)))
+            (is (= orig (-> email/notify-subscribers calls first :args second)))
+            (is (= (pns-from-map ifb) (-> email/notify-subscribers calls first :args last)))))))
 
     (testing "POST /api/delete-rfp"
       (with-stub! [[email/notify-subscribers (constantly nil)]
@@ -348,31 +374,6 @@
           (testing "should delete related media"
             (is (= 1 (-> wp/delete-media calls count)))
             (is (= (:id rfp) (-> wp/delete-media calls first :args first)))))))
-
-    (testing "POST /api/update-ifb"
-      (with-stub! [[email/notify-subscribers (constantly nil)]]
-        (let [new-title "New Title for Invitation #2"
-              new-desc "The description of this invitation has changed."
-              ifb (-> (get-pns-from-db "2fa4e278-f022-4361-b69a-0063a387933a")
-                      (#(into {} %))
-                      (assoc :title new-title)
-                      (assoc :description new-desc))
-              {:keys [status body headers]}
-              (auth-req :post "/api/update-ifb"
-                        (assoc :body ifb))]
-          (testing "should return status 200"
-            (is (= 200 status)))
-
-          (testing "should alter record of ifb in the database"
-            (let [new (get-pns-from-db "2fa4e278-f022-4361-b69a-0063a387933a")]
-              (is (= new-title (:title new)))
-              (is (= new-desc (:description new)))))
-
-          (testing "should notify subscribers of the updated rfp"
-            (is (= 1 (-> email/notify-subscribers calls count)))
-            (is (= :update (-> email/notify-subscribers calls first :args first)))
-            (is (= :ifbs (-> email/notify-subscribers calls first :args second)))
-            (is (= (pns-from-map ifb) (-> email/notify-subscribers calls first :args last)))))))
 
     (testing "POST /api/delete-ifb"
       (with-stub! [[email/notify-subscribers (constantly nil)]

@@ -3,7 +3,7 @@
             [webtools.email :as email :refer [notify-changes notify-deletion notify-addenda]]
             [webtools.procurement.core :refer :all]
             [webtools.db.core :as db]
-            [webtools.test.constants :as c-t]
+            [webtools.util.dates :as util-dates]
             [webtools.test.fixtures :as fixtures]
             [bond.james :refer [calls with-spy with-stub!]]
             [postal.core :refer [send-message]]
@@ -48,12 +48,17 @@
 
 (deftest test-confirm-subscription
   (with-stub! [[send-message (constantly nil)]]
-    (let [subscription {:email "subscriber@gimmes.pam"
-                        :contact_person "Busy Reader"
-                        :company_name "Reader's Digest"}
-          open_date (f/parse (f/formatter "MMMM dd, YYYY") "August 3, 2000")
-          close_date (f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a") "August 3, 2100 at 10:00 pm")
-          pns (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
+    (let [subscription (webtools.procurement.core/map->Subscription
+                        {:email "subscriber@gimmes.pam"
+                         :contact_person "Busy Reader"
+                         :company_name "Reader's Digest"
+                         :proc_id (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
+                         :id (java.util.UUID/randomUUID)
+                         :subscription_number 1
+                         :telephone "789-4561"})
+          open_date (util-dates/parse-date "August 3, 2000")
+          close_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 pm")
+          pns (webtools.procurement.core.PSAnnouncement. (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
                                                          :rfp "123" open_date close_date
                                                          "Title" "D" "L")]
       (email/confirm-subscription subscription pns)
@@ -61,36 +66,40 @@
 
 (deftest test-notify-subscribers
   (testing "should switch on event key and call correct function"
-    (with-stub! [[notify-changes (constantly nil)]
-                 [notify-deletion (constantly nil)]
-                 [notify-addenda (constantly nil)]]
+    (with-stub! [[email/notify-changes (constantly nil)]
+                 [email/notify-deletion (constantly nil)]
+                 [email/notify-addenda (constantly nil)]]
       (let [rfp (get-pns-from-db (make-uuid "d0002906-6432-42b5-b82b-35f0d710f827"))
             new-rfp (assoc rfp :title "New Title")
             rfp-addendum (db/get-addenda {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})
             ifb-addendum (db/get-addenda {:proc_id (make-uuid "5c052995-12c5-4fcc-b57e-bcbf7323f174")})]
         (testing ":update event"
-          (email/notify-subscribers :update :rfps new-rfp)
+          (email/notify-subscribers :update rfp new-rfp)
 
           (testing "should call notify-changes if record has changed"
-            (is (= 1 (-> notify-changes calls count)))
-            (is (= new-rfp (-> notify-changes calls first :args first)))
-            (is (= rfp (-> notify-changes calls first :args second))))
+            (is (= 1 (-> email/notify-changes calls count)))
+            (is (= new-rfp (-> email/notify-changes calls first :args first)))
+            (is (= rfp (-> email/notify-changes calls first :args second))))
 
           (testing "should NOT call notify-changes if record has not changed"
-            (email/notify-subscribers :update :rfps rfp)
+            (email/notify-subscribers :update rfp rfp)
 
-            (is (= 1 (-> notify-changes calls count)))))
+            (is (= 1 (-> email/notify-changes calls count)))))
 
         (testing ":addenda :rfps event"
-          (email/notify-subscribers :addenda :rfps (first rfp-addendum))
+          (email/notify-subscribers :addenda
+                                    (first rfp-addendum)
+                                    (get-pns-from-db (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")))
 
           (testing "should call notify-addendum"
-            (is (= 1 (-> notify-addenda calls count)))
-            (is (= (-> rfp-addendum first :proc_id get-pns-from-db) (-> notify-addenda calls first :args first)))
+            (is (= 1 (-> email/notify-addenda calls count)))
+            (is (= (-> rfp-addendum first :proc_id get-pns-from-db) (-> email/notify-addenda calls first :args first)))
             (is (= (first rfp-addendum) (-> notify-addenda calls first :args second)))))
 
         (testing ":addenda :ifbs event"
-          (email/notify-subscribers :addenda :ifbs (first ifb-addendum))
+          (email/notify-subscribers :addenda
+                                    (first ifb-addendum)
+                                    (get-pns-from-db (make-uuid "5c052995-12c5-4fcc-b57e-bcbf7323f174")))
 
           (testing "should call notify-addendum"
             (is (= 2 (-> notify-addenda calls count)))
@@ -98,7 +107,7 @@
             (is (= (first ifb-addendum) (-> notify-addenda calls second :args second)))))
 
         (testing ":delete event"
-          (email/notify-subscribers :delete :rfps rfp)
+          (email/notify-subscribers :delete rfp nil)
 
           (testing "should call notify-deletion"
             (is (= 1 (-> notify-deletion calls count)))
@@ -106,9 +115,9 @@
 
 (deftest test-notify-changes
   (with-stub! [[send-message (constantly nil)]]
-    (let [open_date (f/parse (f/formatter "MMMM dd, YYYY") "August 3, 2000")
-          close_date (f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a") "August 3, 2100 at 10:00 pm")
-          new_date (f/parse (f/formatter "MMMM dd, YYYY 'at' h:mm a") "August 3, 2100 at 10:00 am")
+    (let [open_date (util-dates/parse-date "August 3, 2000")
+          close_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 pm")
+          new_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 am")
           original (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
                                                          :rfp "123" open_date close_date
                                                          "Title" "D" "L")

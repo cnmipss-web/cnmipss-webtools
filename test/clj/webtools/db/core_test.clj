@@ -19,7 +19,7 @@
   (testing "delete functions" 
     (db/delete-user! {:email "tony.stark@cnmipss.org"})
     (db/delete-cert! {:cert_no "BI-003-2006"})
-    (db/delete-jva! {:announce_no "PSS-2015-311"})
+    (db/delete-jva!  {:announce_no "PSS-2015-311"})
     (db/delete-pnsa! {:id (make-uuid "1174a9a8-b45a-422a-bb46-574f814c2550")})
     (db/delete-pnsa! {:id (make-uuid "2fa4e278-f022-4361-b69a-0063a387933a")})
     (is (= (- const/user-seed-count 1)
