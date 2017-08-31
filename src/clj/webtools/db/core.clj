@@ -12,6 +12,8 @@
    [conman.core :as conman]
    [webtools.config :refer [env]]
    [webtools.constants :as const]
+   [webtools.util :as util]
+   [webtools.util.dates :as util-dates]
    [mount.core :refer [defstate]])
   (:import org.postgresql.util.PGobject
            java.sql.Array
@@ -75,8 +77,8 @@
                (if (and (= (t/hour date) 0)
                         (= (t/minute date) 0)
                         (= (t/second date) 0))
-                 (.writeString jg (f/unparse (f/formatter "MMMM dd, YYYY") date))
-                 (.writeString jg (f/unparse (f/formatter const/procurement-datetime-format) date)))))
+                 (.writeString jg (util-dates/print-date date))
+                 (.writeString jg (util-dates/print-date-at-time date)))))
 
 (extend-protocol jdbc/ISQLValue
   clojure.lang.Keyword
@@ -90,9 +92,10 @@
   [m k]
   (if (= java.lang.String (type (get m k)))
     (assoc m k (try (->> (get m k)
-                         (f/parse (f/formatter "MMMM dd, YYYY"))
+                         (util-dates/parse-date)
                          (c/to-sql-date))
                     (catch Exception e
+                      (println (.getMessage e))
                       nil)))
     m))
 
@@ -100,11 +103,10 @@
   [m k]
   (if (= java.lang.String (type (get m k)))
     (assoc m k (try (->> (get m k)
-                         (re-find const/procurement-datetime-re)
+                         (re-find const/date-at-time-re)
                          (second)
-                         ((fn [date-time]
-                            (let [f-date-time (partial f/parse (f/formatter const/procurement-datetime-format))]
-                              (-> date-time f-date-time c/to-sql-time)))))
+                         ((fn [date-at-time]
+                            (-> date-at-time util-dates/parse-date-at-time c/to-sql-time))))
                     (catch Exception e
                       (println e))))
     m))

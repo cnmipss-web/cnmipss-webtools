@@ -8,7 +8,8 @@
             [clojure.tools.logging :as log]
             [clj-fuzzy.metrics :as measure]
             [webtools.db.core :as db]
-            [webtools.util :refer :all]
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.wordpress-api :as wp]
@@ -48,22 +49,20 @@
 
 (defn is-renewal?
   [orig-cert new-cert]
-  (let [date-format (f/formatter "MMMM dd, YYYY")
-        orig-start (->> orig-cert :start_date (f/parse date-format))
-        new-start (->> new-cert :start_date (f/parse date-format))
-        orig-expiry (->> orig-cert :expiry_date (f/parse date-format))
-        new-expiry (->> new-cert :expiry_date (f/parse date-format))]
+  (let [orig-start (->> orig-cert :start_date util-dates/parse-date)
+        new-start (->> new-cert :start_date util-dates/parse-date)
+        orig-expiry (->> orig-cert :expiry_date util-dates/parse-date)
+        new-expiry (->> new-cert :expiry_date util-dates/parse-date)]
     (try
       (if-let [overlap (t/overlap (t/interval orig-start orig-expiry)
                                    (t/interval new-start new-expiry))]
         (> 365 (t/in-days overlap))
         true)
       (catch Exception e
-        (println (.getMessage e) orig-start orig-expiry new-start new-expiry "\n\n")))))
+        (log/error (.getMessage e) orig-start orig-expiry new-start new-expiry "\n\n")))))
 
 (defn renew-cert!
   [cert]
-
   (let [{:keys [cert_no start_date expiry_date]} cert
         existing-certs (->> (db/get-all-certs)
                             (filter (fn [old-cert]
@@ -116,8 +115,8 @@
 
 (defn jva-reducer
   [jva next-line]
-  (let [this-line (reduce merge (map (fn [[k re]] {k (line-parser re next-line)}) jva-regexes))]
-    (merge-with select-non-nil this-line jva)))
+  (let [this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re next-line)}) jva-regexes))]
+    (merge-with util/select-non-nil this-line jva)))
 
 (defn jva-desc
   [jva]
@@ -137,7 +136,7 @@
             jva-record (as-> (reduce jva-reducer {} text-list) jva
                          (db/make-sql-date jva :open_date)
                          (db/make-sql-date jva :close_date)                       
-                         (make-status jva)
+                         (util/make-status jva)
                          (assoc jva :id (java.util.UUID/randomUUID))
                          (assoc jva :file_link
                                 (wp/create-media filename tempfile
@@ -161,7 +160,7 @@
           jva-record (as-> (reduce jva-reducer {} text-list) jva
                        (db/make-sql-date jva :open_date)
                        (db/make-sql-date jva :close_date)                       
-                       (make-status jva)
+                       (util/make-status jva)
                        (assoc jva :id (java.util.UUID/randomUUID)))
         existing-jva (db/get-jva jva-record)]
     (db/delete-jva! existing-jva)

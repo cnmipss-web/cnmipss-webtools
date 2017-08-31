@@ -3,13 +3,17 @@
             [webtools.db.core :as db]
             [webtools.wordpress-api :as wp]
             [webtools.constants :as const]
-            [webtools.util :refer :all :as util]
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
             [clj-time.format :as f])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper])) 
 
 (extend-type webtools.procurement.core.PSAnnouncement
     process-procurement
+    (proc-type [pnsa]
+      (-> pnsa :type keyword))
+    
     (save-to-db [pnsa]
       (db/create-pnsa! pnsa))
 
@@ -20,13 +24,11 @@
       (db/delete-pnsa! pnsa))
 
     (changes-email [orig new sub]
-      (let [title-string (str (-> new :type name clojure.string/upper-case)
+      (let [title-string (str (-> new proc-type name clojure.string/upper-case)
                               "# " (:number new) " " (:title new))
-            referent-term (if (= :rfp (:type new)) "request" "invitation")
-            time-format (f/formatter const/procurement-datetime-format)
-            date-format (f/formatter const/procurement-date-format)
-            print-date (comp (partial f/unparse date-format))
-            print-datetime (comp (partial f/unparse time-format))]
+            referent-term (if (= :rfp (proc-type new)) "request" "invitation")
+            print-date (comp (partial f/unparse const/date-formatter))
+            print-datetime (comp (partial f/unparse const/date-at-time-formatter))]
         [:html
          [:body
           [:p (str "Greetings " (:contact_person sub) ",")]
@@ -69,8 +71,8 @@
    :title #"(?i)Title\:\s*([\p{L}\p{Z}\p{M}\p{P}\p{N}]+)"})
 
 (defn- procurement-reducer [rfp next-line]
-  (let [this-line (reduce merge (map (fn [[k re]] {k (line-parser re next-line)}) procurement-regexes))]
-    (merge-with select-non-nil this-line rfp)))
+  (let [this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re next-line)}) procurement-regexes))]
+    (merge-with util/select-non-nil this-line rfp)))
 
 (defn create-pns-from-file [file]
   (let [{:keys [tempfile size filename]} file
@@ -88,7 +90,7 @@
       (assoc rec :description desc)
       (db/make-sql-date rec :open_date)
       (db/make-sql-datetime rec :close_date)
-      (make-status rec)
+      (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
       (assoc rec :file_link
              (wp/create-media filename tempfile
@@ -126,8 +128,8 @@
 (let [f (fn [pns]
           (if (every? some? [(:number pns) (:type pns) (:id pns)])
             (-> (assoc pns :id (-> pns :id make-uuid))
-                (assoc :open_date (-> pns :open_date util/parse-date))
-                (assoc :close_date (-> pns :close_date util/parse-date))
+                (assoc :open_date (-> pns :open_date util-dates/parse-date))
+                (assoc :close_date (-> pns :close_date util-dates/parse-date-at-time))
                 map->PSAnnouncement)))]
   (extend-protocol create-procurement
     clojure.lang.PersistentArrayMap

@@ -4,12 +4,16 @@
             [webtools.procurement.core :refer :all]
             [webtools.procurement.server :refer :all]
             [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
             [clj-time.coerce :as c]
             [clj-time.format :as f]
             [postal.core :refer [send-message]]
             [hiccup.core :refer [html]]
             [clojure.tools.logging :as log]
-            [clojure.data :refer [diff]]))
+            [clojure.data :refer [diff]]
+            [clojure.spec.alpha :as s]
+            [webtools.spec.procurement]
+            [webtools.spec.subscription]))
 
 (defn invite [user]
   (let [{:keys [email roles admin]} user
@@ -58,6 +62,11 @@
       (catch Exception e
         (log/error e)))))
 
+(s/fdef confirm-subscription
+        :args (s/cat :subscription :webtools.spec.subscription/record
+                     :pns :webtools.spec.procurement/record)
+        :ret nil?)
+
 (defn confirm-subscription [subscription pns]
   (let [{:keys [email contact_person company_name]} subscription]
     (try
@@ -71,8 +80,8 @@
                                          [:p (str "Greetings " contact_person ",")]
                                          [:p (str "This email is your confirmation that you have registered to receive updates and information regarding "
                                                   (case (:type pns)
-                                                    "rfp" "Request for Proposal "
-                                                    "ifb" "Invitation for Bid ")
+                                                    :rfp "Request for Proposal "
+                                                    :ifb "Invitation for Bid ")
                                                   ": " (:title pns) ".")]
                                          [:p (str "You will be contacted as additional information is published.  If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org")]
                                          [:br]
@@ -95,20 +104,11 @@
   [data]
   (into {} (map (fn [[k v]] [k (.toString v)]) (fix-dates data))))
 
-(def time-format (f/formatter "MMMM dd, YYYY 'at' h:mm a"))
-(def date-format (f/formatter "MMMM dd, YYYY"))
-
-(defn print-date
-  [date]
-  (->> date
-      (f/parse (f/formatters :date-time))
-      (f/unparse date-format)))
-
-(defn print-datetime
-  [datetime]
-  (->> datetime
-      (f/parse (f/formatters :date-time))
-      (f/unparse time-format)))
+(s/fdef notify-changes
+        :args (s/cat :new :webtools.spec.procurement/record
+                     :orig :webtools.spec.procurement/record
+                     :subscribers (s/coll-of :webtools.spec.subscription/record))
+        :ret nil?)
 
 (defn notify-changes [new orig subscribers]
   (println "Notify changes called")
@@ -211,7 +211,6 @@
     (mapv send-fn subscribers)))
 
 (defn notify-subscribers [event orig new]
-  (println "\n\nNotifying subscribers" event new orig)
   (let [subscriptions (db/get-all-subscriptions)
         addenda (db/get-all-addenda)
         changes (take 2 (diff new orig))]
@@ -223,6 +222,11 @@
       (notify-deletion orig (filter (match-subscriber new) subscriptions))
       :addenda
       (notify-addenda new orig (filter (match-subscriber orig) subscriptions)))))
+
+(s/fdef warning-24hr
+        :args (s/cat :pns :webtools.spec.procurement/record
+                     :sub :webtools.spec.subscription/record)
+        :ret nil?)
 
 (defn warning-24hr [pns {:keys [email contact_person] :as sub}]
   (try
@@ -242,7 +246,7 @@
                                                 (:number pns)
                                                 " " (:title pns)
                                                 " must be turned in to the PSS Procurement office no later than "
-                                                (util/print-datetime (:close_date pns)))]
+                                                (util-dates/print-date-at-time (:close_date pns)))]
                                        [:p "Any submissions turned in after that time will not be considered."]
                                        [:br]
                                        [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
@@ -272,7 +276,7 @@
                                                 (:number pns)
                                                 " " (:title pns)
                                                 " has passed as of "
-                                                (f/unparse (f/formatter "MMMM dd, YYYY 'at' h:mm a") (:close_date pns))
+                                                (util-dates/print-date-at-time (:close_date pns))
                                                 ".  No further submissions will be accepted after this time.")]
                                        [:br]
                                        [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
@@ -285,7 +289,7 @@
       (log/error e))))
 
 (defn notify-procurement [{:keys [company_name contact_person email telephone] :as sub}
-                          {:keys [type number title]}]
+                          {:keys [type number title] :as pns}]
   (doseq [user (db/get-proc-users)]
     (let [title-string (str (-> type name clojure.string/upper-case) "# " number " " title)]
       (try
@@ -303,7 +307,5 @@
                                                     " or by telephone at " (util/format-tel-num telephone))]
                                            [:p (str "They will be automatically notified by email regarding any changes or updates made to "
                                                     title-string " via CNMI PSS Webtools.")]]])}]})
-        (println "\nemail sent to: " user)
-        (println "\nregarding: " sub)
         (catch Exception e
           (log/error e))))))

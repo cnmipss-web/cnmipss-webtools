@@ -173,7 +173,7 @@
                          (log/error e)))
                      (db/delete-jva! body)))
 
-  (POST "/api/update-rfp" {:keys [body]}
+  (POST "/api/update-procurement" {:keys [body]}
         (let [new (pns-from-map body)
               orig (get-pns-from-db (:id new))]
           (query-route get-all-procurement
@@ -185,12 +185,6 @@
           (query-route get-all-procurement
                        (future (email/notify-subscribers :delete :rfps rfp))
                        (clear-procurement :rfp rfp))))
-
-  (POST "/api/update-ifb" {:keys [body]}
-        (let [ifb (pns-from-map body)]
-          (query-route get-all-procurement
-                       (future (email/notify-subscribers :update :ifbs ifb))
-                       (change-in-db ifb))))
 
   (POST "/api/delete-ifb" {:keys [body]}
         (query-route get-all-procurement
