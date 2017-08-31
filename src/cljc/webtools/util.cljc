@@ -1,10 +1,11 @@
 (ns webtools.util
-  #?(:clj  (:require [clj-time.core :as time]
-                     [clj-time.coerce :as coerce]
-                     [clj-time.format :as format])
-     :cljs (:require [cljs-time.core :as time]
-                     [cljs-time.coerce :as coerce]
-                     [cljs-time.format :as format])))
+  (:require [webtools.constants :as const]
+            #?(:clj  [clj-time.core :as time]
+               :cljs [cljs-time.core :as time])
+            #?(:clj  [clj-time.coerce :as coerce]
+               :cljs [cljs-time.coerce :as coerce])
+            #?(:clj  [clj-time.format :as format]
+               :cljs [cljs-time.format :as format])))
 
 (let [transforms {:keys keyword
                   :strs str
@@ -66,27 +67,6 @@
         (assoc record :status true)
         (assoc record :status false)))))
 
-(defn parse-date
-  [date]
-  (if (string? date)
-    (if (some? (re-find #"at" date))
-      (format/parse (format/formatter "MMMM dd, YYYY h:mm a") (-> date
-                                                                  (clojure.string/replace #"at" "")
-                                                                  (clojure.string/replace #"\s+" " ")))
-      (format/parse (format/formatter "MMMM dd, YYYY") date))
-    date))
-
-(defn print-date
-  [date]
-  (format/unparse
-   (format/formatter "MMMM dd, YYYY")
-   date))
-
-(defn print-datetime
-  [date]
-  (format/unparse
-   (format/formatter "MMMM dd, YYYY 'at' h:mm a")
-   date))
 
 (defmacro try-let
   [bindings & body]
