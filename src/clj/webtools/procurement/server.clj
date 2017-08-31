@@ -23,6 +23,7 @@
     (delete-from-db [pnsa]
       (db/delete-pnsa! pnsa))
 
+    communicate-procurement
     (changes-email [orig new sub]
       (let [title-string (str (-> new proc-type name clojure.string/upper-case)
                               "# " (:number new) " " (:title new))

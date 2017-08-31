@@ -7,7 +7,6 @@
   "Methods for manipulating procurement records"
   (save-to-db [a] "Save a record to the DB")
   (change-in-db [a] "Update a record in the DB")
-  (changes-email [orig new sub] "Create hiccup markup for an email notifying subscribers about changes")
   (delete-from-db [a] "Delete a record from the DB")
   (for-json [a] "Prep a record to be converted to JSON")
   (proc-type [a] "Returns a records type (:rfp or :ifb)"))
@@ -20,6 +19,10 @@
 (defprotocol create-procurement
   "Method to convert simply map to PSAnnouncement with relevant type checks"
   (pns-from-map [pns]))
+
+(defprotocol communicate-procurement
+  "Methods for generating email notifications regarding procurement announcements"
+  (changes-email [orig new sub]))
 
 (defrecord PSAnnouncement
     [id
