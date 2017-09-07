@@ -113,7 +113,7 @@
 (defn notify-changes [new orig subscribers]
   (println "Notify changes called")
   (let [title-string (str (-> new :type name clojure.string/upper-case)
-                            "# " (:number new) " " (:title new))
+                            "# " (:number orig) " " (:title orig))
         send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (send-message {:to email

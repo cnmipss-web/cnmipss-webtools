@@ -29,7 +29,7 @@
     communicate-procurement
     (changes-email [orig new sub]
       (let [title-string (str (-> new proc-type name clojure.string/upper-case)
-                              "# " (:number new) " " (:title new))
+                              "# " (:number orig) " " (:title orig))
             referent-term (if (= :rfp (proc-type new)) "request" "invitation")]
         [:html
          [:body
