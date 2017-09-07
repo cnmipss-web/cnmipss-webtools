@@ -46,4 +46,4 @@
              (-> (respond/found (str (env :server-uri) "#/app"))
                  (respond/set-cookie "wt-token" token cookie-opts)
                  (respond/set-cookie "wt-email" email cookie-opts)))
-           (respond/found "/webtools/#/?login_failed=true")))))
+           (respond/found "/#/login?login_failed=true")))))
