@@ -7,13 +7,15 @@
 
 (def jq js/jQuery)
 
-(defn bad-login []
+(defn bad-login [res]
   (rf/dispatch [:bad-login])
   (set! (.-href js/location) "#/login"))
 
 (defn verified-token?
-  [[ok response]]
-  (let [admin (get-in response [:body "is-admin"])
+  [[ok full-response]]
+  ()
+  (let [response (if-let [res (:response full-response)] res full-response) ;Deal with different response structures
+        admin (get-in response [:body "is-admin"])
         user (get-in response [:body "user"])
         roles (get user "roles")
         email (get user "email")]
@@ -21,7 +23,8 @@
       (do
         (rf/dispatch [:verified-token email admin roles])
         (rf/dispatch [:set-active-page :main]))
-      (bad-login))))
+      (if email
+        (bad-login response)))))
 
 (defn all-users
   [[ok {:keys [body]}]]

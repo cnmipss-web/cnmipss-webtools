@@ -109,7 +109,7 @@
                 is-admin ((db/is-user-admin? user-email) :admin)]
             (if (= token correct-token)
               (json-response resp/ok (keyed [user is-admin]))
-              (resp/forbidden)))
+              (json-response resp/forbidden (keyed [user is-admin]))))
           (resp/forbidden)))
   
   (GET "/logout" request
