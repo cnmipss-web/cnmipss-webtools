@@ -185,7 +185,7 @@
            (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/header "Content-Type" "application/json"))
        (catch Exception e#
-         ;(println (.getMessage e#))
+         (println (.getMessage e#))
          (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role))
              (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
              (response/header "Content-Type" "application/json"))))))

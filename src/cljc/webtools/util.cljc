@@ -1,5 +1,6 @@
 (ns webtools.util
   (:require [webtools.constants :as const]
+            [clojure.spec.alpha :as s]
             #?(:clj  [clj-time.core :as time]
                :cljs [cljs-time.core :as time])
             #?(:clj  [clj-time.coerce :as coerce]
@@ -60,12 +61,20 @@
   [record]
   (let [{:keys [close_date]} record
         today (time/now)
-        end (coerce/from-date close_date)]
+        end (if (instance? java.sql.Date close_date)
+              (coerce/from-sql-date close_date)
+              close_date)]
     (if (nil? end)
       (assoc record :status true)
       (if (time/before? today end)
         (assoc record :status true)
         (assoc record :status false)))))
+
+(s/fdef make-status
+        :args (s/cat :record (s/alt :procurement :webtools.spec.procurement/record
+                                    :jva map?))
+        :ret (s/or :procurement :webtools.spec.procurement/record
+                   :jva map?))
 
 
 (defmacro try-let

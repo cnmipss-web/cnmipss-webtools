@@ -16,20 +16,20 @@
 
 
 (s/fdef parse-date
-        :args (s/or :string string?
-                    :date-time (fn [x] (instance?
-                                        #?(:clj org.joda.time.DateTime
-                                           :cljs js/Function) x)))
+        :args (s/cat :date (s/alt :string string?
+                                  :date-time (fn [x] (instance?
+                                                      #?(:clj org.joda.time.DateTime
+                                                         :cljs js/Function) x))))
         :ret :webtools.spec.core/date)
 
 (s/fdef parse-datetime
-        :args (s/or :string string?
-                    :date-time :webtools.spec.core/date)
+        :args (s/cat :date-time (s/alt :string string?
+                                       :date-time :webtools.spec.core/date))
         :ret :webtools.spec.core/date)
 
 (s/fdef parse-date-at-time
-        :args (s/or :string string?
-                    :date-time :webtools.spec.core/date)
+        :args (s/cat :date-at-time (s/or :string string?
+                                         :date-time :webtools.spec.core/date))
         :ret :webtools.spec.core/date)
 
 #?(:clj

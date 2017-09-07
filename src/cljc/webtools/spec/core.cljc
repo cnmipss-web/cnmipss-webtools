@@ -10,15 +10,18 @@
                                :cljs cljs.core/UUID) %)
                 gen/uuid))
 
+(s/def ::uuid-str (s/with-gen
+                    string?
+                    (fn [] (gen/fmap str (gen/uuid)))))
+
 (s/def ::date (s/with-gen
                 (partial instance? #?(:clj org.joda.time.DateTime
                                       :cljs js/Function))
-                (fn [] (gen/fmap (partial apply #(date-time %1 %2 %3 %4))
+                (fn [] (gen/fmap (partial apply #(date-time %1 %2 %3))
                                  (gen/tuple
                                   (gen/choose 2000 2025) ;year
                                   (gen/choose 1 12) ;month
                                   (gen/choose 1 28) ;day
-                                  (gen/choose 0 23) ;hour
                                   )))))
 
 

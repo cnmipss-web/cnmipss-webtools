@@ -3,7 +3,12 @@
             [webtools.db.core :as db]
             [conman.core :refer [bind-connection] :as conman]
             [clojure.java.jdbc :as sql]
-            [mount.core :as mount]))
+            [mount.core :as mount]
+            [clojure.spec.test.alpha :as stest]))
+
+(defn instrument [ts]
+  (stest/instrument)
+  (ts))
 
 (defn prep-db
   [ts]

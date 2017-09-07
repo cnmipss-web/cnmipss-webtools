@@ -15,7 +15,10 @@
       (-> pnsa :type keyword))
     
     (save-to-db [pnsa]
-      (db/create-pnsa! pnsa))
+      (-> pnsa
+          (db/make-sql-date :open_date)
+          (db/make-sql-datetime :close_date)
+          (db/create-pnsa!)))
 
     (change-in-db [pnsa]
       (db/update-pnsa! pnsa))
@@ -90,8 +93,9 @@
       (into {} rec)
       (assoc rec :type (-> rec :type clojure.string/lower-case keyword))
       (assoc rec :description desc)
-      (db/make-sql-date rec :open_date)
-      (db/make-sql-datetime rec :close_date)
+      (update rec :open_date util-dates/parse-date)
+      (update rec :close_date util-dates/parse-date-at-time)
+      ((fn [] (println (-> rec :open_date type)) rec))
       (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
       (assoc rec :file_link

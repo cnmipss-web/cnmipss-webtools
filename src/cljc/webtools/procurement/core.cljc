@@ -1,7 +1,8 @@
 (ns webtools.procurement.core
   (:require [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as gen]
-            [webtools.spec.procurement]))
+            [webtools.spec.procurement]
+            [webtools.spec.subscription]))
 
 (defprotocol process-procurement
   "Methods for manipulating procurement records"
@@ -11,42 +12,18 @@
   (for-json [a] "Prep a record to be converted to JSON")
   (proc-type [a] "Returns a records type (:rfp or :ifb)"))
 
-(s/fdef proc-type
-        :args :webtools.spec.procurement/record
-        :ret #{:rfp :ifb})
-
 (defprotocol retrieve-procurement
   "Methods to retrive procurement records from DB"
   (make-uuid [id] "Convert an id to uuid class")
   (get-pns-from-db [id] "Retrieve an rfp or ifb based on its id"))
 
-(s/fdef make-uuid
-        :args (s/or :string string?
-                    :uuid :webtools.spec.core/uuid)
-        :ret :webtools.spec.core/uuid)
-
-(s/fdef get-pns-from-db
-        :args :webtools.spec.core/uuid
-        :ret  (s/or :pns :webtools.spec.procurement/record
-                    :nil nil?))
-
 (defprotocol create-procurement
   "Method to convert simply map to PSAnnouncement with relevant type checks"
   (pns-from-map [pns]))
 
-(s/fdef pns-from-map
-        :args map?
-        :ret :webtools.spec.procurement/record)
-
 (defprotocol communicate-procurement
   "Methods for generating email notifications regarding procurement announcements"
   (changes-email [orig new sub]))
-
-(s/fdef changes-email
-        :args (s/cat :orig :webtools.spec.procurement/record
-                     :new :webtools.spec.procurement/record
-                     :sub :webtools.spec.subscription/record)
-        :ret vector?)
 
 (defrecord PSAnnouncement
     [id
@@ -74,9 +51,79 @@
      email
      telephone])
 
-;;Specs
+(s/def ::procurement
+  (s/with-gen
+    :webtools.spec.procurement/record
+    (fn [] (gen/fmap (partial apply ->PSAnnouncement)
+                     (gen/tuple
+                      (s/gen :webtools.spec.procurement/id)
+                      (s/gen :webtools.spec.procurement/type)
+                      (s/gen :webtools.spec.procurement/number)
+                      (s/gen :webtools.spec.procurement/open_date)
+                      (s/gen :webtools.spec.procurement/close_date)
+                      (s/gen :webtools.spec.procurement/title)
+                      (s/gen :webtools.spec.procurement/description)
+                      (s/gen :webtools.spec.procurement/file_link))))))
+
+(s/def ::subscription
+  (s/with-gen
+    :webtools.spec.subscription/record
+    (fn [] (gen/fmap (partial ->Subscription)
+                     (gen/tuple
+                      (s/gen :webtools.spec.subscription/id)
+                      (s/gen :webtools.spec.subscription/proc_id)
+                      (s/gen :webtools.spec.subscription/subscription_number)
+                      (s/gen :webtools.spec.subscription/company_name)
+                      (s/gen :webtools.spec.subscription/contact_person)
+                      (s/gen :webtools.spec.subscription/email)
+                      (s/gen :webtools.spec.subscription/telephone))))))
+
+(s/fdef proc-type
+        :args (s/cat :a ::procurement)
+        :ret #{:rfp :ifb})
+
+(s/fdef make-uuid
+        :args (s/cat :id (s/alt :string :webtools.spec.core/uuid-str
+                                :uuid :webtools.spec.core/uuid))
+        :ret :webtools.spec.core/uuid)
+
+(s/fdef get-pns-from-db
+        :args (s/cat :id (s/alt :string :webtools.spec.core/uuid-str
+                                :uuid :webtools.spec.core/uuid))
+        :ret  (s/or :pns ::procurement
+                    :nil nil?))
+
+(s/fdef pns-from-map
+        :args (s/cat :map :webtools.spec.procurement/record)
+        :ret ::procurement)
+
+(s/fdef changes-email
+        :args (s/cat :orig ::procurement
+                     :new ::procurement
+                     :sub :webtools.spec.subscription/record)
+        :ret vector?)
 
 (s/fdef map->PSAnnouncement
-        :args :webtools.spec.procurement/record
-        :ret (partial instance? webtools.procurement.core.PSAnnouncement)
-        :fn (s/and #(= (-> % :ret :id) (-> % :args :id))))
+        :args (s/cat :map (s/alt :pns :webtools.spec.procurement/record
+                                 :nil nil?))
+        :ret  (s/or :pns ::procurement
+                    :sub nil?)
+        :fn   (s/and (fn [record]
+                       (every?
+                        (map
+                         (fn [[key val]]
+                           (= val (-> record :args key))))))))
+
+(s/fdef map->Subscription
+        :args (s/cat :map (s/alt :sub :webtools.spec.subscription/record
+                                 :nil nil?))
+        :ret  (s/or :sub ::subscription
+                    :nil nil?)
+        :fn   (s/and (fn [record]
+                       (every?
+                        (map
+                         (fn [[key val]]
+                           (= val (-> record :args key))))))))
+
+
+

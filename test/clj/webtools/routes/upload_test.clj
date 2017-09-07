@@ -9,6 +9,7 @@
             [clj-time.format :as f]
             [webtools.handler :refer :all]
             [webtools.util :refer :all]
+            [webtools.util.dates :as util-dates]
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.db.core :as db]
@@ -87,7 +88,7 @@
         (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal)))))
 
   (testing "POST /upload/jva-pdf"
-    (with-stub! [[wp/create-media (constantly nil)]]
+    (with-stub! [[wp/create-media (constantly "http://nil")]]
       (let [pdf (file "test/clj/webtools/test/jva-sample.pdf")
             {:keys [status body headers]}
             (auth-req :post "/upload/jva-pdf"
@@ -96,17 +97,16 @@
           (is (= 302 status)))
 
         (testing "should store jva info in DB"
-          (let [jva (db/get-jva {:announce_no "PSS-2017-041"})
-                parse-date (partial f/parse (f/formatter const/date-string))]
-            (is (= (parse-date "August 4, 2017") (:open_date jva)))
-            (is (= (parse-date "August 18, 2017") (:close_date jva)))))
+          (let [jva (db/get-jva {:announce_no "PSS-2017-041"})]
+            (is (= (util-dates/parse-date "August 4, 2017") (:open_date jva)))
+            (is (= (util-dates/parse-date "August 18, 2017") (:close_date jva)))))
 
         (testing "should create wp media"
           (is (= 1 (-> wp/create-media calls count)))
           (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))))
 
   (testing "POST /upload/procurement-pdf"
-    (with-stub! [[wp/create-media (constantly nil)]]
+    (with-stub! [[wp/create-media (constantly "http://nil")]]
       (testing "should handle uploaded rfps"
         (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
               {:keys [status body headers error params] :as response}

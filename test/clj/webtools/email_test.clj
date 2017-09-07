@@ -3,6 +3,7 @@
             [webtools.email :as email :refer [notify-changes notify-deletion notify-addenda]]
             [webtools.procurement.core :refer :all]
             [webtools.db.core :as db]
+            [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.test.fixtures :as fixtures]
             [bond.james :refer [calls with-spy with-stub!]]
@@ -10,7 +11,7 @@
             [clj-time.core :as t]
             [clj-time.format :as f]))
 
-(use-fixtures :once fixtures/prep-db)
+(use-fixtures :once fixtures/prep-db fixtures/instrument)
 
 (use-fixtures :each fixtures/with-rollback)
 
@@ -118,22 +119,28 @@
     (let [open_date (util-dates/parse-date "August 3, 2000")
           close_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 pm")
           new_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 am")
-          original (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
-                                                         :rfp "123" open_date close_date
-                                                         "Title" "D" "L")
-          new-vers (webtools.procurement.core.PSAnnouncement. "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
-                                                         :rfp "123" open_date new_date
-                                                         "New Title" "D" "L")
-          subscribers [{:rfp_id "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
-                        :company_name "Thing 1"
-                        :contact_person "Thing 2"
-                        :email "thing2@thing.one"
-                        :telephone 7894561}
-                       {:rfp_id "9d3ee41e-f79f-4e91-8a9a-535d959ba374"
-                        :company_name "Testers Inc"
-                        :contact_person "Chief Tester"
-                        :email "test@11thethi.ngs"
-                        :telephone 4567891}]]
+          original (->PSAnnouncement
+                    (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
+                    :rfp "123" open_date close_date
+                    "Title" "D" "L")
+          new-vers (->PSAnnouncement
+                    (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
+                    :rfp "123" open_date new_date
+                    "New Title" "D" "L")
+          subscribers [(map->Subscription {:id (java.util.UUID/randomUUID)
+                                           :proc_id (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
+                                           :subscription_number 0
+                                           :company_name "Thing 1"
+                                           :contact_person "Thing 2"
+                                           :email "thing2@thing.one"
+                                           :telephone (util/format-tel-num 7894561)})
+                       (map->Subscription {:id (java.util.UUID/randomUUID)
+                                           :proc_id (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
+                                           :subscription_number 1
+                                           :company_name "Testers Inc"
+                                           :contact_person "Chief Tester"
+                                           :email "test@11thethi.ngs"
+                                           :telephone (util/format-tel-num 4567891)})]]
       (notify-changes new-vers original subscribers)
       (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))
 

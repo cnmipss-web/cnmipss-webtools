@@ -4,7 +4,7 @@
             [webtools.spec.core]))
 
 (s/def ::id :webtools.spec.core/uuid)
-(s/def ::type #{:rfp :ifb})
+(s/def ::type #{:rfp :ifb "rfp" "ifb"})
 (s/def ::number string?)
 (s/def ::open_date :webtools.spec.core/date)
 (s/def ::close_date :webtools.spec.core/date)
@@ -21,3 +21,5 @@
                    ::title
                    ::description
                    ::file_link]))
+
+
