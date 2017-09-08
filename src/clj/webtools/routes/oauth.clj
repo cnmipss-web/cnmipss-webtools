@@ -10,7 +10,8 @@
             [clojure.data.json :as json]
             [compojure.core :refer [defroutes GET]]
             [ring.util.http-response :as respond]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.tools.logging :as log]))
 
 (defn config<-
   [env]
@@ -24,26 +25,31 @@
            (auth/request-auth-url)
            (respond/found)))
   (GET "/oauth/oauth-callback" request
-       (let [token (-> (config<- env)
-                       (auth/get-tokens (get-in request [:params :code]))
-                       (get :access_token))
-             email (-> token
-                       (#(str "https://www.googleapis.com/oauth2/v1/userinfo?"
-                              "fields=email%2Cname&access_token=" %))
-                       (http/get)
-                       (get :body)
-                       (json/read-str)
-                       (get "email"))
-             user (db/get-user-info (keyed [email]))
-             cookie-opts {:http-only true :max-age max-cookie-age :path "/webtools"}]
-         (if (re-seq #"cnmipss.org$" email)
-           (do
-             (if user
-               (db/set-user-token! (keyed [email token]))
-               (let [admin false
-                     id (java.util.UUID/randomUUID)]
-                 (db/create-user! (keyed [email token admin id]))))
-             (-> (respond/found (str (env :server-uri) "#/app"))
-                 (respond/set-cookie "wt-token" token cookie-opts)
-                 (respond/set-cookie "wt-email" email cookie-opts)))
-           (respond/found "/#/login?login_failed=true")))))
+       (try
+         (let [token (-> (config<- env)
+                         (auth/get-tokens (get-in request [:params :code]))
+                         (get :access_token))
+               email (-> token
+                         (#(str "https://www.googleapis.com/oauth2/v1/userinfo?"
+                                "fields=email%2Cname&access_token=" %))
+                         (http/get)
+                         (get :body)
+                         (json/read-str)
+                         (get "email"))
+               user (db/get-user-info (keyed [email]))
+               cookie-opts {:http-only true :max-age max-cookie-age :path "/webtools"}]
+           (if (re-seq #"cnmipss.org$" email)
+             (do
+               (if user
+                 (db/set-user-token! (keyed [email token]))
+                 (let [admin false
+                       id (java.util.UUID/randomUUID)
+                       roles nil]
+                   (db/create-user! (keyed [email token admin id roles]))))
+               (-> (respond/found (str (env :server-uri) "#/app"))
+                   (respond/set-cookie "wt-token" token cookie-opts)
+                   (respond/set-cookie "wt-email" email cookie-opts)))
+             (respond/found "/#/login?login_failed=true")))
+         (catch Exception e
+           (log/error e)
+           (respond/internal-server-error {:message (.getMessage e)})))))
