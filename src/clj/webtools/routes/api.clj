@@ -61,8 +61,8 @@
       (mapv (comp wp/delete-media :id) addenda)
       (db/delete-pnsa! body))))
 
-(def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address."
-                :other-sql "Error performing SQL transaction."
+(def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address.  "
+                :other-sql "Error performing SQL transaction.  "
                 :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance. "})
 
 (defroutes api-routes
@@ -90,7 +90,7 @@
               (json-response resp/ok created))
 
             (catch java.sql.BatchUpdateException e
-              (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_(rfp|ifb)_id_key"))]
+              (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\""))]
                 (json-response resp/internal-server-error {:message (:duplicate error-msg)})
                 (json-response resp/internal-server-error {:message (str (:other-sql error-msg)
                                                                          (.getMessage e))})))
@@ -141,6 +141,7 @@
               admin (-> (get-in request [:body :admin]) truthy)
               id (java.util.UUID/randomUUID)
               user (keyed [email admin roles id])]
+          (log/info "Created User: " user)
           (query-route db/get-all-users
                        (db/create-user! user)
                        (future (email/invite user)))))
