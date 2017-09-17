@@ -1,0 +1,30 @@
+.sidebar {
+    position: fixed;
+    top: 46px;
+    left: 0px;
+    width: 300px;
+    border-right: 1px solid transparentize($blue, 0.85);
+    z-index: 1;
+    background: $sidebar-bg-color;
+
+    @include custom-transition(left 0.5s, ease, 0s);
+}
+
+.sidebar-btn {
+    width: 100%;
+    height: 100px;
+    text-align: center;
+    border-radius: 0px;
+    background-color: inherit;
+    color: $blue;
+    @include custom-transition(background-color 0.65s, ease, 0s);
+
+    &:hover, &:focus {
+        background-color: $sidebar-bg-hilight;
+    }
+}
+
+.sidebar-btn.active {
+    background-color: $sidebar-bg-active;
+}
+

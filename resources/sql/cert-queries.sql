@@ -19,6 +19,7 @@ WHERE cert_no = :cert_no
 -- :doc retrieve a user given the cert_no
 SELECT * FROM certifications
 WHERE cert_no = :cert_no
+order by cert_no
 
 -- :name get-all-certs :? :*
 -- :doc retrieve the full table of certifications

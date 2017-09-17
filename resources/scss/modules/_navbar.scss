@@ -1,0 +1,15 @@
+header.navbar {
+    background-color: $blue;
+    color: $nav-link-color;
+
+    a {
+        color: $nav-link-color;
+    }
+    z-index: 1000;
+    border-radius: 0;
+}
+
+.navbar-footer {
+    float: right;
+}
+

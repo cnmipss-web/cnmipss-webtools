@@ -18,3 +18,12 @@
     min-width: $lg-width;
   }
 }
+
+/*
+ * Custom width columns
+ */
+@mixin custom-columns($n, $prefix) {
+  @for $i from 1 through $n {
+  #{$prefix}.custom-col-#{$i} { width: 100% / $n * $i; }
+  }
+}

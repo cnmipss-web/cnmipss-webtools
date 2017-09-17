@@ -22,6 +22,16 @@ $light-blue: #105194;
 $light-gold: #dfc253;
 $manila: #f1d592;
 
+// COLOR PALETTE VARIABLES
+$gray-dark: #212529;
+$gray: #495057;
+$gray-light: #adb5bd;
+$brand-primary: #1b6ec2;
+$brand-success: #396f3a;
+$brand-warning: #b24d04;
+$brand-danger: #c92a2a;
+$brand-info: #0b7285;
+
 /**
  * Colors by Function
  */
@@ -31,6 +41,43 @@ $header-bg-color: $blue;
 $nav-btn-bg-color: $gold;
 $nav-link-color: white;
 $nav-link-hover-color: $light-gold;
+
+$sidebar-transparency: 0.15;
+$sidebar-bg-color: transparentize(white, $sidebar-transparency);
+$sidebar-bg-hilight: transparentize(lighten($light-gold, 25), $sidebar-transparency);
+$sidebar-bg-active: transparentize($light-gold, $sidebar-transparency);
+
+/**
+ * Font Weights
+ */
+
+$light: 100;
+$regular: 400;
+$bold: 600;
+
+/**
+ * Fonts
+ */
+
+$base-font-family: 'Roboto', Arial, sans-serif;
+$base-font-weight: $regular;
+$base-font-size: 14px;
+$base-font-line-height: 1.5;
+
+$article-font-family: serif;
+$article-font-weight: $regular;
+$article-font-size: 14px;
+$article-font-line-height: 1.5;
+
+$title-font-family: $base-font-family;
+$title-font-weight: $bold;
+$title-font-size: 24px;
+$title-font-line-height: 2;
+
+$fixed-font-family: monospace;
+$fixed-font-weight: $regular;
+$fixed-font-size: 85%;
+$fixed-font-line-height: $base-font-line-height;
 
 /**
  * Accessibility Variables
@@ -43,3 +90,8 @@ $alt-outline: 1px solid red;
  * Borders
  */
 $report-tabs-border: 1px solid $manila;
+$drop-shadow: 1px 2px 2px 2px #ddd;
+
+/**
+ * Misc
+ */

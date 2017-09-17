@@ -1,0 +1,94 @@
+/**
+ * Accessible button colors to replace Bootstrap defaults
+ */
+$btn-default-color: #fff;
+$btn-default-bg: $gray;
+$btn-default-color-hover: #fff;
+$btn-default-bg-start: $btn-default-bg;
+$btn-default-bg-end: darken($btn-default-bg, 10%);
+$btn-default-border: darken($btn-default-bg, 5%);;
+
+$btn-primary-color: #fff;
+$btn-primary-bg: $brand-primary;
+$btn-primary-bg-start: $btn-primary-bg;
+$btn-primary-bg-end: darken($btn-primary-bg, 10%);
+$btn-primary-border: darken($btn-primary-bg, 5%);
+
+$btn-primary-inverse-color: $btn-primary-bg;
+$btn-primary-inverse-bg: $btn-primary-color;
+
+$btn-success-color: #fff;
+$btn-success-bg: $brand-success;
+$btn-success-bg-start: $btn-success-bg;
+$btn-success-bg-end: darken($btn-success-bg, 10%);
+$btn-success-border: darken($btn-success-bg, 5%);
+
+$btn-warning-color: #fff;
+$btn-warning-bg: $brand-warning;
+$btn-warning-bg-start: $btn-warning-bg;
+$btn-warning-bg-end: darken($btn-warning-bg, 10%);
+$btn-warning-border: darken($btn-warning-bg, 5%);
+
+$btn-danger-color: #fff;
+$btn-danger-bg: $brand-danger;
+$btn-danger-bg-start: $btn-danger-bg;
+$btn-danger-bg-end: darken($btn-danger-bg, 10%);
+$btn-danger-border: darken($btn-danger-bg, 5%);
+
+$btn-info-color: #fff;
+$btn-info-bg: $brand-info;
+$btn-info-bg-start: $btn-info-bg;
+$btn-info-bg-end: darken($btn-info-bg, 10%);
+$btn-info-border: darken($btn-info-bg, 5%);
+
+$btn-disabled-color: $gray-dark;
+$btn-disabled-bg-color: $gray-light;
+
+
+/**
+ * Button Styles
+ */
+@mixin button-variant($color, $bg, $border) {
+    color: $color;
+    background-color: $bg;
+    border-color: $border;
+}
+
+//.btn.btn-default {
+//  @include button-variant($btn-default-color, $btn-default-bg, $btn-default-border);
+//}
+.btn.btn-primary {
+  @include button-variant($btn-primary-color, $btn-primary-bg, $btn-primary-border);
+}
+// Success appears as green
+.btn.btn-success {
+  @include button-variant($btn-success-color, $btn-success-bg, $btn-success-border);
+}
+// Info appears as blue-green
+.btn.btn-info {
+  @include button-variant($btn-info-color, $btn-info-bg, $btn-info-border);
+}
+// Warning appears as orange
+.btn.btn-warning {
+  @include button-variant($btn-warning-color, $btn-warning-bg, $btn-warning-border);
+}
+// Danger and error appear as red
+.btn.btn-danger {
+  @include button-variant($btn-danger-color, $btn-danger-bg, $btn-danger-border);
+}
+
+
+button.nav-link {
+    cursor: pointer;
+    border: none;
+    background: inherit;
+    color: inherit;
+}
+
+button.file-link {
+    padding: 4px 6px;
+}
+ 
+button.jva-reannounce {
+    margin-right: auto;
+}

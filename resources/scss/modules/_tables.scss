@@ -1,0 +1,128 @@
+table {
+    margin-top: 15px;
+    width: 100%;
+    box-shadow: $drop-shadow;
+    font-family: $base-font-family;
+    font-weight: $base-font-weight;
+    font-size: $base-font-size;
+    line-height: 1.25em;
+    
+    tr.row:nth-of-type(even) {
+        &, label {
+            background-color: lighten($light-gold, 35);
+        }
+    }
+    form {
+        box-shadow: none;
+    }
+}
+
+th {
+    padding: 10px 0px;;
+}
+
+tr {
+    margin: 0;
+    padding: 0px;
+    border-bottom: 1px solid #ddd;
+    
+}
+
+tr.row.user-list-row {
+    margin: 0;
+    width: 100%;
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+    padding-bottom: 5px;
+}
+
+table.jva-list {
+    max-height: 800px;
+    overflow-y: scroll;
+}
+
+tr.row.jva-list-row {
+    white-space: pre-wrap;
+    font-size: 14px;
+    border-bottom: 1px solid #ddd;
+
+    &.closed {
+        background-color: lightgrey !important;
+    }
+    
+    strong {
+        font-weight: 600;
+    }
+
+    em {
+        color: red;
+        font-weight: 600;
+    }
+
+    td:not(:first-child) {
+        border-left: 1px solid #ddd;
+    }
+    
+    td {
+        padding-top: 5px;
+        padding-bottom: auto;
+        max-height: 150px;
+        min-height: 75px;
+        text-align: center;
+
+        button {
+            margin: 5px;
+        }
+    }
+
+}
+
+div.procurement-table-box {
+    box-shadow: $drop-shadow;
+    display: table;
+    margin-top: 20px;
+    margin-top: 20px;
+    max-height: 800px;
+    overflow-y: scroll;
+    padding: 0px;
+    padding-top: 10px;
+    
+    h2.procurement-title {
+        font-family: $title-font-family;
+        font-size: $title-font-size;
+        font-weight: $title-font-weight;
+        line-height: $title-font-line-height;
+    }
+
+    table {
+        box-shadow: none;
+        margin: 0px;
+    }
+}
+
+
+@include custom-columns(20, td);
+
+#existing-addenda {
+    width: 250px;
+    margin: 0 0;
+    td, th {
+        width: 50px;
+        text-align: center;
+    }
+}
+#existing-addenda, #pns-subscriber-table {
+    caption {
+        margin-left: 15px;
+        caption-side: top;
+    }
+
+    &,td,th,tr {
+        box-shadow: none;
+        border: none;
+    }
+}
+#pns-subscriber-table {
+    text-align: left;
+}

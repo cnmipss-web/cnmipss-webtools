@@ -1,44 +1,44 @@
 <!DOCTYPE html>
 <html>
-  <head>
-      <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Welcome to certification-db</title>
-  </head>
-  <body>
-    
-    <div id="app">
-      <div class="container-fluid">
-        <div class="card-deck">
-          <div class="card-block">
-            <h4>Welcome to certification-db</h4>
-            <p>If you're seeing this message, that means you haven't yet compiled your ClojureScript!</p>
-            <p>Please run <code>lein figwheel</code> to start the ClojureScript compiler and reload the page.</p>
-            <h4>For better ClojureScript development experience in Chrome follow these steps:</h4>
-            <ul>
-              <li>Open DevTools
-              <li>Go to Settings ("three dots" icon in the upper right corner of DevTools > Menu > Settings F1 > General > Console)
-              <li>Check-in "Enable custom formatters"
-              <li>Close DevTools
-              <li>Open DevTools
-            </ul>
-            <p>See <a href="http://www.luminusweb.net/docs/clojurescript.md">ClojureScript</a> documentation for further details.</p>
-          </div>
+    <head>
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Welcome to certification-db</title>
+    </head>
+    <body>
+        
+        <div id="app">
+            <div class="container" >
+                <div class="row">
+                    <div id="loading-wheel" class="searchable-table col-xs-12">
+                        <div id="floatingCirclesG">
+                            <div class="f_circleG" id="frotateG_01"></div>
+                            <div class="f_circleG" id="frotateG_02"></div>
+                            <div class="f_circleG" id="frotateG_03"></div>
+                            <div class="f_circleG" id="frotateG_04"></div>
+                            <div class="f_circleG" id="frotateG_05"></div>
+                            <div class="f_circleG" id="frotateG_06"></div>
+                            <div class="f_circleG" id="frotateG_07"></div>
+                        <div class="f_circleG" id="frotateG_08"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-
-    <!-- scripts and styles -->
-    {% style "/assets/bootstrap/css/bootstrap.min.css" %}
-    {% style "/assets/font-awesome/css/font-awesome.min.css" %}
-    {% style "/css/screen.css" %}
-
-    <script type="text/javascript">
-        var context = "{{servlet-context}}";
-        var csrfToken = "{{csrf-token}}";
-    </script>
-    {% script "/js/app.js" %}
-  </body>
+        
+        <!-- scripts and styles -->
+        {% style "/webtools/assets/bootstrap/css/bootstrap.min.css" %}
+        {% style "/webtools/assets/font-awesome/css/font-awesome.min.css" %}
+        {% style "/webtools/css/screen.css" %}
+        
+        <script type="text/javascript">
+         var context = "{{servlet-context}}";
+         var csrfToken = "{{csrf-token}}";
+        </script>
+        {% script "/webtools/js/app.js" %}
+        {% script "/webtools/assets/tether/dist/js/tether.min.js" %}
+        {% script "/webtools/assets/bootstrap/js/bootstrap.min.js" %}
+    </body>
 </html>
 
 
