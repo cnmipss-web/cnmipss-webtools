@@ -188,8 +188,9 @@
                        (clear-procurement :rfp rfp))))
 
   (POST "/api/delete-ifb" {:keys [body]}
-        (query-route get-all-procurement
-                     (future (email/notify-subscribers :delete :ifbs body))
-                     (clear-procurement :ifb body))))
+        (let [ifb (pns-from-map body)]
+          (query-route get-all-procurement
+                       (future (email/notify-subscribers :delete :ifbs ifb))
+                       (clear-procurement :ifb ifb)))))
 
 

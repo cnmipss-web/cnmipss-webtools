@@ -3,6 +3,7 @@
             [ajax.core :as ajax]
             [webtools.handlers.api :as ajax-handlers]
             [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
             [webtools.constants :as const]
             [webtools.procurement.core :as p]))
 
@@ -106,7 +107,8 @@
 
 (defn delete-procurement [item]
   (let [type (-> item :type name)
-        type-caps (clojure.string/upper-case type)]
+        type-caps (clojure.string/upper-case type)
+        {:keys [id close_date open_date]} item]
     (fn [e]
       (.preventDefault e)
       (if (js/confirm (str "WARNING: Deleting this " type-caps
@@ -117,6 +119,8 @@
         (ajax/ajax-request {:uri (str "/webtools/api/delete-" type)
                             :method :post
                             :format (ajax/json-request-format)
-                            :params item
+                            :params (-> (assoc item :id (str id))
+                                        (assoc :close_date (util-dates/print-date-at-time close_date))
+                                        (assoc :open_date (util-dates/print-date open_date)))
                             :response-format (util/full-response-format ajax/json-response-format)
                             :handler ajax-handlers/all-procurement})))))

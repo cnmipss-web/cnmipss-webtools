@@ -5,7 +5,8 @@
             [webtools.constants :as const]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
-            [clj-time.format :as f])
+            [clj-time.format :as f]
+            [clojure.tools.logging :as log])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper])) 
 
@@ -132,11 +133,15 @@
 
 
 (let [f (fn [pns]
-          (if (every? some? [(:number pns) (:type pns) (:id pns)])
-            (-> (assoc pns :id (-> pns :id make-uuid))
-                (assoc :open_date (-> pns :open_date util-dates/parse-date))
-                (assoc :close_date (-> pns :close_date util-dates/parse-date-at-time))
-                map->PSAnnouncement)))]
+          (try
+            (if (every? some? [(:number pns) (:type pns) (:id pns)])
+              (-> (assoc pns :id (-> pns :id make-uuid))
+                  (assoc :open_date (-> pns :open_date util-dates/parse-date))
+                  (assoc :close_date (-> pns :close_date util-dates/parse-date-at-time))
+                  map->PSAnnouncement))
+            (catch Exception e
+              (log/error e)
+              (throw e))))]
   (extend-protocol create-procurement
     clojure.lang.PersistentArrayMap
     (pns-from-map [pns] (f pns))

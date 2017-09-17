@@ -394,7 +394,7 @@
             (is (= 1 (-> email/notify-subscribers calls count)))
             (is (= :delete (-> email/notify-subscribers calls first :args first)))
             (is (= :ifbs (-> email/notify-subscribers calls first :args second)))
-            (is (= ifb (-> email/notify-subscribers calls first :args last))))
+            (is (= (pns-from-map ifb) (-> email/notify-subscribers calls first :args last))))
 
           (testing "should delete related addenda"
             (let [addenda (db/get-addenda {:proc_id (:id ifb)})]
