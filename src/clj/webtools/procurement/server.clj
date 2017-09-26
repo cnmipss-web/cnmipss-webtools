@@ -71,7 +71,7 @@
 
 (def procurement-regexes
   {:type #"(RFP|IFB)"
-   :number #"(?i)PSS (RFP|IFB)\#\:\s*(\d{2}\-\d{3})"
+   :number #"(?i)PSS\s*(RFP|IFB)\s*\#\s*\:?\s*(\d+\-\d+)"
    :open_date #"(?i)^(\.*OPEN\:\s*)(\w+\s\d{2},\s\d{4})"
    :close_date #"(?i)^(\.*CLOSE\:\s*)(\w+\s\d{2},\s\d{4}\s+at\s+\d{1,2}\:\d{2}\s+am|pm)"
    :title #"(?i)Title\:\s*([\p{L}\p{Z}\p{M}\p{P}\p{N}]+)"})
