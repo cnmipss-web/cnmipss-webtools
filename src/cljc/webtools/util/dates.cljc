@@ -42,7 +42,12 @@
      org.joda.time.DateTime
      (parse-date [date] date)
      (parse-datetime [date] date)
-     (parse-date-at-time [date] date))
+     (parse-date-at-time [date] date)
+
+     nil
+     (parse-date [date] nil)
+     (parse-datetime [date] nil)
+     (parse-date-at-time [date] nil))
 
    :cljs
    (extend-protocol parse-dates
