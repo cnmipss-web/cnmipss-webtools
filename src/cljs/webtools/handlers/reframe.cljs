@@ -38,11 +38,17 @@
 (reg-event-db
  :verified-token
  (fn [db [_ email admin roles]]
-   (as-> (assoc db :bad-login false) db
+   (let [roles-list (clojure.string/split roles #",")]
+     (when (and
+            (not admin)
+            (= 1 (count roles-list)))
+       (dispatch [:set-active-role (first roles-list)])
+       (dispatch [:hide-roles]))
+     (as-> (assoc db :bad-login false) db
        (assoc db :session (util/keyed [email admin]))
        (if admin
          (assoc db :roles const/role-list)
-         (assoc db :roles (clojure.string/split roles #","))))))
+         (assoc db :roles roles-list))))))
 
 (reg-event-db
  :action-success
@@ -76,11 +82,11 @@
  :store-users
  (fn [db [_ users]]
    (let [{:keys [email]} (db :session)
-         current-user (first (filter #(= email (:email %)) users))]
+         {:keys [admin roles]} (first (filter #(= email (:email %)) users))]
      (-> db
          (assoc :user-list users)
-         (assoc-in [:session :admin] (:admin current-user))
-         (assoc :roles (clojure.string/split (:roles current-user) #","))))))
+         (assoc-in [:session :admin] admin)
+         (assoc :roles (clojure.string/split roles #","))))))
 
 (reg-event-db
  :toggle-roles
