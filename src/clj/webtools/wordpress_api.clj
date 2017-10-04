@@ -1,6 +1,7 @@
 (ns webtools.wordpress-api
   (:require [webtools.constants :as const :refer [wp-media-route wp-token-route]]
             [webtools.util :as util]
+            [clojure.tools.logging :as log]
             [clj-http.client :as http]
             [webtools.config :refer [env]]
             [webtools.json :refer [json->edn]]))
@@ -38,7 +39,7 @@
         (if error (throw error))
         (-> body json->edn :source_url))
       (catch Exception e
-        (println "Error creating wp-media: " (.getMessage e))))))
+        (log/error e)))))
 
 (defn delete-media
   [slug]
@@ -53,4 +54,4 @@
                     :body (-> {:force true} clojure.data.json/write-str)
                     :error-handler println})
       (catch Exception e
-        (println e)))))
+        (log/error e)))))
