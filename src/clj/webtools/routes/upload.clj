@@ -210,15 +210,16 @@
                                                " for "
                                                (clojure.string/upper-case (name type))
                                                " " number)
-                              :slug slug)]
-    (when (some? file_link)
-      (future (email/notify-subscribers :addenda (get-pns-from-db uuid) {:file_link file_link
-                                                                         :proc_id uuid}))
-      (db/create-addendum! {:id slug
-                            :file_link file_link
-                            :proc_id uuid
-                            :number (inc (count existing-addenda))}))
-    (if (nil? file_link) (throw (Exception. "Error uploading addendum to Wordpress")))))
+                                   :slug slug)]
+    (if (nil? file_link)
+      (throw (Exception. "Error uploading addendum to Wordpress"))
+      (do
+        (future (email/notify-subscribers :addenda (get-pns-from-db uuid) {:file_link file_link
+                                                                           :proc_id uuid}))
+        (db/create-addendum! {:id slug
+                              :file_link file_link
+                              :proc_id uuid
+                              :number (inc (count existing-addenda))})))))
 
 (defroutes upload-routes
   (POST "/upload/certification-csv" req

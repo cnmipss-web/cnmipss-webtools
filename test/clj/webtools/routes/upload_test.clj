@@ -12,6 +12,7 @@
             [webtools.util.dates :as util-dates]
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
+            [webtools.email :as email]
             [webtools.db.core :as db]
             [webtools.constants :as const]
             [webtools.test.constants :as test-const]
@@ -145,4 +146,24 @@
 
           (testing "should create wp media"
             (is (= 2 (-> wp/create-media calls count)))
-            (is (= java.util.UUID (-> wp/create-media calls second :args last type)))))))))
+            (is (= java.util.UUID (-> wp/create-media calls second :args last type))))))))
+
+  (testing "POST /upload/procurement-addendum"
+    (with-stub! [[wp/create-media (constantly "http://cnmipss.org/file-link.pdf")]
+                 [email/notify-subscribers (constantly nil)]]
+      (testing "should store uploaded addenda"
+        (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
+              {:keys [status body headers error params]}
+              (auth-req :post "/upload/procurement-addendum"
+                        (assoc :params {:file {:tempfile pdf :filename "sample-addendum.pdf" :size (.length pdf)}
+                                        :id "d0002906-6432-42b5-b82b-35f0d710f827"
+                                        :type :rfp
+                                        :number "NNN-STRING"}))]
+          (testing "should redirect after successful upload"
+            (is (= 302 status))
+            (is (nil? error))
+            (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
+
+          (testing "should store addendum info in postgres DB")
+
+          (testing "should create wp media"))))))
