@@ -7,7 +7,7 @@
             [webtools.json :refer :all]
             [clojure.test :refer :all]
             [clj-http.client :as http]
-            [bond.james :refer [calls with-spy with-stub!]]))
+            [bond.james :refer [calls with-spy with-stub! with-stub-ns]]))
 
 (use-fixtures :once fixtures/prep-db)
 
@@ -43,14 +43,14 @@
 
 (deftest test-delete-media
   (testing "deletes a file from the wordpress server"
-    (with-stub! [[http/delete (constantly nil)]
-                 [http/get (constantly {:body (edn->json [{:id "1234"}])})]]
+    (with-stub-ns [[clj-http.client (constantly {:body (edn->json [{:id "1234"}])})]]
       (let [slug "f9869a17-7a64-40a9-ba5b-83e53f855268"
               url (str (:wp-host env) wp-media-route "/1234")]
         (wp/delete-media slug)
+
         (testing "should http/get id for media url"
           (is (= 1 (-> http/get calls count))))
-        
+
         (testing "should call http/delete with correct url"
           (is (= 1 (-> http/delete calls count)))
           (is (= url (-> http/delete calls first :args first))))))))

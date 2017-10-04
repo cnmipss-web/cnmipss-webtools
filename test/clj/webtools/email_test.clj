@@ -110,7 +110,7 @@
         (testing ":delete event"
           (email/notify-subscribers :delete rfp nil)
 
-          (testing "should call notify-deletion"
+          (testing "should call notify-deletion if PSAnnouncement is open"
             (is (= 1 (-> notify-deletion calls count)))
             (is (= rfp (-> notify-deletion calls first :args first)))))))))
 
@@ -145,17 +145,41 @@
       (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))
 
 (deftest test-notify-addenda
-  (with-stub! [[send-message (constantly nil)]]
-    (let [rfp (get-pns-from-db (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"))
-          addenda {:id "84ee3bd5-9077-449f-a576-08eec5b26028"
-                   :proc_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
-          subscribers (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
-      (notify-addenda rfp addenda subscribers)
-      (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))
+  (testing "should send notification message of new addenda"
+    (with-stub! [[send-message (constantly nil)]]
+      (let [proc-id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
+            rfp (get-pns-from-db proc-id)
+            addenda {:id "84ee3bd5-9077-449f-a576-08eec5b26028"
+                     :proc_id proc-id
+                     :file_link ""}
+            subscribers (db/get-subscriptions {:proc_id proc-id})]
+        (notify-addenda addenda rfp subscribers)
+        (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org")
+
+        (testing "should generate correct subject lines"
+          (let [subject (->> send-message calls first :args first :subject)]
+            (is (= "Addendum added to RFP# 17-015 Test Request for Proposal #3" subject))))))))
 
 (deftest test-notify-deletion
-  (with-stub! [[send-message (constantly nil)]]
-    (let [rfp (get-pns-from-db (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"))
-          subscribers (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
-      (notify-deletion rfp subscribers)
-      (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))
+  (testing "should send notification message if open PSAnnouncement is deleted"
+    (with-stub! [[send-message (constantly nil)]]
+      (let [rfp (-> (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
+                    (get-pns-from-db)
+                    (util/make-status))
+            subscribers (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
+        (notify-deletion rfp subscribers)
+        (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org")
+
+        (testing "should generate correct subject lines"
+          (let [subject (->> send-message calls first :args first :subject)]
+            (is (= "RFP# 17-015 Test Request for Proposal #3 has been DELETED" subject)))))))
+
+  (testing "should not send notification message if closed PSAnnouncement is deleted"
+    (with-stub! [[send-message (constantly nil)]]
+      (let [rfp (-> (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
+                    (get-pns-from-db)
+                    (util/make-status))
+            subscribers (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
+        (notify-deletion (assoc rfp :close_date (t/minus (t/now) (t/days 1))) subscribers)
+        (validate-emails (-> send-message calls))
+        (is (= 0 (-> send-message calls count)))))))
