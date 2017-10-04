@@ -111,7 +111,7 @@
         :ret nil?)
 
 (defn notify-changes [new orig subscribers]
-  (println "Notify changes called")
+  (log/info "Notifying subscribers of PSAnnouncement Changes:" new orig subscribers)
   (let [title-string (str (-> new :type name clojure.string/upper-case)
                             "# " (:number orig) " " (:title orig))
         send-fn
@@ -131,81 +131,64 @@
   (fn [subscriber]
     (= (:id pns) (-> subscriber :proc_id make-uuid))))
 
-(defn notify-deletion [pns subscribers]
-  (log/info "\n\nDeleting: \n" pns "\n\n" subscribers)
-  (let [send-fn
-        (fn [{:keys [email contact_person] :as sub}]
-          (try
-            (send-message {:to email
-                           :from "procurement@cnmipss.org"
-                           :subject (str (if (-> sub :rfp_id some?)
-                                           "RFP#"
-                                           "IFB#")
-                                         (if (-> sub :rfp_id some?)
-                                           (:rfp_no pns)
-                                           (:ifb_no pns))
-                                         " " (:title pns)
-                                         "has been DELETED")
-                           :body [{:type "text/html"
-                                   :content (html
-                                             [:html
-                                              [:body
-                                               [:p (str "Greetings " contact_person ",")]
-                                               [:p (str "We would like to notify you that "
-                                                        (if (-> sub :rfp_id some?)
-                                                          "RFP#"
-                                                          "IFB#")
-                                                        (if (-> sub :rfp_id some?)
-                                                          (:rfp_no pns)
-                                                          (:ifb_no pns))
-                                                        " " (:title pns)
-                                                        " has been withdrawn from the CNMI PSS website along with any addenda or other documentation.  You will not receive any further emails regarding this matter.")]
-                                               [:br]
-                                               [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-                                               [:br]
-                                               [:p "Thank you,"]
-                                               [:p "Kimo Rosario"]
-                                               [:p "Procurement & Supply Officer"]
-                                               [:p "CNMI PSS"]]])}]})
-            (catch Exception e
-              (log/error e))))]
-    (mapv send-fn subscribers)))
+(defn notify-deletion [{:keys [number title] :as pns} subscribers]
+  (log/info "Deleting: " pns subscribers)
+  (if-let [not-closed? (:status (util/make-status pns))]
+    (let [title-string (str (-> pns :type name clojure.string/upper-case) "# " number " " title)
+          send-fn
+          (fn [{:keys [email contact_person] :as sub}]
+            (try
+              (send-message
+               {:to email
+                :from "procurement@cnmipss.org"
+                :subject (str title-string " has been DELETED")
+                :body [{:type "text/html"
+                        :content (html
+                                  [:html
+                                   [:body
+                                    [:p (str "Greetings " contact_person ",")]
+                                    [:p (str "We would like to notify you that "
+                                             title-string
+                                             " has been withdrawn from the CNMI PSS website along with any addenda or other documentation.  You will not receive any further emails regarding this matter.")]
+                                    [:br]
+                                    [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                    [:br]
+                                    [:p "Thank you,"]
+                                    [:p "Kimo Rosario"]
+                                    [:p "Procurement & Supply Officer"]
+                                    [:p "CNMI PSS"]]])}]})
+              (catch Exception e
+                (log/error e))))]
+      (mapv send-fn subscribers))
+    (log/info "PSAnnouncement already closed, skipping email notifications")))
 
 (defn notify-addenda [addendum pns subscribers]
-  (log/info "\n\nNotify-Addenda:\n\nPNS: " pns "\n\nAdd: " addendum "\n\nSubs: " subscribers)
-  (let [send-fn
+  (log/info "Notify-Addenda:\n\nPNS: " pns "\n\nAdd: " addendum "\n\nSubs: " subscribers)
+  (let [title-string (str (-> pns :type name clojure.string/upper-case) "# " (:number pns) " " (:title pns))
+        send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (try
-            (send-message {:to email
-                           :from "procurement@cnmipss.org"
-                           :subject (str "Addendum added to "
-                                         (if (-> sub :rfp_id some?)
-                                           "RFP#"
-                                           "IFB#")
-                                         (if (-> sub :rfp_id some?)
-                                           (:rfp_no pns)
-                                           (:ifb_no pns))
-                                         " " (:title pns))
-                           :body [{:type "text/html"
-                                   :content (html
-                                             [:html
-                                              [:body
-                                               [:p (str "Greetings " contact_person ",")]
-                                               [:p (str "We would like to notify you that an addendum has been added to "
-                                                        (if (-> sub :rfp_id some?)
-                                                          "RFP#"
-                                                          "IFB#")
-                                                        (:number pns) " " (:title pns)
-                                                        ".  You may access the full content of this addendum through ")
-                                                [:a {:href (:file_link addendum)}
-                                                 "this link."]]
-                                               [:br]
-                                               [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-                                               [:br]
-                                               [:p "Thank you,"]
-                                               [:p "Kimo Rosario"]
-                                               [:p "Procurement & Supply Officer"]
-                                               [:p "CNMI PSS"]]])}]})
+            (send-message
+             {:to email
+              :from "procurement@cnmipss.org"
+              :subject (str "Addendum added to " title-string)
+              :body [{:type "text/html"
+                      :content (html
+                                [:html
+                                 [:body
+                                  [:p (str "Greetings " contact_person ",")]
+                                  [:p (str "We would like to notify you that an addendum has been added to "
+                                           title-string
+                                           ".  You may access the full content of this addendum through ")
+                                   [:a {:href (:file_link addendum)}
+                                    "this link."]]
+                                  [:br]
+                                  [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                  [:br]
+                                  [:p "Thank you,"]
+                                  [:p "Kimo Rosario"]
+                                  [:p "Procurement & Supply Officer"]
+                                  [:p "CNMI PSS"]]])}]})
             (catch Exception e
               (log/error e))))]
     (mapv send-fn subscribers)))
