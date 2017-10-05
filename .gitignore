@@ -16,3 +16,4 @@ hs_err_pid18549.log
 temp.csv
 node_modules
 out/
+.idea/
