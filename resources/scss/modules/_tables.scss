@@ -2,6 +2,7 @@ table {
     margin-top: 15px;
     width: 100%;
     box-shadow: $drop-shadow;
+    border: $table-border;
     font-family: $base-font-family;
     font-weight: $base-font-weight;
     font-size: $base-font-size;
@@ -17,19 +18,21 @@ table {
     }
 }
 
-th {
+th, td {
     padding: 10px 0px;;
 }
 
-tr {
-    margin: 0;
+tr, tr.row {
+    margin: 0px;
     padding: 0px;
     border-bottom: 1px solid #ddd;
-    
+
+    td:not(:first-child) {
+        border-left: 1px solid #ddd;
+    }
 }
 
 tr.row.user-list-row {
-    margin: 0;
     width: 100%;
     display:flex;
     flex-direction: row;
@@ -60,13 +63,8 @@ tr.row.jva-list-row {
         font-weight: 600;
     }
 
-    td:not(:first-child) {
-        border-left: 1px solid #ddd;
-    }
     
     td {
-        padding-top: 5px;
-        padding-bottom: auto;
         max-height: 150px;
         min-height: 75px;
         text-align: center;
@@ -102,7 +100,8 @@ div.procurement-table-box {
 }
 
 
-@include custom-columns(20, td);
+@include custom-columns(20, td)
+@include custom-columns(20, th)
 
 #existing-addenda {
     width: 250px;

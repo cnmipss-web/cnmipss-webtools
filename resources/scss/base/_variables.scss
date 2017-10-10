@@ -90,7 +90,9 @@ $alt-outline: 1px solid red;
  * Borders
  */
 $report-tabs-border: 1px solid $manila;
-$drop-shadow: 1px 2px 2px 2px #ddd;
+$drop-shadow: none; //1px 2px 2px 2px #ddd;
+$table-border: 1px solid #ddd;
+$form-border: none;
 
 /**
  * Misc
