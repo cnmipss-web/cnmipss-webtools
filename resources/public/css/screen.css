@@ -674,3 +674,10 @@ th.custom-col-20 {
 
 #pns-subscriber-table {
   text-align: left; }
+
+#cert-error-list {
+  border: 2px solid darkred; }
+  #cert-error-list caption {
+    caption-side: top;
+    color: darkred;
+    font-weight: 600; }

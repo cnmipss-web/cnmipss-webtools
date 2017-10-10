@@ -111,6 +111,7 @@ div.procurement-table-box {
         text-align: center;
     }
 }
+
 #existing-addenda, #pns-subscriber-table {
     caption {
         margin-left: 15px;
@@ -122,6 +123,16 @@ div.procurement-table-box {
         border: none;
     }
 }
+
 #pns-subscriber-table {
     text-align: left;
+}
+
+#cert-error-list {
+    border: 2px solid darkred;
+    caption {
+        caption-side: top;
+        color: darkred;
+        font-weight: $bold;
+    }
 }

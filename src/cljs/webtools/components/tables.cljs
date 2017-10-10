@@ -195,17 +195,26 @@
                          (delete-cert e)))}
        [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
 
+(defn- flatten-errors [list next-error]
+  (let [certs (->> (clojure.string/split next-error #"\n")
+                   (mapv cljs.reader/read-string))]
+    (concat list certs)))
 
 (defn error-table [error-list]
-  [:table
-   [:caption "Duplicate Certs: "]
-   [:tbody
-    (for [error error-list]
-      (let [certs (->> (clojure.string/split error #"\n")
-                       (mapv cljs.reader/read-string))]
-        ^{:key (str (* 100000000 (.random js/Math)))} [:div.container-fluid
-                                                       [cert-row (first certs)]
-                                                       [cert-row (second certs)]]))]])
+  (let [th-props {:scope "col"}]
+    [:table#cert-error-list
+     [:caption "Duplicate Certs: These records caused an error and were not saved to the database."]
+     [:thead
+      [:tr.row.lookup-row
+       [:th.custom-col-3.text-center th-props "Cert Number"]
+       [:th.custom-col-3.text-center th-props "Last Name"]
+       [:th.custom-col-3.text-center th-props "First Name"]
+       [:th.custom-col-2.text-center th-props "Cert Type"]
+       [:th.custom-col-3.text-center th-props "Effective Date"]
+       [:th.custom-col-3.text-center th-props "Expiration Date"]]]
+     [:tbody
+      (for [cert (reduce flatten-errors [] error-list)]
+        ^{:key (str (* 100000000 (.random js/Math)))} (vec (drop-last (cert-row cert))))]]))
 
 (defn- sort-certs
   [certs]
