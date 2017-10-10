@@ -3,6 +3,7 @@
             [cljs.spec.alpha :as s]
             [cljs-time.core :as time]
             [cljs-time.format :as f]
+            [clojure.string :refer [join]]
             [webtools.components.forms :as forms]
             [webtools.handlers.events :as events]
             [webtools.procurement.core :as p]
@@ -11,6 +12,18 @@
             [webtools.util.dates :as util-dates]
             [webtools.spec.procurement]
             [webtools.spec.subscription]))
+
+(defn- filter-by
+  [rows & ks]
+  (filter
+   (fn [row] (let [searches @(rf/subscribe [:search-text])]
+               (every? #(re-seq (re-pattern (str "(?i)" %))
+                                (clojure.string/join " " (map row ks))) searches)))
+   rows))
+
+(defn- filter-jvas
+  [jvas]
+  (filter-by jvas :position :location :announce_no :salary))
 
 (defn user-row [user]
   [:tr.row.user-list-row
@@ -60,15 +73,6 @@
                                                :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
       [:a {:on-click (events/delete-jva jva)}
        [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
-
-(defn filter-jvas
-  [jvas]
-  (filter
-   (fn [jva] (let [{:keys [position location announce_no salary]} jva
-                   searches @(rf/subscribe [:jva-searches])]
-               (every? #(re-seq (re-pattern (str "(?i)" %))
-                                (str position " " location " " announce_no " " salary)) searches)))
-   jvas))
 
 (defn sort-jvas [jvas]
   (concat (->> jvas (filter (comp not force-close?)) (sort-by :announce_no) reverse)
@@ -164,19 +168,24 @@
 
 (defn cert-row [row]
   (let [{:keys [last_name first_name cert_type cert_no start_date expiry_date mi]} row]
-    [:tr.row.lookup-row.col-xs-12
-     [:th.col-xs-2 {:scope "row"}
+    [:tr.row.lookup-row
+     [:th.custom-col-3 {:scope "row"}
       [:p.text-center (second (re-find #"(.*?)(\-renewal\-\d+)?$" cert_no))]]
-     [:td.col-xs-2
+     [:td.custom-col-3
       [:p.text-center last_name]]
-     [:td.col-xs-2
+     [:td.custom-col-3
       [:p.text-center (str first_name " " mi)]]
-     [:td.col-xs-2
+     [:td.custom-col-2
       [:p.text-center cert_type]]
-     [:td.col-xs-2
+     [:td.custom-col-3
       [:p.text-center start_date]]
-     [:td.col-xs-2
-      [:p.text-center expiry_date]]]))
+     [:td.custom-col-3
+      [:p.text-center expiry_date]]
+     [:td.custom-col-3 {:style {:text-align "center"}}
+      [:button.btn.btn-warning.file-link
+       [:i.fa.fa-pencil]]
+      [:button.btn.btn-danger.file-link
+       [:i.fa.fa-trash]]]]))
 
 
 (defn error-table [error-list]
@@ -188,10 +197,43 @@
                        (mapv cljs.reader/read-string))]
         ^{:key (str (* 100000000 (.random js/Math)))} [:div.container-fluid
                                                        [cert-row (first certs)]
-                                                       [cert-row (second certs)]]))]]) 
-(s/fdef subscriber-row
-        :args :webtools.spec.subscription/record
-        :ret vector?)
+                                                       [cert-row (second certs)]]))]])
+
+(defn- sort-certs
+  [certs]
+  (sort-by :cert_no certs))
+
+(defn cert-table [table]
+  (let [th-props {:scope "col"}
+        n-results (count table)
+        results-str (str n-results (if (> n-results 1) " results." " result."))]
+    [:div
+     [:p.sr-only {:aria-live "polite"} results-str]
+     [:table.lookup-list.col-xs-12
+      [:caption.sr-only (str "Certified Personnel Table ")]
+      [:thead
+       [:tr.row.lookup-row
+        [:th.custom-col-3.text-center th-props "Cert Number"]
+        [:th.custom-col-3.text-center th-props "Last Name"]
+        [:th.custom-col-3.text-center th-props "First Name"]
+        [:th.custom-col-2.text-center th-props "Cert Type"]
+        [:th.custom-col-3.text-center th-props "Effective Date"]
+        [:th.custom-col-3.text-center th-props "Expiration Date"]
+        [:th.custom-col-3.text-center th-props "Tools"]]]
+      [:tbody
+       (if (< 0 (count @(rf/subscribe [:search-text])))
+         (for [row table]
+           ^{:key (join " " (map row [:cert_no :first_name :last_name]))} [cert-row row]))]]]))
+
+(defn existing-certifications
+  [state]
+  (let [table @(rf/subscribe [:cert-list])]
+    [:div.col-xs-12.col-sm-10.offset-sm-1
+     [forms/cert-search "Search Certification Records"]
+     [cert-table (-> table js->clj clojure.walk/keywordize-keys
+                     (filter-by :cert_no :first_name :last_name)
+                     sort-certs)]]))
+
  
 (defn subscriber-row [subscriber]
   [:tr
@@ -199,6 +241,10 @@
    [:td (:contact_person subscriber)]
    [:td (-> subscriber :telephone util/format-tel-num)]
    [:td (:email subscriber)]])
+
+(s/fdef subscriber-row
+        :args :webtools.spec.subscription/record
+        :ret vector?)
 
 (defn pns-subscribers [subscribers]
   [:table#pns-subscriber-table

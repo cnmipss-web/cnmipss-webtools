@@ -8,12 +8,10 @@
             [webtools.util :as util]
             [webtools.cookies :refer [get-cookie]]))
 
-
-
 (defn- certification []
-  [:div
-   [:div.col-xs-12.col-sm-10.offset-sm-1.col-md-8.offset-md-2.col-lg-6.offset-lg-3
-    [forms/upload-form (.-hash js/location)]
+  [:div.row
+   [:div.col-xs-12.col-sm-10.offset-sm-1
+    [forms/manage-certifications-form (.-hash js/location)]
     [:div {:style {:margin-top "15px" :text-align "center"}}
      (let [wt-success (get-cookie "wt-success")]
        (when (string? wt-success)
@@ -30,10 +28,11 @@
    (if-let [errors @(rf/subscribe [:error-list])]
      [:div.col-xs-12.col-sm-10.offset-sm-1
       (println "Errors: " errors)
-      [tables/error-table errors]])])
+      [tables/error-table errors]])
+   [tables/existing-certifications]])
 
 (defn- hro []
-  [:div
+  [:div.row
    [:div.col-xs-12
     [forms/jva-search]
     [tables/jva-list @(rf/subscribe [:jva-list])]]
@@ -41,7 +40,7 @@
     [forms/jva-upload (.-hash js/location)]]])
 
 (defn- procurement []
-  [:div
+  [:div.row
    [:div.col-xs-12
     [forms/procurement-uploads]]
    [:div.col-xs-12
@@ -49,7 +48,7 @@
     [tables/rfp-ifb-list @(rf/subscribe [:procurement-list])]]])
 
 (defn manage-users []
-  [:div
+  [:div.row
    [tables/user-table @(rf/subscribe [:user-list])]
    [:div.col-xs-12
     [forms/invite-users]]])
@@ -58,14 +57,13 @@
   [:div])
 
 (defn display-role [role]
-  [:div.row
-   (case role
-     "Certification" (certification)
-     "HRO" (hro)
-     "Procurement" (procurement)
-     "Manage Users" (manage-users)
-     "Manage DB" (manage-db)
-     (if (not= ""  (first @(rf/subscribe [:roles])))
-       [:div]
-       [:div.no-role
-        [:p.text-center "You have no assigned roles.  Please contact the Webmaster for more information."]]))])
+  (case role
+    "Certification" (certification)
+    "HRO" (hro)
+    "Procurement" (procurement)
+    "Manage Users" (manage-users)
+    "Manage DB" (manage-db)
+    (if (not= ""  (first @(rf/subscribe [:roles])))
+      [:div]
+      [:div.no-role
+       [:p.text-center "You have no assigned roles.  Please contact the Webmaster for more information."]])))

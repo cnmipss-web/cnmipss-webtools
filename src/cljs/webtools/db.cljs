@@ -9,4 +9,5 @@
    :wp-host "/"
    :jva-searches [""]
    :edit-jva true
-   :add-addendum false})
+   :add-addendum false
+   :search-text [""]})

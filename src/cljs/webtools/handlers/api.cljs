@@ -3,7 +3,7 @@
             [webtools.constants :as const]
             [webtools.util :as util]
             [ajax.core :as ajax]
-            [klang.core :refer-macros [info!]]))
+            [klang.core :refer-macros [info! erro!]]))
 
 (def jq js/jQuery)
 
@@ -37,12 +37,18 @@
         jvas (clojure.walk/keywordize-keys body)]
     (if ok
       (rf/dispatch [:store-jvas jvas])
-      (println response))))
+      (erro! response))))
 
 (defn all-procurement
   [[ok response]]
   (let [{:keys [body]} response]
     (if ok
       (rf/dispatch [:store-procurement-list (clojure.walk/keywordize-keys body)])
-      (println response))))
+      (erro! response))))
  
+(defn all-certs
+  [[ok response]]
+  (let [{:keys [body]} response]
+    (if ok
+      (rf/dispatch [:store-cert-list (clojure.walk/keywordize-keys body)])
+      (erro! response))))

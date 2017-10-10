@@ -18,14 +18,29 @@
         [:p.bad-login-text "Sorry, that login attempt failed.  Please try again or contact the Webmaster."]))
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
 
-(defn upload-form [path]
+(defn manage-certifications-form [path]
   [:form#upload-form {:action "/webtools/upload/certification-csv" :method "post" :enc-type "multipart/form-data"}
-   [:div.form-group
-    [:label {:for "upload-csv"} "Upload CSV File"]
-    [:input#upload-csv.form-control {:type "file" :name "file"}]]
-   [:div.form-group
-    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
-    [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
+   [:div.form-inline.row
+    [:div.form-group.col-xs-6
+     [:label {:for "upload-csv"} "Upload CSV File"]
+     [:br]
+     [:input#upload-csv.form-control {:type "file" :name "file"}]]
+    [:div.form-group.col-xs-6 {:style {:width "25%"}}
+     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}]
+     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
+                                                       :style {:width "100%"
+                                                               :height "100%"}} "Upload"]]]])
+(defn cert-search
+  [placeholder]
+  [:div#cert-search
+   [:form {:role "search"}
+    [:div.form-group
+     [:label.sr-only {:for "search-certs"} placeholder]
+     [:input.form-control {:type "search"
+                           :id "search-certs"
+                           :placeholder placeholder
+                           :on-change event-handlers/search-certs
+                           :ref "search-certified"}]]]])
 
 (defn revert-backup-form []
   [:form#revert-form

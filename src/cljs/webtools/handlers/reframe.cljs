@@ -69,6 +69,8 @@
  :set-active-role
  (fn [db [_ role]]
    (case role
+     "Certification" (ajax-get {:uri "/webtools/api/all-certs"
+                                :handler ajax-handlers/all-certs})
      "HRO" (ajax-get {:uri "/webtools/api/all-jvas"
                       :handler ajax-handlers/all-jvas})
      "Procurement" (ajax-get {:uri "/webtools/api/all-procurement"
@@ -77,6 +79,16 @@
                                :handler ajax-handlers/all-users})
      nil)
    (assoc db :active-role role)))
+
+(reg-event-db
+ :set-search-text
+ (fn [db [_ searches]]
+   (assoc db :search-text searches)))
+
+(reg-event-db
+ :store-cert-list
+ (fn [db [_ certs]]
+   (assoc db :cert-list certs)))
 
 (reg-event-db
  :store-users

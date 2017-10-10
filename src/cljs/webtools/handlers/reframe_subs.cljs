@@ -49,12 +49,20 @@
  (fn [db _]
    (:show-roles db)))
 
+(reg-sub :search-text
+ (fn [db _]
+   (:search-text db)))
+
+(reg-sub :cert-list
+ (fn [db _]
+   (:cert-list db)))
+
 (reg-sub :jva-list
  (fn [db _]
    (:jva-list db)))
 
 (reg-sub :jva-modal
- (fn [db _]
+ (fn [db _] 
    (:jva-modal db)))
 
 (reg-sub :edit-jva

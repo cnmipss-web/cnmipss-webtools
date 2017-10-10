@@ -92,7 +92,11 @@
 
 (defn search-jvas []
   (let [searches (-> "#search-jvas" jq .val (clojure.string/split #" "))]
-    (rf/dispatch [:set-jva-searches searches])))
+    (rf/dispatch [:set-search-text searches])))
+
+(defn search-certs []
+  (let [searches (-> "#search-certs" jq .val (clojure.string/split #" "))]
+    (rf/dispatch [:set-search-text searches])))
 
 (defn edit-procurement [item]
   (fn [e]
