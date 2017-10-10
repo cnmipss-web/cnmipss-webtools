@@ -68,9 +68,9 @@
        [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
       [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
        [:button.btn.btn-warning.file-link {:title "Edit"
-                                               :data-toggle "modal"
-                                               :data-target "#jva-modal"
-                                               :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
+                                           :data-toggle "modal"
+                                           :data-target "#jva-modal"
+                                           :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
       [:a {:on-click (events/delete-jva jva)}
        [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
 
@@ -182,8 +182,13 @@
      [:td.custom-col-3
       [:p.text-center expiry_date]]
      [:td.custom-col-3 {:style {:text-align "center"}}
-      [:button.btn.btn-warning.file-link
-       [:i.fa.fa-pencil]]
+      [:a {:on-click (fn []
+                       (println "Setting cert-modal" row)
+                       (rf/dispatch [:set-cert-modal row]))}
+       [:button.btn.btn-warning.file-link {:title "Edit"
+                                           :data-toggle "modal"
+                                           :data-target "#cert-modal"
+                                           :aria-controls "cert-modal"} [:i.fa.fa-pencil]]]
       [:button.btn.btn-danger.file-link
        [:i.fa.fa-trash]]]]))
 

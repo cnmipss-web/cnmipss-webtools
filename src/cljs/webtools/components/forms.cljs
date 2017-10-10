@@ -30,6 +30,7 @@
      [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
                                                        :style {:width "100%"
                                                                :height "100%"}} "Upload"]]]])
+
 (defn cert-search
   [placeholder]
   [:div#cert-search
@@ -41,6 +42,30 @@
                            :placeholder placeholder
                            :on-change event-handlers/search-certs
                            :ref "search-certified"}]]]])
+
+(def cert-fields
+  {:cert_no "Cert Number"
+   :last_name "Last Name"
+   :first_name "First Name"
+   :mi "Middle Name"
+   :cert_type "Cert Type"
+   :start_date "Effective Date"
+   :expiry_date "Expiration Date"})
+
+(defn edit-cert [cert]
+  [:form#edit-cert.edit-modal {:on-submit (event-handlers/edit-cert cert)}
+   (for [[key val] cert]
+     (let [field-name (key cert-fields)]
+       [:div.form-group.form-inline {:key (str key)}
+        [:label.bold {:for field-name} field-name]
+        [:input.form-control {:type "text"
+                              :id (name key)
+                              :name field-name
+                              :default-value val
+                              :on-change #(->> (-> (str "#" (name key)) jq .val)
+                                               (conj [:edit-cert key])
+                                               (rf/dispatch))}]]))])
+
 
 (defn revert-backup-form []
   [:form#revert-form

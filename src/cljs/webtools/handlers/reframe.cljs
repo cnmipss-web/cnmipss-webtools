@@ -91,6 +91,16 @@
    (assoc db :cert-list certs)))
 
 (reg-event-db
+ :set-cert-modal
+ (fn [db [_ cert]]
+   (assoc db :cert-modal cert)))
+
+(reg-event-db
+ :edit-cert
+ (fn [db [_ key val]]
+   (assoc db :cert-modal (assoc (:cert-modal db) key val))))
+
+(reg-event-db
  :store-users
  (fn [db [_ users]]
    (let [{:keys [email]} (db :session)

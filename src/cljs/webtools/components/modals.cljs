@@ -3,6 +3,27 @@
             [webtools.components.forms :as forms]
             [webtools.components.tables :as tables]))
 
+(defn cert-modal [cert]
+  [:div#cert-modal.modal.fade {:role "dialog"
+                              :tabIndex "-1"
+                              :aria-labelledby "cert-modal-label"
+                              :aria-hidden "true"}
+   [:div.modal-dialog {:role "document"}
+    [:div.modal-content
+     [:div.modal-header
+      [:h5#cert-modal-label.modal-title (str "Editing Certifiction for: " (:cert_no cert))]
+      [:button.close {:data-dismiss "modal"
+                      :aria-label "Close"}
+       [:span {:aria-hidden "true"} "\u00d7"]]]
+     [:div.modal-body
+      [forms/edit-cert cert]]
+     [:div.modal-footer
+      [:div.col-xs-2]
+      [:div.col-xs-4]
+      [:div.col-xs-6
+       [:button.btn.btn-secondary {:data-dismiss "modal"} "Exit"]
+       [:button.btn.btn-primary {:type "submit" :form "edit-cert"} "Save Changes"]]]]]])
+
 (defn jva-modal [jva]
   [:div#jva-modal.modal.fade {:role "dialog"
                               :tabIndex "-1"
@@ -107,4 +128,5 @@
   [:div
    [jva-modal @(rf/subscribe [:jva-modal])]
    [procurement-modal @(rf/subscribe [:procurement-modal])]
-   [pns-subscriber-modal @(rf/subscribe [:subscriber-modal])]])
+   [pns-subscriber-modal @(rf/subscribe [:subscriber-modal])]
+   [cert-modal @(rf/subscribe [:cert-modal])]])

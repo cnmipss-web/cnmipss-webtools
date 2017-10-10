@@ -57,6 +57,10 @@
  (fn [db _]
    (:cert-list db)))
 
+(reg-sub :cert-modal
+ (fn [db _ ]
+   (:cert-modal db)))
+
 (reg-sub :jva-list
  (fn [db _]
    (:jva-list db)))

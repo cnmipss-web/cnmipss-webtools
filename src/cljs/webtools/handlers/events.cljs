@@ -128,3 +128,14 @@
                                         (assoc :open_date (util-dates/print-date open_date)))
                             :response-format (util/full-response-format ajax/json-response-format)
                             :handler ajax-handlers/all-procurement})))))
+
+(defn edit-cert [cert]
+  (fn [e]
+    (.preventDefault e)
+   (println "Setting: " cert)
+    (ajax/ajax-request {:uri "/webtools/api/update-cert"
+                        :method :post
+                        :format (ajax/json-request-format)
+                        :params cert
+                        :response-format (util/full-response-format ajax/json-response-format)
+                        :handler ajax-handlers/all-certs})))
