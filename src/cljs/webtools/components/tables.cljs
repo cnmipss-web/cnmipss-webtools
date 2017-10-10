@@ -167,7 +167,8 @@
             [:a {:href file_link :target "_blank"} filename]]]))]]))
 
 (defn cert-row [row]
-  (let [{:keys [last_name first_name cert_type cert_no start_date expiry_date mi]} row]
+  (let [{:keys [last_name first_name cert_type cert_no start_date expiry_date mi]} row
+        delete-cert (events/delete-cert row)]
     [:tr.row.lookup-row
      [:th.custom-col-3 {:scope "row"}
       [:p.text-center (second (re-find #"(.*?)(\-renewal\-\d+)?$" cert_no))]]
@@ -182,15 +183,17 @@
      [:td.custom-col-3
       [:p.text-center expiry_date]]
      [:td.custom-col-3 {:style {:text-align "center"}}
-      [:a {:on-click (fn []
-                       (println "Setting cert-modal" row)
-                       (rf/dispatch [:set-cert-modal row]))}
+      [:a {:on-click (fn [] (rf/dispatch [:set-cert-modal row]))}
        [:button.btn.btn-warning.file-link {:title "Edit"
                                            :data-toggle "modal"
                                            :data-target "#cert-modal"
                                            :aria-controls "cert-modal"} [:i.fa.fa-pencil]]]
-      [:button.btn.btn-danger.file-link
-       [:i.fa.fa-trash]]]]))
+      [:a {:on-click (fn [e]
+                       (if (js/confirm (str "Are you sure you want to DELETE this record?  "
+                                            "Records cannot be recovered if deleted."))
+
+                         (delete-cert e)))}
+       [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
 
 
 (defn error-table [error-list]
