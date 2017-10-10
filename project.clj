@@ -4,6 +4,7 @@
   :url "http://cnmipss-webtools.herokuapp.com"
 
   :dependencies [[cheshire "5.7.1"]
+                 [cider/cider-nrepl "0.14.0"]
                  [clj-fuzzy "0.4.0"]
                  [clj-http "3.6.1"]
                  [clj-time "0.14.0"]
@@ -107,7 +108,8 @@
                  :pretty-print false
                  :closure-warnings
                  {:externs-validation :off :non-standard-jsdoc :off}
-                 :externs ["react/externs/react.js"]}}}}
+                 :externs ["react/externs/react.js"]}}
+               }}
              
              :aot :all
              :uberjar-name "webtools.jar"
@@ -118,7 +120,7 @@
    :test          [:project/dev :project/test :profiles/test]
 
    :project/dev  {:dependencies [[binaryage/devtools "0.9.4"]
-                                 [cider/cider-nrepl "0.14.0"]
+
                                  [circleci/bond "0.3.0"]
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.7"]
@@ -156,7 +158,25 @@
                      {:output-to "target/test.js"
                       :main "webtools.doo-runner"
                       :optimizations :whitespace
-                      :pretty-print true}}}}
+                      :pretty-print true}}
+                    :min-test
+                    {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
+                     :compiler
+                     {:output-to "target/cljsbuild/public/js/app.js"
+                      :optimizations :simple
+                      :pretty-print false
+                      :closure-warnings
+                      {:externs-validation :off :non-standard-jsdoc :off}
+                      :externs ["react/externs/react.js"]}}
+                    :min
+                    {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
+                     :compiler
+                     {:output-to "target/cljsbuild/public/js/app.js"
+                      :optimizations :advanced
+                      :pretty-print false
+                      :closure-warnings
+                      {:externs-validation :off :non-standard-jsdoc :off}
+                      :externs ["react/externs/react.js"]}}}}
                   
                   :doo {:alias {:default [:phantom] 
                                 :all [:chrome :firefox :safari]}

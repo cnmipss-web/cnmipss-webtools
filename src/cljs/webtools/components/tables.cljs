@@ -1,5 +1,6 @@
 (ns webtools.components.tables
   (:require [re-frame.core :as rf]
+            [cljs.reader :refer [read-string]]
             [cljs.spec.alpha :as s]
             [cljs-time.core :as time]
             [cljs-time.format :as f]
@@ -197,7 +198,7 @@
 
 (defn- flatten-errors [list next-error]
   (let [certs (->> (clojure.string/split next-error #"\n")
-                   (mapv cljs.reader/read-string))]
+                   (mapv read-string))]
     (concat list certs)))
 
 (defn error-table [error-list]
