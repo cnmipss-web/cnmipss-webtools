@@ -1,7 +1,7 @@
-(defproject cnmipss-webtools "0.2.2"
+(defproject cnmipss-webtools "0.2.3"
 
   :description "Internal Web Application for various CNMI PSS Webtools"
-  :url "http://cnmipss-webtools.herokuapp.com"
+  :url "http://www.cnmipss.org/webtools/"
 
   :dependencies [[cheshire "5.7.1"]
                  [cider/cider-nrepl "0.14.0"]
