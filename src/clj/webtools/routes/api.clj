@@ -160,6 +160,12 @@
           (query-route db/get-all-users
                        (db/delete-user! (keyed [email])))))
 
+  (POST "/api/update-cert" {:keys [body]}
+        (query-route db/get-all-certs (db/update-cert! body)))
+
+  (POST "/api/delete-cert" {:keys [body]}
+        (query-route db/get-all-certs (db/delete-cert! body)))
+
   (POST "/api/update-jva" {:keys [body]}
         (let [jva (-> body
                       (db/make-sql-date :open_date)
