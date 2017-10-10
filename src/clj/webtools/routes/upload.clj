@@ -24,6 +24,7 @@
            [webtools.procurement.core PSAnnouncement]))
 
 (defn create-new-cert
+  "Convert a list represented a row in the uploaded CSV file to a hash-map representing the certification record."
   [current]
   (let [[_ last-name first-name mi _ _ type cert-no start expiry _] current]
     {:cert_no cert-no
@@ -35,12 +36,14 @@
      :mi mi}))
 
 (defn cert-changed?
+  "Compare two certs and return true if they differ, false if they do not."
   [new orig]
   (let [diffs (diff new orig)]
     (not (nil? (or (first diffs)
                    (second diffs))))))
 
 (defn match-cert?
+  "Generate a function to test if a given certification shares the supplied cert-no."
   [cert-no]
   (fn [cert]
     (if (= cert-no (:cert_no cert))
@@ -48,6 +51,11 @@
       false)))
 
 (defn is-renewal?
+  "Compare dates on two certifications.  
+
+  If the certifications overlap by less than one year, the second is considered a renewal and this function returns true.
+
+  If the certificaitons overlap by more than one year, the second is considered an erroneous collision and this function returns false."
   [orig-cert new-cert]
   (let [orig-start (->> orig-cert :start_date util-dates/parse-date)
         new-start (->> new-cert :start_date util-dates/parse-date)
@@ -62,6 +70,9 @@
         (log/error (.getMessage e) orig-start orig-expiry new-start new-expiry "\n\n")))))
 
 (defn renew-cert!
+  "Create a renewal record for a given certification record
+
+  Renewal records take the form of a new certificaiton with -renewal-# added as a suffix to the certification number."
   [cert]
   (let [{:keys [cert_no start_date expiry_date]} cert
         existing-certs (->> (db/get-all-certs)
@@ -75,6 +86,11 @@
 
 
 (defn handle-collision
+  "Determine how to proceed when two certifications collide based on their certification number.
+
+  If one is a renewal of the other, create a renewal record.  
+  If not, but the name is the same, overwrite the old one.
+  If the new certifcation is not a renewal, and has a difference name, create an error to be returned to user."
   [new-cert orig-cert errors]
   (let [[new-only orig-only joint] (diff new-cert orig-cert)
         same-name? (not-any? nil? (map joint [:first_name :last_name])) 
@@ -88,6 +104,11 @@
           (db/update-cert! new-cert))))))
 
 (defn process-cert-csv
+  "Determine whether a certificate is new, a renewal, or erroneous and store it accordingly.
+
+  If new, save to DB.
+  If renewal, save renewal to DB.
+  If erroneous, return errors to user."
   [params]
   (let [{:keys [file]} params
         {:keys [tempfile size filename]} file
@@ -106,6 +127,7 @@
           (throw (Exception. (apply str (take 5 @errors)))))))))
 
 (def jva-regexes
+  "Regexes to parse JVA for key information"
   {:announce_no #"(?i)ANNOUNCEMENT\s*NO\.?:\s*(.*\S)"
    :position #"(?i)(POSITION/TITLE)\s*:\s*(.*\S)"
    :open_date #"(?i)OPEN(ING)?\s*DATE\s*:\s*(.*)\s*CL"
@@ -114,6 +136,7 @@
    :location #"(?i)^LOCATION\s*:\s*(.*\w)"})
 
 (defn jva-reducer
+  ""
   [jva next-line]
   (let [this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re next-line)}) jva-regexes))]
     (merge-with util/select-non-nil this-line jva)))

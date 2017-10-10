@@ -17,9 +17,10 @@
 (def truthy (comp some? #{"true" true}))
 
 (defn json-response
-  [res body]
+  "Pass a JSON body to supplied ring response fn"
+  [ring-response body]
   (-> (edn->json body)
-      res
+      ring-response
       (resp/header "Content-Type" "application/json")))
 
 (defmacro query-route
@@ -41,12 +42,14 @@
         (json-response resp/internal-server-error e#)))))
 
 (defn get-all-procurement
+  "Retrieve all procurements relations from the DB and return a hash-map containing those relations."
   []
   {:pnsa (db/get-all-pnsa)
    :addenda (db/get-all-addenda)
    :subscriptions (db/get-all-subscriptions)})
 
 (defn clear-procurement
+  "Delete all records associated with a PSAnnouncement id and delete WP media files associated with that id"
   [type {:keys [id] :as body}]
   (let [uuid (make-uuid id)
         query-map {:proc_id uuid}]
