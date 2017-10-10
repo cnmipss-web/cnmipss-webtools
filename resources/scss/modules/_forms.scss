@@ -114,10 +114,31 @@ form#procurement-uploads.col-xs-12 {
     }
 
 }
+
 #upload-btn {
     position: relative;
     // width: 33%;
     // left: 33%;
     right: -100%;
     margin-top: 35px;
+}
+
+#edit-cert {
+    form {
+        width: 100%;
+    }
+
+    div.form-group {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    label {
+        margin-top: 10px;
+    }
+
+    input {
+        margin-right: 30%;
+    }
 }
