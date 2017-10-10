@@ -18,18 +18,22 @@
         [:p.bad-login-text "Sorry, that login attempt failed.  Please try again or contact the Webmaster."]))
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
 
-(defn manage-certifications-form [path]
-  [:form#upload-form {:action "/webtools/upload/certification-csv" :method "post" :enc-type "multipart/form-data"}
+
+(defn upload-form
+  "Multipurpose upload form"
+  [{:keys [path action accept label multiple]}]
+  [:form#upload-form {:action action :method "post" :enc-type "multipart/form-data"}
    [:div.form-inline.row
     [:div.form-group.col-xs-6
-     [:label {:for "upload-csv"} "Upload CSV File"]
+     [:label {:for "file"} label]
      [:br]
-     [:input#upload-csv.form-control {:type "file" :name "file"}]]
-    [:div.form-group.col-xs-6 {:style {:width "25%"}}
-     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}]
+     [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept accept :multiple multiple}]]
+    [:div.form-group.col-xs-3
+     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
      [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
                                                        :style {:width "100%"
-                                                               :height "100%"}} "Upload"]]]])
+                                                              :height "100%"}} "Upload"]]]])
+
 
 (defn cert-search
   [placeholder]
@@ -126,20 +130,11 @@
     [roles-checklist "new-user"]]
    [:button.btn.btn-primary {:type "submit"} "Invite"]])
 
-(defn jva-upload [path]
-  [:form.jva-upload.col-md-6.offset-md-3 {:action "/webtools/upload/jva-pdf" :method "post" :enc-type "multipart/form-data"}
-   [:div.form-group
-    [:label {:for "file"} "Upload New JVA"]
-    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple true}]]
-   [:div.form-group 
-    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
-    [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
-
 (defn replace-jva [jva]
   [:form#replace-jva.edit-modal
    {:action "/webtools/upload/reannounce-jva" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
-    [:label {:for "file"} "Upload New JVA"]
+    [:label {:for "file"} "Reannounce JVA"]
     [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple false}]]
    [:div.form-group 
     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value ""}  ]

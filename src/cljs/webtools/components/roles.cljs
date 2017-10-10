@@ -11,7 +11,11 @@
 (defn- certification []
   [:div.row
    [:div.col-xs-12.col-sm-10.offset-sm-1
-    [forms/manage-certifications-form (.-hash js/location)]
+    [forms/upload-form {:path (.-hash js/location)
+                        :action "/webtools/upload/certification-csv"
+                        :accept "csv"
+                        :label "Upload CSV File"
+                        :multiple false}]
     [:div {:style {:margin-top "15px" :text-align "center"}}
      (let [wt-success (get-cookie "wt-success")]
        (when (string? wt-success)
@@ -33,11 +37,15 @@
 
 (defn- hro []
   [:div.row
-   [:div.col-xs-12
+   [:div.col-xs-12.col-sm-10.offset-sm-1
+    [forms/upload-form {:path (.-hash js/location)
+                        :action "/webtools/upload/jva-pdf"
+                        :accept "pdf"
+                        :label "Upload New JVA"
+                        :multiple true}]]
+   [:div.col-xs-12.col-sm-10.offset-sm-1
     [forms/jva-search]
-    [tables/jva-list @(rf/subscribe [:jva-list])]]
-   [:div.col-xs-12
-    [forms/jva-upload (.-hash js/location)]]])
+    [tables/jva-list @(rf/subscribe [:jva-list])]]])
 
 (defn- procurement []
   [:div.row

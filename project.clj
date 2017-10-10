@@ -158,25 +158,7 @@
                      {:output-to "target/test.js"
                       :main "webtools.doo-runner"
                       :optimizations :whitespace
-                      :pretty-print true}}
-                    :min-test
-                    {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
-                     :compiler
-                     {:output-to "target/cljsbuild/public/js/app.js"
-                      :optimizations :simple
-                      :pretty-print false
-                      :closure-warnings
-                      {:externs-validation :off :non-standard-jsdoc :off}
-                      :externs ["react/externs/react.js"]}}
-                    :min
-                    {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
-                     :compiler
-                     {:output-to "target/cljsbuild/public/js/app.js"
-                      :optimizations :advanced
-                      :pretty-print false
-                      :closure-warnings
-                      {:externs-validation :off :non-standard-jsdoc :off}
-                      :externs ["react/externs/react.js"]}}}}
+                      :pretty-print true}}}}
                   
                   :doo {:alias {:default [:phantom] 
                                 :all [:chrome :firefox :safari]}
