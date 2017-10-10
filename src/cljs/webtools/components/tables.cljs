@@ -28,16 +28,16 @@
 
 (defn user-row [user]
   [:tr.row.user-list-row
-   [:td.col-xs-3.text-left (user :email)]
-   [:td.col-xs-9.text-left (forms/edit-user-roles user)]])
+   [:td.custom-col-5.text-left {:style {:padding-left "10px"}} (user :email)]
+   [:td.custom-col-15.text-left (forms/edit-user-roles user)]])
 
 (defn user-table [users]
   [:table.user-list
    [:caption.sr-only "Registered Users"]
    [:thead
     [:tr.row.user-list-row
-     [:th.col-xs-3.text-center {:scope "col"} "Email"]
-     [:th.col-xs-9.text-center {:scope "col"} "Roles"]]]
+     [:th.custom-col-5.text-center {:scope "col"} "Email"]
+     [:th.custom-col-15.text-center {:scope "col"} "Roles"]]]
    [:tbody
     (for [user (sort-by :email users)]
       ^{:key (str "user-" (user :email))} [user-row user])]])
@@ -189,11 +189,7 @@
                                            :data-toggle "modal"
                                            :data-target "#cert-modal"
                                            :aria-controls "cert-modal"} [:i.fa.fa-pencil]]]
-      [:a {:on-click (fn [e]
-                       (if (js/confirm (str "Are you sure you want to DELETE this record?  "
-                                            "Records cannot be recovered if deleted."))
-
-                         (delete-cert e)))}
+      [:a {:on-click delete-cert}
        [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
 
 (defn- flatten-errors [list next-error]
