@@ -61,12 +61,13 @@
   [email]
   (fn [event]
     (.preventDefault event)
-    (ajax/ajax-request {:uri "/webtools/api/delete-user"
-                        :method :post
-                        :format (ajax/json-request-format)
-                        :params {:email email}
-                        :response-format (util/full-response-format ajax/json-response-format)
-                        :handler ajax-handlers/all-users})))
+    (if (js/confirm "Are you sure you want to DELETE this user?")
+      (ajax/ajax-request {:uri "/webtools/api/delete-user"
+                          :method :post
+                          :format (ajax/json-request-format)
+                          :params {:email email}
+                          :response-format (util/full-response-format ajax/json-response-format)
+                          :handler ajax-handlers/all-users}))))
 
 (defn edit-jva [jva]
   (fn [e]
@@ -82,12 +83,13 @@
 (defn delete-jva [jva]
   (fn [e]
     (.preventDefault e)
-    (ajax/ajax-request {:uri "/webtools/api/delete-jva"
-                        :method :post
-                        :format (ajax/json-request-format)
-                        :params jva
-                        :response-format (util/full-response-format ajax/json-response-format)
-                        :handler ajax-handlers/all-jvas})))
+    (if (js/confirm "Are you sure you want to DELETE this jva? DELETE is permanent.")
+      (ajax/ajax-request {:uri "/webtools/api/delete-jva"
+                          :method :post
+                          :format (ajax/json-request-format)
+                          :params jva
+                          :response-format (util/full-response-format ajax/json-response-format)
+                          :handler ajax-handlers/all-jvas}))))
 
 
 (defn search-jvas []
@@ -143,9 +145,10 @@
 (defn delete-cert [cert]
   (fn [e]
     (.preventDefault e)
-    (ajax/ajax-request {:uri "/webtools/api/delete-cert"
-                        :method :post
-                        :format (ajax/json-request-format)
-                        :params cert
-                        :response-format (util/full-response-format ajax/json-response-format)
-                        :handler ajax-handlers/all-certs})))
+    (if (js/confirm "Are you sure you want to DELETE this certification record?  DELETING a record is permanent.")
+      (ajax/ajax-request {:uri "/webtools/api/delete-cert"
+                          :method :post
+                          :format (ajax/json-request-format)
+                          :params cert
+                          :response-format (util/full-response-format ajax/json-response-format)
+                          :handler ajax-handlers/all-certs}))))

@@ -198,19 +198,6 @@
                            :on-change event-handlers/search-jvas
                            :ref "search-certified"}]]]])
 
-(defn procurement-upload []
-  [:div.form-group
-   [:label {:for "file"} "Upload New RFP/IFB Announcements"]
-   [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple true}]])
-
-(defn procurement-uploads [path]
-  [:form#procurement-uploads.col-xs-12 {:action "/webtools/upload/procurement-pdf" :method "post" :enc-type "multipart/form-data"}
-   [:div.form-inline
-    [procurement-upload]]
-   [:div.form-group
-    [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
-    [:button#upload-btn.btn.btn-primary {:type "submit"} "Upload"]]])
-(defn rfp-ifb-search [] [:div])
 
 (def procurement-fields
   {:number "Number"

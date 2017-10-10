@@ -50,14 +50,18 @@
 (defn- procurement []
   [:div.row
    [:div.col-xs-12
-    [forms/procurement-uploads]]
+    [forms/upload-form {:path (.-hash js/location)
+                        :action "/webtools/upload/procurement-pdf"
+                        :accept "pdf"
+                        :label "Upload New RFP/IFB Announcements"
+                        :multiple true}]]
    [:div.col-xs-12
-    [forms/rfp-ifb-search]
     [tables/rfp-ifb-list @(rf/subscribe [:procurement-list])]]])
 
 (defn manage-users []
   [:div.row
-   [tables/user-table @(rf/subscribe [:user-list])]
+   [:div.col-xs-12
+    [tables/user-table @(rf/subscribe [:user-list])]]
    [:div.col-xs-12
     [forms/invite-users]]])
 
