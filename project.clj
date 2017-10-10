@@ -1,4 +1,4 @@
-(defproject cnmipss-webtools "0.2.1"
+(defproject cnmipss-webtools "0.2.2"
 
   :description "Internal Web Application for various CNMI PSS Webtools"
   :url "http://cnmipss-webtools.herokuapp.com"
