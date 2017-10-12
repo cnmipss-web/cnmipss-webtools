@@ -88,7 +88,26 @@
 (reg-event-db
  :store-cert-list
  (fn [db [_ certs]]
-   (assoc db :cert-list certs)))
+   (->> certs
+        ;; Atempted to add lazy-loading 25 items at a time.  Doesn't work right...
+        ;; (map-indexed (fn [idx cert] {:cert cert :display (> 25 idx)}))
+        (assoc db :cert-list))))
+
+(reg-event-db :lazy-load
+ (fn [db [_ load-count]]
+   (let [{:keys [cert-list]} db
+         boundary (atom nil)]
+     (->> cert-list
+          (map-indexed (fn [idx cert]
+                         (when (and (nil? @boundary)
+                                    (not= (:display cert) (:display (nth cert-list (+ idx 1)))))
+                           (println "Boundary at " idx )
+                           (reset! boundary idx))
+                         (if (and (some? @boundary)
+                                  (> (+ @boundary load-count) idx))
+                           (assoc cert :display true)
+                           cert)))
+          (assoc db :cert-list)))))
 
 (reg-event-db
  :set-cert-modal
@@ -209,4 +228,4 @@
 
 (reg-event-db :email-subscribers
  (fn [db [_ item subscribers]]
-   ))
+   db))

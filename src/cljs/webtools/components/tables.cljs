@@ -12,7 +12,8 @@
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.spec.procurement]
-            [webtools.spec.subscription]))
+            [webtools.spec.subscription]
+            [webtools.timeout :refer [throttle]]))
 
 (defn- filter-by
   [rows & ks]
@@ -236,8 +237,8 @@
         [:th.custom-col-3.text-center th-props "Tools"]]]
       [:tbody
        (if (< 0 (count @(rf/subscribe [:search-text])))
-         (for [row table]
-           ^{:key (join " " (map row [:cert_no :first_name :last_name]))} [cert-row row]))]]]))
+         (for [cert  table]
+           ^{:key (join " " (map cert [:cert_no :first_name :last_name]))} [cert-row cert]))]]]))
 
 (defn existing-certifications
   [state]

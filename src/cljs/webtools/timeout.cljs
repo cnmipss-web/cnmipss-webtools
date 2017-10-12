@@ -1,7 +1,8 @@
 (ns webtools.timeout
   (:require [ajax.core :as ajax]
             [webtools.constants :refer [max-cookie-age]]
-            [webtools.cookies :as cookies]))
+            [webtools.cookies :as cookies]
+            [cljs-time.core :as t]))
 
 (def jq js/jQuery)
 
@@ -26,3 +27,11 @@
     (.on doc "click" reset-idle-time)
     (.on doc "mousemove"  reset-idle-time)
     (.on doc "keypress" reset-idle-time)))
+
+(defn throttle [callback wait]
+  (let [time (atom (t/now))]
+    (fn []
+      (when (t/after? (t/plus @time wait) (t/now))
+        (println "Callback") 
+        (callback)
+        (reset! time (t/now))))))
