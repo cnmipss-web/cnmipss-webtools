@@ -35,6 +35,7 @@
                  [org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/clojurescript "1.9.671" :scope "provided"]
                  [org.clojure/data.csv "0.1.4"]
+                 [org.clojure/test.check "0.10.0-alpha2"]
                  [org.clojure/tools.cli "0.3.5"]
                  [org.clojure/tools.logging "0.4.0"]
                  [org.flatland/useful "0.11.5"]
@@ -104,7 +105,7 @@
                {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
                 :compiler
                 {:output-to "target/cljsbuild/public/js/app.js"
-                 :optimizations :advanced
+                 :optimizations :simple
                  :pretty-print false
                  :closure-warnings
                  {:externs-validation :off :non-standard-jsdoc :off}
@@ -125,7 +126,6 @@
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.7"]
                                  [figwheel-sidecar "0.5.11"]
-                                 [org.clojure/test.check "0.10.0-alpha2"]
                                  [pjstadig/humane-test-output "0.8.2"]
                                  [prone "1.1.4"]
                                  [ring/ring-devel "1.6.1"]
@@ -152,15 +152,6 @@
                       :source-map true
                       :optimizations :none
                       :pretty-print true}}
-                    :mintest
-                    {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
-                     :compiler
-                     {:output-to "target/cljsbuild/public/js/app.js"
-                      :optimizations :simple
-                      :pretty-print false
-                      :closure-warnings
-                      {:externs-validation :off :non-standard-jsdoc :off}
-                      :externs ["react/externs/react.js"]}}
                     :test
                     {:source-paths ["src/cljc" "src/cljs" "test/cljs" "env/test/cljs"]
                      :compiler
