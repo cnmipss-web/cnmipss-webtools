@@ -156,11 +156,11 @@
                           :response-format (util/full-response-format ajax/json-response-format)
                           :handler ajax-handlers/all-certs}))))
 
-(defn lazy-load 
-  "Used for on-scroll events to lazy-load large tables for display"
-  [target load-count]
-  (let [window-top (-> js/window jq .scrollTop)
-        window-bot (+ window-top (-> js/window jq .height))
-        target-top (-> (jq target) .offset .-top)]
-    (when (< target-top window-bot)
-      (rf/dispatbch [:lazy-load load-count]))))
+;; (defn lazy-load 
+;;   "Used for on-scroll events to lazy-load large tables for display"
+;;   [target load-count]
+;;   (let [window-top (-> js/window jq .scrollTop)
+;;         window-bot (+ window-top (-> js/window jq .height))
+;;         target-top (-> (jq target) .offset .-top)]
+;;     (when (< target-top window-bot)
+;;       (rf/dispatbch [:lazy-load load-count]))))

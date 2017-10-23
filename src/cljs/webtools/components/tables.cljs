@@ -45,9 +45,14 @@
 
 (defn force-close?
   [{:keys [status close_date]}]
-  (or (not status)
-      (and close_date
-           (time/after? (time/now) close_date))))
+  (try
+    (or (not status)
+        (and close_date
+             (time/after? (time/now) (util-dates/parse-date close_date))))
+    (catch js/Error e
+      (println "Exception in webtools.components.tables.force-close?" e)
+      (println close_date)
+      false)))
 
 (defn jva-row [jva]
   (let [{:keys [status close_date]} jva]
