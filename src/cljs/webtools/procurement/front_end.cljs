@@ -13,26 +13,16 @@
       (assoc :open_date (util-dates/parse-date open_date))
       (assoc :close_date (util-dates/parse-date-at-time close_date))))
 
-(extend-type webtools.procurement.core/PSAnnouncement
-  p/process-procurement
-  (proc-type [pnsa]
-      (-> pnsa :type keyword))
-  
-  (for-json [{:keys [id open_date close_date] :as pns}]
-    (-> (assoc pns :id (str id))
-        (assoc :open_date (util-dates/print-date open_date))
-        (assoc :close_date (util-dates/print-date-at-time close_date)))))
-
 (extend-protocol p/create-procurement
   cljs.core/PersistentHashMap
-  (pns-from-map [pns]
+  (convert-pns-from-map [pns]
     (p/map->PSAnnouncement (-fix-types pns)))
   cljs.core/PersistentArrayMap
-  (pns-from-map [pns]
+  (convert-pns-from-map [pns]
     (p/map->PSAnnouncement (-fix-types pns))))
 
 (extend-type string
-  p/retrieve-procurement
+  p/procurement-from-db
   (make-uuid [id] (uuid id))
   (get-pns-from-db [id]
     (let [{:keys [rfps ifbs]} @(rf/subscribe [:procurement-list])
@@ -44,7 +34,7 @@
         (throw (js/Error. (str "Duplicate matches " matches)))))))
 
 (extend-type cljs.core/UUID
-  p/retrieve-procurement
+  p/procurement-from-db
   (make-uuid [id] id)
   (get-pns-from-db [id]
     (let [{:keys [rfps ifbs]} @(rf/subscribe [:procurement-list])
@@ -56,6 +46,6 @@
         (throw (js/Error. (str "Duplicate matches " matches)))))))
 
 (extend-type nil
-  p/retrieve-procurement
+  p/procurement-from-db
   (make-uuid [id] nil)
   (get-pns-from-db [id] nil))

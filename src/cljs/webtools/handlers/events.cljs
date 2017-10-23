@@ -107,7 +107,10 @@
     (ajax/ajax-request {:uri "/webtools/api/update-procurement"
                         :method :post
                         :format (ajax/json-request-format)
-                        :params (p/for-json item)
+                        :params (let [{:keys [id open_date close_date] :as pns} item]
+                                  (-> (assoc pns :id (str id))
+                                      (assoc :open_date (util-dates/print-date open_date))
+                                      (assoc :close_date (util-dates/print-date-at-time close_date))))
                         :response-format (util/full-response-format ajax/json-response-format)
                         :handler ajax-handlers/all-procurement})))
 

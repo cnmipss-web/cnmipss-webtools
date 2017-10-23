@@ -93,21 +93,21 @@
         ;; (map-indexed (fn [idx cert] {:cert cert :display (> 25 idx)}))
         (assoc db :cert-list))))
 
-(reg-event-db :lazy-load
- (fn [db [_ load-count]]
-   (let [{:keys [cert-list]} db
-         boundary (atom nil)]
-     (->> cert-list
-          (map-indexed (fn [idx cert]
-                         (when (and (nil? @boundary)
-                                    (not= (:display cert) (:display (nth cert-list (+ idx 1)))))
-                           (println "Boundary at " idx )
-                           (reset! boundary idx))
-                         (if (and (some? @boundary)
-                                  (> (+ @boundary load-count) idx))
-                           (assoc cert :display true)
-                           cert)))
-          (assoc db :cert-list)))))
+;; (reg-event-db :lazy-load
+;;  (fn [db [_ load-count]]
+;;    (let [{:keys [cert-list]} db
+;;          boundary (atom nil)]
+;;      (->> cert-list
+;;           (map-indexed (fn [idx cert]
+;;                          (when (and (nil? @boundary)
+;;                                     (not= (:display cert) (:display (nth cert-list (+ idx 1)))))
+;;                            (println "Boundary at " idx )
+;;                            (reset! boundary idx))
+;;                          (if (and (some? @boundary)
+;;                                   (> (+ @boundary load-count) idx))
+;;                            (assoc cert :display true)
+;;                            cert)))
+;;           (assoc db :cert-list)))))
 
 (reg-event-db
  :set-cert-modal
@@ -174,10 +174,10 @@
  (fn [db [_ list]]
   (assoc db :procurement-list {:rfps (->> (:pnsa list)
                                           (filter #(= "rfp" (:type %)))
-                                          (map p/pns-from-map))
+                                          (map p/convert-pns-from-map))
                                :ifbs (->> (:pnsa list)
                                           (filter #(= "ifb" (:type %)))
-                                          (map p/pns-from-map))
+                                          (map p/convert-pns-from-map))
                                :addenda (:addenda list)
                                :subscriptions (:subscriptions list)})))
 
