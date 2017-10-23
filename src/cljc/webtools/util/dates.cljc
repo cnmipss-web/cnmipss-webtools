@@ -55,12 +55,16 @@
      (parse-date [date] (format/parse const/date-formatter date))
      (parse-datetime [date] (format/parse const/date-time-formatter date))
      (parse-date-at-time [date]
-       (println "Parsing: " date)
        (-> (clojure.string/replace date #"at" "")  ;; Workaround for bug in cljs-time handling of 'at'
            (clojure.string/replace #"\s+" " ")
            (parse-datetime)))
      
      function
+     (parse-date [date] date)
+     (parse-datetime [date] date)
+     (parse-date-at-time [date] date)
+
+     object
      (parse-date [date] date)
      (parse-datetime [date] date)
      (parse-date-at-time [date] date)))
