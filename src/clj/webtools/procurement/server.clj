@@ -11,7 +11,7 @@
            [org.apache.pdfbox.text PDFTextStripper])) 
 
 (extend-type webtools.procurement.core.PSAnnouncement
-    process-procurement
+    procurement-to-db
     (proc-type [pnsa]
       (-> pnsa :type keyword))
     
@@ -29,45 +29,44 @@
 
     communicate-procurement
     (changes-email [orig new sub]
-      (let [title-string (str (-> new proc-type name clojure.string/upper-case)
+      (let [title-string (str (-> new :type name clojure.string/upper-case)
                               "# " (:number orig) " " (:title orig))
-            referent-term (if (= :rfp (proc-type new)) "request" "invitation")]
-        [:html
-         [:body
-          [:p (str "Greetings " (:contact_person sub) ",")]
-          [:p (str "We would like to notify you that details of " title-string " have been changed.")]
+            referent-term (if (= :rfp (:type new)) "request" "invitation")]
+        [:body
+         [:p (str "Greetings " (:contact_person sub) ",")]
+         [:p (str "We would like to notify you that details of " title-string " have been changed.")]
 
-          (if (not= (:open_date orig) (:open_date new))
-            [:p (str "The window for submissions will now begin on "
-                     (util-dates/print-date (:open_date new)) ".  ")])
+         (if (not= (:open_date orig) (:open_date new))
+           [:p (str "The window for submissions will now begin on "
+                    (util-dates/print-date (:open_date new)) ".  ")])
 
-          (if (not= (:close_date orig) (:close_date new))
-            [:p (str "The window for submissions will now close at "
-                     (util-dates/print-date-at-time (:close_date new)) ".  ")])
+         (if (not= (:close_date orig) (:close_date new))
+           [:p (str "The window for submissions will now close at "
+                    (util-dates/print-date-at-time (:close_date new)) ".  ")])
 
-          (if (not= (:number orig) (:number new))
-            [:p (str "The " (-> new :type name clojure.string/upper-case)
-                     "# of this request has been changed to "
-                     (:number new) ".  ")])
+         (if (not= (:number orig) (:number new))
+           [:p (str "The " (-> new :type name clojure.string/upper-case)
+                    "# of this request has been changed to "
+                    (:number new) ".  ")])
 
-          (if (not= (:title orig) (:title new))
-            [:p (str "The title of this " referent-term " has been changed to: ")
-             [:em (:title new)] ".  "])
+         (if (not= (:title orig) (:title new))
+           [:p (str "The title of this " referent-term " has been changed to: ")
+            [:em (:title new)] ".  "])
 
-          (if (not= (:description orig) (:description new))
-            [:p
-             (str "The description of this " referent-term " has been change to the following: ")
-             [:br]
-             [:br]
-             (:description new)])
+         (if (not= (:description orig) (:description new))
+           [:p
+            (str "The description of this " referent-term " has been change to the following: ")
+            [:br]
+            [:br]
+            (:description new)])
 
-          [:br]
-          [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-          [:br]
-          [:p "Thank you,"]
-          [:p "Kimo Rosario"]
-          [:p "Procurement & Supply Officer"]
-          [:p "CNMI PSS"]]])))
+         [:br]
+         [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+         [:br]
+         [:p "Thank you,"]
+         [:p "Kimo Rosario"]
+         [:p "Procurement & Supply Officer"]
+         [:p "CNMI PSS"]])))
 
 (def procurement-regexes
   {:type #"(RFP|IFB)"
@@ -112,7 +111,7 @@
                               :slug (:id rec)))
       (map->PSAnnouncement rec))))
 
-(extend-protocol retrieve-procurement
+(extend-protocol procurement-from-db
   java.lang.String
   (get-pns-from-db [id]
     (-> {:id (make-uuid id)}         
@@ -141,10 +140,22 @@
                   map->PSAnnouncement))
             (catch Exception e
               (log/error e)
+              (throw e))))
+      g (fn [sub]
+          (try
+            (if (every? some? [(:id sub) (:proc_id sub)])
+              (-> (assoc sub :id (-> sub :id make-uuid))
+                  (assoc :proc_id (-> sub :proc_id make-uuid))
+                  (assoc :telephone (-> sub :telephone util/format-tel-num))
+                  map->Subscription))
+            (catch Exception e
+              (log/error e)
               (throw e))))]
   (extend-protocol create-procurement
     clojure.lang.PersistentArrayMap
-    (pns-from-map [pns] (f pns))
+    (convert-pns-from-map [pns] (f pns))
+    (convert-sub-from-map [sub] (g sub))
 
     clojure.lang.PersistentHashMap
-    (pns-from-map [pns] (f pns))))
+    (convert-pns-from-map [pns] (f pns))
+    (convert-sub-from-map [sub] (g sub))))

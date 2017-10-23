@@ -21,11 +21,14 @@
 
 (defroutes oauth-routes
   (GET "/oauth/oauth-init" []
-       (-> (config<- env)
-           (auth/request-auth-url)
-           (respond/found)))
+       (do
+         (println "/oauth/oauth-init")
+         (-> (config<- env)
+             (auth/request-auth-url)
+             (respond/found))))
   (GET "/oauth/oauth-callback" request
        (try
+         (println "/oauth/oauth-callback")
          (let [token (-> (config<- env)
                          (auth/get-tokens (get-in request [:params :code]))
                          (get :access_token))

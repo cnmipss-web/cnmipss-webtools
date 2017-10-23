@@ -6,7 +6,7 @@
 
 (defn- -deadline-notifier
   [interval mailer]
-  (doseq [pnsa (mapv pns-from-map (db/get-all-pnsa))]
+  (doseq [pnsa (mapv convert-pns-from-map (db/get-all-pnsa))]
     (if (t/within? interval (:close_date pnsa))
       (let [subscribers (db/get-subscriptions {:proc_id (:id pnsa)})]
         (mapv (partial mailer pnsa) subscribers)))))

@@ -18,6 +18,18 @@
 (def ^:private webmaster-email "webmaster@cnmipss.org")
 (def ^:private procurement-email "procurement@cnmipss.org")
 
+(defn unsubscribe-option [email k]
+  (let [routes {:procurement "https://cnmipss.org/webtools/api/procurement-unsubscribe"}]
+    (if (some? (get routes k))
+      [:div
+       [:a {:href (get routes k)} "Unsubscribe"]]
+      (throw (NullPointerException. (str "Null URL used in webtools.email/unsubscribe-option for key " k))))))
+
+(s/fdef unsubscribe-option
+        :args (s/cat :email :webtools.spec.internet/email-address
+                     :key keyword?)
+        :ret vector?)
+
 (defn invite [user]
   (let [{:keys [email roles admin]} user
         name (->> email
@@ -87,7 +99,8 @@
                                           [:p "Thank you,"]
                                           [:p "Kimo Rosario"]
                                           [:p "Procurement & Supply Officer"]
-                                          [:p "CNMI PSS"]]])}]})
+                                          [:p "CNMI PSS"]
+                                          (unsubscribe-option email :procurement)]])}]})
       (catch Exception e
         (log/error e)))))
 
@@ -118,7 +131,9 @@
                          :from procurement-email
                          :subject (str "Changes to " title-string)
                          :body [{:type "text/html"
-                                 :content (html (changes-email orig new sub))}]}))]
+                                 :content (html [:html
+                                                 (conj (changes-email orig new sub)
+                                                       (unsubscribe-option email :procurement))])}]}))]
     (mapv send-fn subscribers)))
 
 (s/fdef notify-changes
@@ -160,7 +175,8 @@
                                       [:p "Thank you,"]
                                       [:p "Kimo Rosario"]
                                       [:p "Procurement & Supply Officer"]
-                                      [:p "CNMI PSS"]]])}]})
+                                      [:p "CNMI PSS"]
+                                      (unsubscribe-option email :procurement)]])}]})
               (catch Exception e
                 (log/error e))))]
       (mapv send-fn subscribers))
@@ -192,7 +208,8 @@
                                     [:p "Thank you,"]
                                     [:p "Kimo Rosario"]
                                     [:p "Procurement & Supply Officer"]
-                                    [:p "CNMI PSS"]]])}]})
+                                    [:p "CNMI PSS"]
+                                    (unsubscribe-option email :procurement)]])}]})
             (catch Exception e
               (log/error e))))]
     (mapv send-fn subscribers)))
@@ -237,7 +254,8 @@
                                         [:p "Thank you,"]
                                         [:p "Kimo Rosario"]
                                         [:p "Procurement & Supply Officer"]
-                                        [:p "CNMI PSS"]]])}]})
+                                        [:p "CNMI PSS"]
+                                        (unsubscribe-option email :procurement)]])}]})
     (catch Exception e
       (log/error e))))
 
@@ -272,7 +290,8 @@
                                         [:p "Thank you,"]
                                         [:p "Kimo Rosario"]
                                         [:p "Procurement & Supply Officer"]
-                                        [:p "CNMI PSS"]]])}]})
+                                        [:p "CNMI PSS"]
+                                        (unsubscribe-option email :procurement)]])}]})
     (catch Exception e
       (log/error e))))
 

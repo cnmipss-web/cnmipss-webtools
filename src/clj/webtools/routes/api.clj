@@ -184,20 +184,20 @@
                      (db/delete-jva! body)))
 
   (POST "/api/update-procurement" {:keys [body]}
-        (let [new (pns-from-map body)
+        (let [new (convert-pns-from-map body)
               orig (get-pns-from-db (:id new))]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :update orig new))
                        (change-in-db new))))
 
   (POST "/api/delete-rfp" {:keys [body]}
-        (let [rfp (pns-from-map body)]
+        (let [rfp (convert-pns-from-map body)]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :delete :rfps rfp))
                        (clear-procurement :rfp rfp))))
 
   (POST "/api/delete-ifb" {:keys [body]}
-        (let [ifb (pns-from-map body)]
+        (let [ifb (convert-pns-from-map body)]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :delete :ifbs ifb))
                        (clear-procurement :ifb ifb)))))

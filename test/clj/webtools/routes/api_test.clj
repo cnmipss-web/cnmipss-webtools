@@ -1,5 +1,6 @@
 (ns webtools.routes.api-test
   (:require [clojure.test :refer :all]
+            [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
             [clojure.walk :as walk]
             [clojure.java.io :refer [file]]
@@ -58,22 +59,17 @@
         (is (= 200 status))
         (is (= "application/json" (get headers "Content-Type")))
         (is (= clojure.lang.PersistentArrayMap (type edn-body)))
+
         (is (= 6 (count pnsa)))
-        (is (every? #(and (-> % :type string?)
-                          (-> % :number string?)
-                          (-> % :open_date string?)
-                          (-> % :description string?)
-                          (-> % :title string?)) pnsa))
+        (is (every? #(s/valid? :webtools.spec.procurement/record %) (map convert-pns-from-map pnsa)))
+
         (is (= 3 (count addenda)))
         (is (every? #(and (-> % :file_link string?)
                           (-> % :addendum_number int?)
                           (-> % :proc_id some?)) addenda))
+
         (is (= 4 (count subscriptions)))
-        (is (every? #(and (-> % :company_name string?)
-                          (-> % :contact_person string?)
-                          (-> % :email string?)
-                          (-> % :telephone int?)
-                          (-> % :proc_id some?)) subscriptions)))))
+        (is (every? #(s/valid? :webtools.spec.subscription/record %) (map convert-sub-from-map subscriptions))))))
 
   (testing "POST /api/subscribe-procurement"
     (with-stub! [[email/confirm-subscription (constantly nil)]]
@@ -315,7 +311,7 @@
             (is (= 1 (-> email/notify-subscribers calls count)))
             (is (= :update (-> email/notify-subscribers calls first :args first)))
             (is (= orig (-> email/notify-subscribers calls first :args second)))
-            (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))))
+            (is (= (convert-pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))))
 
       (with-stub! [[email/notify-subscribers (constantly nil)]]
         (let [new-title "New Title for Invitation #2"
@@ -340,7 +336,7 @@
             (is (= 1 (-> email/notify-subscribers calls count)))
             (is (= :update (-> email/notify-subscribers calls first :args first)))
             (is (= orig (-> email/notify-subscribers calls first :args second)))
-            (is (= (pns-from-map ifb) (-> email/notify-subscribers calls first :args last)))))))
+            (is (= (convert-pns-from-map ifb) (-> email/notify-subscribers calls first :args last)))))))
 
     (testing "POST /api/delete-rfp"
       (with-stub! [[email/notify-subscribers (constantly nil)]
@@ -361,7 +357,7 @@
             (is (= 1 (-> email/notify-subscribers calls count)))
             (is (= :delete (-> email/notify-subscribers calls first :args first)))
             (is (= :rfps (-> email/notify-subscribers calls first :args second)))
-            (is (= (pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))
+            (is (= (convert-pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))
 
           (testing "should delete related addenda"
             (let [addenda (db/get-addenda {:proc_id (:id rfp)})]
@@ -394,7 +390,7 @@
             (is (= 1 (-> email/notify-subscribers calls count)))
             (is (= :delete (-> email/notify-subscribers calls first :args first)))
             (is (= :ifbs (-> email/notify-subscribers calls first :args second)))
-            (is (= (pns-from-map ifb) (-> email/notify-subscribers calls first :args last))))
+            (is (= (convert-pns-from-map ifb) (-> email/notify-subscribers calls first :args last))))
 
           (testing "should delete related addenda"
             (let [addenda (db/get-addenda {:proc_id (:id ifb)})]

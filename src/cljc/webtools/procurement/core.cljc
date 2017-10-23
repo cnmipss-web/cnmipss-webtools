@@ -4,22 +4,22 @@
             [webtools.spec.procurement]
             [webtools.spec.subscription]))
 
-(defprotocol process-procurement
+(defprotocol procurement-to-db
   "Methods for manipulating procurement records"
-  (save-to-db [a] "Save a record to the DB")
-  (change-in-db [a] "Update a record in the DB")
-  (delete-from-db [a] "Delete a record from the DB")
-  (for-json [a] "Prep a record to be converted to JSON")
-  (proc-type [a] "Returns a records type (:rfp or :ifb)"))
+  (save-to-db     [pns] "Save a record to the DB")
+  (change-in-db   [pns] "Update a record in the DB")
+  (delete-from-db [pns] "Delete a record from the DB"))
 
-(defprotocol retrieve-procurement
+(defprotocol procurement-from-db
   "Methods to retrive procurement records from DB"
-  (make-uuid [id] "Convert an id to uuid class")
+  (make-uuid       [id] "Convert an id to uuid class")
   (get-pns-from-db [id] "Retrieve an rfp or ifb based on its id"))
 
 (defprotocol create-procurement
-  "Method to convert simply map to PSAnnouncement with relevant type checks"
-  (pns-from-map [pns]))
+  "Method to convert simple maps to procurement records, with validation and type conversion"
+  (convert-pns-from-map [map])
+  (convert-sub-from-map [map])
+  (convert-add-from-map [map]))
 
 (defprotocol communicate-procurement
   "Methods for generating email notifications regarding procurement announcements"
@@ -78,10 +78,6 @@
                       (s/gen :webtools.spec.subscription/email)
                       (s/gen :webtools.spec.subscription/telephone))))))
 
-(s/fdef proc-type
-        :args (s/cat :a ::procurement)
-        :ret #{:rfp :ifb})
-
 (s/fdef make-uuid
         :args (s/cat :id (s/alt :string :webtools.spec.core/uuid-str
                                 :uuid :webtools.spec.core/uuid))
@@ -93,8 +89,8 @@
         :ret  (s/or :pns ::procurement
                     :nil nil?))
 
-(s/fdef pns-from-map
-        :args (s/cat :map :webtools.spec.procurement/record)
+(s/fdef convert-pns-from-map
+        :args (s/cat :map map?)                     
         :ret ::procurement)
 
 (s/fdef changes-email

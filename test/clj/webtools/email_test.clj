@@ -48,7 +48,8 @@
       (validate-emails (-> send-message calls)))))
 
 (deftest test-confirm-subscription
-  (with-stub! [[send-message (constantly nil)]]
+  (with-stub! [[send-message (constantly nil)]
+               [email/unsubscribe-option (constantly nil)]]
     (let [subscription (webtools.procurement.core/map->Subscription
                         {:email "subscriber@gimmes.pam"
                          :contact_person "Busy Reader"
@@ -63,7 +64,10 @@
                                                          :rfp "123" open_date close_date
                                                          "Title" "D" "L")]
       (email/confirm-subscription subscription pns)
-      (validate-emails (-> send-message calls) [subscription] "procurement@cnmipss.org"))))
+      (testing "should send a message when called"
+        (validate-emails (-> send-message calls) [subscription] "procurement@cnmipss.org"))
+      (testing "should offer the option to unsubscribe from further emails"
+        (is (= 1 (count (calls email/unsubscribe-option))))))))
 
 (deftest test-notify-subscribers
   (testing "should switch on event key and call correct function"
@@ -115,7 +119,8 @@
             (is (= rfp (-> notify-deletion calls first :args first)))))))))
 
 (deftest test-notify-changes
-  (with-stub! [[send-message (constantly nil)]]
+  (with-stub! [[send-message (constantly nil)]
+               [email/unsubscribe-option (constantly "UNSUBSCRIBE STRING")]]
     (let [open_date (util-dates/parse-date "August 3, 2000")
           close_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 pm")
           new_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 am")
@@ -142,11 +147,22 @@
                                            :email "test@11thethi.ngs"
                                            :telephone (util/format-tel-num 4567891)})]]
       (notify-changes new-vers original subscribers)
-      (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org"))))
+      (validate-emails (-> send-message calls) subscribers "procurement@cnmipss.org")
+
+      (testing "should offer the option to unsubscribe from further emails"
+          (is (= (count subscribers) (count (calls email/unsubscribe-option))))
+
+          (let [unsubscribe-option (->> send-message
+                                        calls
+                                        (map :args)
+                                        (map #(-> % first :body first :content))
+                                        (map #(re-seq #"UNSUBSCRIBE STRING</body>" %)))]
+            (is (every? some? unsubscribe-option)))))))
 
 (deftest test-notify-addenda
   (testing "should send notification message of new addenda"
-    (with-stub! [[send-message (constantly nil)]]
+    (with-stub! [[send-message (constantly nil)]
+                 [email/unsubscribe-option (constantly "UNSUBSCRIBE STRING")]]
       (let [proc-id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
             rfp (get-pns-from-db proc-id)
             addenda {:id "84ee3bd5-9077-449f-a576-08eec5b26028"
@@ -158,11 +174,22 @@
 
         (testing "should generate correct subject lines"
           (let [subject (->> send-message calls first :args first :subject)]
-            (is (= "Addendum added to RFP# 17-015 Test Request for Proposal #3" subject))))))))
+            (is (= "Addendum added to RFP# 17-015 Test Request for Proposal #3" subject))))
+
+        (testing "should offer the option to unsubscribe from further emails"
+          (is (= (count subscribers) (count (calls email/unsubscribe-option))))
+
+          (let [unsubscribe-option (->> send-message
+                                        calls
+                                        (map :args)
+                                        (map #(-> % first :body first :content))
+                                        (map #(re-seq #"UNSUBSCRIBE STRING</body>" %)))]
+            (is (every? some? unsubscribe-option))))))))
 
 (deftest test-notify-deletion
   (testing "should send notification message if open PSAnnouncement is deleted"
-    (with-stub! [[send-message (constantly nil)]]
+    (with-stub! [[send-message (constantly nil)]
+                 [email/unsubscribe-option (constantly "UNSUBSCRIBE STRING")]]
       (let [rfp (-> (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
                     (get-pns-from-db)
                     (util/make-status))
@@ -172,7 +199,17 @@
 
         (testing "should generate correct subject lines"
           (let [subject (->> send-message calls first :args first :subject)]
-            (is (= "RFP# 17-015 Test Request for Proposal #3 has been DELETED" subject)))))))
+            (is (= "RFP# 17-015 Test Request for Proposal #3 has been DELETED" subject))))
+
+        (testing "should offer the option to unsubscribe from further emails"
+          (is (= (count subscribers) (count (calls email/unsubscribe-option))))
+
+          (let [unsubscribe-option (->> send-message
+                                        calls
+                                        (map :args)
+                                        (map #(-> % first :body first :content))
+                                        (map #(re-seq #"UNSUBSCRIBE STRING</body>" %)))]
+            (is (every? some? unsubscribe-option)))))))
 
   (testing "should not send notification message if closed PSAnnouncement is deleted"
     (with-stub! [[send-message (constantly nil)]]
@@ -183,3 +220,16 @@
         (notify-deletion (assoc rfp :close_date (t/minus (t/now) (t/days 1))) subscribers)
         (validate-emails (-> send-message calls))
         (is (= 0 (-> send-message calls count)))))))
+
+(deftest test-unsubscribe-option
+  (testing "should generate hiccup markup"
+    (let [markup (email/unsubscribe-option "test@test.com" :procurement)]
+      (is (vector? markup))
+      (is (= :div (first markup)))))
+
+  (testing "should throw an error for null url keys"
+    (try
+      (let [markup (email/unsubscribe-option "test@test.com" :incorrect-key)]
+        (is (nil? markup)))
+      (catch Exception err
+        (is (instance? NullPointerException err))))))
