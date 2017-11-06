@@ -13,8 +13,15 @@
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
             [ring.middleware.cors :refer [wrap-cors]]
-            [ring.middleware.cookies :refer [wrap-cookies]])
+            [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.middleware.browser-caching :refer [wrap-browser-caching]]
+            )
   (:import [javax.servlet ServletContext]))
+
+(defn cache-control [handler]
+  (wrap-browser-caching handler {"application/javascript" (* 60 60 24)
+                                 "text/javascript" (* 60 60 24)
+                                 "text/html" (* 60 60 24 7)}))
 
 (defn wrap-webtools-auth [handler]
   (fn [request]

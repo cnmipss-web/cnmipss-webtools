@@ -54,6 +54,7 @@
                  [ring/ring-spec "0.0.3"]
                  [secretary "1.2.3"]
                  [selmer "1.10.8"]
+                 [slester/ring-browser-caching "0.1.1"]
                  [stuarth/clj-oauth2 "0.3.2"]
                  [try-let "1.1.0"]]
 
@@ -65,6 +66,7 @@
   :resource-paths ["resources" "target/cljsbuild"]
   :target-path "target/%s/"
   :main ^:skip-aot webtools.core
+
   :migratus {:store :database
              :db ~(get (System/getenv) "DATABASE_URL")}
   
@@ -105,7 +107,7 @@
                {:source-paths ["src/cljc" "src/cljs" "env/prod/cljs"]
                 :compiler
                 {:output-to "target/cljsbuild/public/js/app.js"
-                 :optimizations :simple
+                 :optimizations :advanced
                  :pretty-print false
                  :closure-warnings
                  {:externs-validation :off :non-standard-jsdoc :off}
