@@ -199,17 +199,17 @@
      (db/create-jva!))))
 
 (defmacro post-file-route
-  [r p role]
+  [r handler role]
   `(let [params# (get ~r :params)
          cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
      (try
-       (~p params#)
-       (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role ))
+       (~handler params#)
+       (-> (response/found (str (env :server-uri) "#/app" "?success=true&role=" ~role ))
            (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/header "Content-Type" "application/json"))
        (catch Exception e#
          (println (.getMessage e#))
-         (-> (response/found (str (env :server-uri) "#/app" "?role=" ~role))
+         (-> (response/found (str (env :server-uri) "#/app" "?success=false&role=" ~role))
              (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
 

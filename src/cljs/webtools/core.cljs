@@ -70,7 +70,7 @@
 (secretary/defroute "/app" []
   (let [token (get-cookie :token)
         email (url-decode (get-cookie :email))
-        success (get (first (re-seq #"success=(true|false)" (.-hash js/location))) 1)
+        success (get (first (re-seq #"&?success=(true|false)&?" (.-hash js/location))) 1)
         current-role (get (first (re-seq #"role=(.*)&?" (.-hash js/location))) 1)]
     (case success
       "true" (rf/dispatch [:action-success])
