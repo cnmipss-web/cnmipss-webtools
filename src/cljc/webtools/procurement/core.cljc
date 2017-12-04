@@ -33,7 +33,8 @@
      close_date
      title
      description
-     file_link])
+     file_link
+     spec_link])
 
 (defrecord Addendum
     [id
@@ -63,7 +64,8 @@
                       (s/gen :webtools.spec.procurement/close_date)
                       (s/gen :webtools.spec.procurement/title)
                       (s/gen :webtools.spec.procurement/description)
-                      (s/gen :webtools.spec.procurement/file_link))))))
+                      (s/gen :webtools.spec.procurement/file_link)
+                      (s/gen :webtools.spec.procurement/spec_link))))))
 
 (s/def ::subscription
   (s/with-gen

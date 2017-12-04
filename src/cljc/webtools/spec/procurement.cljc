@@ -11,6 +11,7 @@
 (s/def ::title          string?)
 (s/def ::description    string?)
 (s/def ::file_link      string?)
+(s/def ::spec_link      string?)
 
 (s/def ::record
   (s/keys :req-un [::id
@@ -20,4 +21,5 @@
                    ::close_date
                    ::title
                    ::description
-                   ::file_link]))
+                   ::file_link
+                   ::spec_link]))
