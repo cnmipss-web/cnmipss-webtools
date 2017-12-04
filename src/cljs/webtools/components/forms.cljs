@@ -218,6 +218,27 @@
          (conj [:edit-procurement key])
          (rf/dispatch))))
 
+(defn procurement-upload []
+  (let [accept "pdf"
+        multiple false
+        action "/webtools/upload/procurement-pdf"
+        path (.-hash js/location)]
+    [:form#upload-form {:action action :method "post" :enc-type "multipart/form-data"}
+     [:div.form-inline.row
+      [:div.form-group.col-xs-4
+       [:label {:for "ann-file"} "Upload New RFP/IFB Announcement"]
+       [:br]
+       [:input#upload-jva.form-control {:type "file" :id "ann-file" :name "ann-file" :accept accept :multiple multiple}]]
+      [:div.form-group.col-xs-4
+       [:label {:for "specs-file"} "Upload Specs for this Announcement"]
+       [:br]
+       [:input#upload-jva.form-control {:type "file" :id "spec-file" :name "spec-file" :accept accept :multiple multiple}]]
+      [:div.form-group.col-xs-4
+       [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
+       [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
+                                                         :style {:width "100%"
+                                                                 :height "100%"}} "Upload"]]]]))
+
 (defn edit-procurement [item]
   [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)
                                       :key (random-uuid)} ;;HACK: key forces :default-values to update

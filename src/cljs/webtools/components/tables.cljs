@@ -110,12 +110,12 @@
 
 (defn procurement-row [item]
   [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
-   [:td.custom-col-1 (:number item)]
-   [:td.custom-col-2 (util-dates/print-date (:open_date item))]
-   [:td.custom-col-2 (util-dates/print-date-at-time (:close_date item))]
-   [:td.custom-col-4 (:title item)]
-   [:td.custom-col-8.text-left (-> item :description (subs 0 140) (str "..."))]
-   [:td.custom-col-3
+   [:td.custom-col-1.text-center (:number item)]
+   [:td.custom-col-2.text-center.p-1 (util-dates/print-date (:open_date item))]
+   [:td.custom-col-2.text-center.p-1 (util-dates/print-date-at-time (:close_date item))]
+   [:td.custom-col-4.text-center.p-1 (:title item)]
+   [:td.custom-col-8.text-left.p-1 (-> item :description (subs 0 140) (str "..."))]
+   [:td.custom-col-3.text-center.pl-1.pr-1
     [:a {:on-click #(rf/dispatch [:set-subscriber-modal item])}
      [:button.btn.btn-success.file-link {:title "Subscribers"
                                          :data-toggle "modal"
@@ -123,6 +123,8 @@
                                          :aria-controls "pns-subscriber-modal"} [:i.fa.fa-envelope]]]
     [:a {:href (:file_link item)}
      [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
+    [:a {:href (:spec_link item)}
+     [:button.btn.btn-info.file-link {:title "Specifications"} [:i.fa.fa-info-circle]]]
     [:a {:on-click (fn [] (rf/dispatch [:set-procurement-modal item]))}
      [:button.btn.btn-warning.file-link {:title "Edit"
                                          :data-toggle "modal"
@@ -143,7 +145,7 @@
       [:th.custom-col-2.text-center {:scope "col"} "Closing Date"]
       [:th.custom-col-4.text-center {:scope "col"} "Title"]
       [:th.custom-col-8.text-center {:scope "col"} "Description"]
-      [:th.custom-col-3.text-center {:scope "col"} "Link"]]]
+      [:th.custom-col-3.text-center {:scope "col"} "Links"]]]
     [:tbody
      (for [item (-> m k)]
        ^{:key (str (name k) (:title item))} [procurement-row (assoc item :status true)])]]])
