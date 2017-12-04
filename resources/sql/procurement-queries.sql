@@ -1,8 +1,8 @@
 -- :name create-pnsa! :! :n
 -- :doc Creates a new record of a Procurement RFP or IFB Announcement
 insert into procurement_rfps_and_ifbs
-(id, type, number, open_date, close_date, title, description, file_link)
-values (:id, :type, :number, :open_date, :close_date, :title, :description, :file_link);
+(id, type, number, open_date, close_date, title, description, file_link, spec_link)
+values (:id, :type, :number, :open_date, :close_date, :title, :description, :file_link, :spec_link);
 
 -- :name delete-pnsa! :! :n
 -- :doc Deletes a record of a Procurement RFP or IFB Announcement from the DB
