@@ -79,8 +79,11 @@
   (let [this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re next-line)}) procurement-regexes))]
     (merge-with util/select-non-nil this-line rfp)))
 
-(defn create-pns-from-file [file]
-  (let [{:keys [tempfile size filename]} file
+(defn create-pns-from-file 
+  "Takes an announcement file and a specification file and uploads both to the WP site.  
+  Parses information from the files to create a PSAnnouncement type record."
+  [ann-file spec-file]
+  (let [{:keys [tempfile size filename]} ann-file
             announcement (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
             desc (-> (re-find #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/" announcement)
                      (last)
@@ -98,6 +101,18 @@
       ((fn [] (println (-> rec :open_date type)) rec))
       (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
+      (do
+        (println filename tempfile
+                 :title (:title rec)
+                 :alt_text (str "Announcement for "
+                                (-> rec :type name clojure.string/upper-case)
+                                "# " (:number rec) " " (:title rec))
+                 :description (-> (:description rec)
+                                  (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
+                                  (last)
+                                  (cemerick.url/url-encode))
+                 :slug (:id rec))
+        rec)
       (assoc rec :file_link
              (wp/create-media filename tempfile
                               :title (:title rec)
@@ -109,6 +124,17 @@
                                                (last)
                                                (cemerick.url/url-encode))
                               :slug (:id rec)))
+      (assoc rec :spec_link
+             (wp/create-media (:filename spec-file) (:tempfile spec-file)
+                              :title (:title rec)
+                              :alt_text (str "Specifications for "
+                                             (-> rec :type name clojure.string/upper-case)
+                                             "# " (:number rec) " " (:title rec))
+                              :description (-> (:description rec)
+                                               (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
+                                               (last)
+                                               (cemerick.url/url-encode))
+                              :slug (str (:id rec) "-spec")))
       (map->PSAnnouncement rec))))
 
 (extend-protocol procurement-from-db
