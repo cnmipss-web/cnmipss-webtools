@@ -215,11 +215,9 @@
 
 (defn process-procurement-pdf
   [params]
-  (let [{:keys [file]} params]
-    (if (= (type file) clojure.lang.PersistentArrayMap)
-      (let [pns (create-pns-from-file file)]
-        (save-to-db pns))
-      (mapv (comp process-procurement-pdf #(into {} [[:file %]])) file))))
+  (let [{:keys [ann-file spec-file]} params
+        pns (create-pns-from-file ann-file spec-file)]
+    (save-to-db pns)))
 
 (defn process-procurement-addendum
   [params]

@@ -54,7 +54,9 @@
   (let [uuid (make-uuid id)
         query-map {:proc_id uuid}]
     (try
+      ;; Delete announcement file and spec file from WP media files
       (wp/delete-media id)
+      (wp/delete-media (str id "-spec"))
       (catch Exception e
         (log/error e)))
     (let [addenda (db/get-addenda query-map)
