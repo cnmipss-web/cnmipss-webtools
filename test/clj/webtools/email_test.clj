@@ -62,7 +62,7 @@
           close_date (util-dates/parse-date-at-time "August 3, 2100 at 10:00 pm")
           pns (webtools.procurement.core.PSAnnouncement. (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
                                                          :rfp "123" open_date close_date
-                                                         "Title" "D" "L")]
+                                                         "Title" "D" "L" "S")]
       (email/confirm-subscription subscription pns)
       (testing "should send a message when called"
         (validate-emails (-> send-message calls) [subscription] "procurement@cnmipss.org"))
