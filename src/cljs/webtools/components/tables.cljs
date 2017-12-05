@@ -137,7 +137,7 @@
   [:div.procurement-table-box.col-xs-12
    [:h2.procurement-title.text-center (key->name k)]
    [:table.procurement-list
-    [:caption.sr-only "List of current"]
+    [:caption.sr-only "List of current requests for proposals and invitations for bids"]
     [:thead
      [:tr.row.jva-list-row
       [:th.custom-col-1.text-center {:scope "col"} "Number"]
