@@ -15,13 +15,9 @@
             [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.browser-caching :refer [wrap-browser-caching]]
+            ;;[ring.util.response :as response]
             )
   (:import [javax.servlet ServletContext]))
-
-(defn cache-control [handler]
-  (wrap-browser-caching handler {"application/javascript" (* 60 60 24)
-                                 "text/javascript" (* 60 60 24)
-                                 "text/html" (* 60 60 24 7)}))
 
 (defn wrap-webtools-auth [handler]
   (fn [request]
@@ -96,4 +92,7 @@
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only false}})
       wrap-context
-      wrap-internal-error))
+      wrap-internal-error
+      (wrap-browser-caching {"application/javascript" (* 60 600 24)
+                             "text/javascript" (* 60 60 24)
+                             "text/html" (* 60 60 24 7)})))

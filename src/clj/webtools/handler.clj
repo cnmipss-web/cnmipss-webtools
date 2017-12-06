@@ -19,8 +19,7 @@
   (routes
     (-> #'home-routes
         (wrap-routes middleware/wrap-csrf)
-        (wrap-routes middleware/wrap-formats)
-        (wrap-routes middleware/cache-control))
+        (wrap-routes middleware/wrap-formats))
     #'oauth-routes
     (-> #'api-routes
         (wrap-routes middleware/wrap-api))
