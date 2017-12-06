@@ -135,7 +135,7 @@
    {:action "/webtools/upload/reannounce-jva" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
     [:label {:for "file"} "Reannounce JVA"]
-    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple false}]]
+    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept ".pdf" :multiple false}]]
    [:div.form-group 
     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value ""}  ]
     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"} "Upload"]]])
@@ -301,7 +301,7 @@
    {:action "/webtools/upload/procurement-addendum" :method "post" :enc-type "multipart/form-data"}
    [:div.form-group
     [:label {:for "file"} "Upload Addendum"]
-    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept "pdf" :multiple false}]]
+    [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept ".pdf" :multiple false}]]
    [:div.form-group.sr-only
     [:input.form-control {:type "text" :name "id" :value (:id item)}]
     [:input.form-control {:type "text" :name "number" :value (:number item)}]

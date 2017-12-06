@@ -40,7 +40,7 @@
    [:div.col-xs-12.col-sm-10.offset-sm-1
     [forms/upload-form {:path (.-hash js/location)
                         :action "/webtools/upload/jva-pdf"
-                        :accept "pdf"
+                        :accept ".pdf"
                         :label "Upload New JVA"
                         :multiple true}]]
    [:div.col-xs-12.col-sm-10.offset-sm-1
