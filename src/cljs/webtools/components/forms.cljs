@@ -200,12 +200,12 @@
 
 
 (def procurement-fields
-  {:number "Number"
-   :status "Status"
-   :open_date "Opening Date"
-   :close_date "Closing Date"
+  {:number      "Number"
+   :status      "Status"
+   :open_date   "Opening Date"
+   :close_date  "Closing Date"
    :description "Description"
-   :title "Title"})
+   :title       "Title"})
 
 (defn toggle-procurement-status
   [item]
@@ -219,7 +219,7 @@
          (rf/dispatch))))
 
 (defn procurement-upload []
-  (let [accept "pdf"
+  (let [accept ".pdf"
         multiple false
         action "/webtools/upload/procurement-pdf"
         path (.-hash js/location)]
@@ -228,13 +228,25 @@
       [:div.form-group.col-xs-4
        [:label {:for "ann-file"} "Upload New RFP/IFB Announcement"]
        [:br]
-       [:input#upload-jva.form-control {:type "file" :id "ann-file" :name "ann-file" :accept accept :multiple multiple}]]
+       [:input#upload-jva.form-control {:type "file"
+                                        :id "ann-file"
+                                        :name "ann-file"
+                                        :accept accept
+                                        :multiple multiple}]]
       [:div.form-group.col-xs-4
-       [:label {:for "specs-file"} "Upload Specs for this Announcement"]
+       [:label {:for "spec-file"} "Upload Specs for this Announcement"]
        [:br]
-       [:input#upload-jva.form-control {:type "file" :id "spec-file" :name "spec-file" :accept accept :multiple multiple}]]
+       [:input#upload-jva.form-control {:type "file"
+                                        :id "spec-file"
+                                        :name "spec-file"
+                                        :accept accept
+                                        :multiple multiple}]]
       [:div.form-group.col-xs-4
-       [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
+       [:input {:style {:display "none"}
+                :on-change nil
+                :type "text"
+                :name "path"
+                :value path}]
        [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
                                                          :style {:width "100%"
                                                                  :height "100%"}} "Upload"]]]]))
@@ -244,6 +256,7 @@
                                       :key (random-uuid)} ;;HACK: key forces :default-values to update
    (for [[key val] (->> item
                         (filter (fn [[key val]] (not= key :file_link)))
+                        (filter (fn [[key val]] (not= key :spec_link)))
                         (filter (fn [[key val]] (not= key :type)))
                         (sort-by (fn [[key val]] (case key
                                                    :number 0
