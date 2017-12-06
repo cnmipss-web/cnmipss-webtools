@@ -76,13 +76,19 @@
          [forms/procurement-addendum item]]
         [forms/edit-procurement item])]
      [:div.modal-footer
-      [:div.col-xs-2
-       (if (not @(rf/subscribe [:add-addendum]))
+      [:div.col-xs-3
+       (if (and (not @(rf/subscribe [:add-addendum]))
+                (not @(rf/subscribe [:change-specs])))
          [:button.btn.btn-danger.procurement-addendum {:on-click #(rf/dispatch [:add-addendum true])} "Addendum"])]
-      [:div.col-xs-4]
+      [:div.col-xs-3
+       (if (and (not @(rf/subscribe [:add-addendum]))
+                (not @(rf/subscribe [:change-specs])))
+         [:button.btn.btn-info.procurement-addendum {:on-click #(rf/dispatch [:change-specs true])} "Change Specs"])]
+
       [:div.col-xs-6
        [:button.btn.btn-secondary {:data-dismiss "modal"
-                                   :on-click #(rf/dispatch [:add-addendum false])} "Exit"]
+                                   :on-click #(do (rf/dispatch [:add-addendum false])
+                                                  (rf/dispatch [:change-specs false]))} "Exit"]
        (if (not @(rf/subscribe [:add-addendum]))
          [:button.btn.btn-primary {:type "submit" :form "edit-procurement"} "Save Changes"])]]]]])
 

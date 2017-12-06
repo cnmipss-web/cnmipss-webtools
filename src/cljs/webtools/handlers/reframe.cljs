@@ -217,6 +217,10 @@
  (fn [db [_ setting]]
    (assoc db :add-addendum setting)))
 
+(reg-event-db :change-specs
+ (fn [db [_ setting]]
+   (assoc db :change-specs setting)))
+
 (reg-event-db :set-subscriber-modal
  (fn [db [_ {:keys [id] :as item}]]
    (let [subscriptions (filter #(= id (-> % :proc_id p/make-uuid)) (get-in db [:procurement-list :subscriptions]))]

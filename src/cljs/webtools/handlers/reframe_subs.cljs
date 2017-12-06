@@ -93,6 +93,10 @@
  (fn [db _]
    (:add-addendum db)))
 
+(reg-sub :change-specs
+ (fn [db _]
+   (:change-specs db)))
+
 (reg-sub :addenda
  (fn [db _]
    (:addenda db)))
