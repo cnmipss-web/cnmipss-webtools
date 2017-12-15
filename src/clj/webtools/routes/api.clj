@@ -38,7 +38,7 @@
       ~@body
       (json-response resp/ok (~q))
       (catch Exception e#
-        (println e#)
+        (log/error e#)
         (json-response resp/internal-server-error e#)))))
 
 (defn get-all-procurement

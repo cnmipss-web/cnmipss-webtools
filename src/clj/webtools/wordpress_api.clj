@@ -52,6 +52,6 @@
                    {:headers {"Content-Type" "application/json"
                               "Authorization" (wp-auth-token)}
                     :body (-> {:force true} clojure.data.json/write-str)
-                    :error-handler println})
+                    :error-handler (fn [e] (log/error e))})
       (catch Exception e
         (log/error e)))))

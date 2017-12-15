@@ -98,21 +98,8 @@
       (assoc rec :description desc)
       (update rec :open_date util-dates/parse-date)
       (update rec :close_date util-dates/parse-date-at-time)
-      ((fn [] (println (-> rec :open_date type)) rec))
       (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
-      (do
-        (println filename tempfile
-                 :title (:title rec)
-                 :alt_text (str "Announcement for "
-                                (-> rec :type name clojure.string/upper-case)
-                                "# " (:number rec) " " (:title rec))
-                 :description (-> (:description rec)
-                                  (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
-                                  (last)
-                                  (cemerick.url/url-encode))
-                 :slug (:id rec))
-        rec)
       (assoc rec :file_link
              (wp/create-media filename tempfile
                               :title (:title rec)

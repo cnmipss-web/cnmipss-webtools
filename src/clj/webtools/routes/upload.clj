@@ -1,5 +1,6 @@
 (ns webtools.routes.upload
   (:require [compojure.core :refer [defroutes GET POST]]
+            [cemerick.url :as curl]
             [ring.util.http-response :as response]
             [clojure.data :refer [diff]]
             [clojure.data.json :as json]
@@ -16,6 +17,7 @@
             [webtools.procurement.core :refer :all]
             [webtools.procurement.server :refer [create-pns-from-file]]
             [webtools.email :as email]
+            [webtools.error-handler.sql :as sql-error]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce]
             [clj-time.format :as f])
@@ -198,19 +200,44 @@
                              :slug (:id jva-record)))
      (db/create-jva!))))
 
+(defn redirect-url
+  ([success role]
+   (-> (curl/url (str (env :server-uri)))
+       (assoc :query {"success" success
+                      "role" role})
+       (assoc :anchor "app")
+       (str)))
+  ([success role error]
+   (-> (curl/url (str (env :server-uri)))
+       (assoc :query {"success" success
+                      "role" role
+                      "error" (sql-error/code (sql-error/type error))})
+       (assoc :anchor "app")
+       (str))))
+
 (defmacro post-file-route
   [r handler role]
   `(let [params# (get ~r :params)
          cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
+     (println "post-file-route : " params# ~role)
      (try
        (~handler params#)
-       (-> (response/found (str (env :server-uri) "#/app" "?success=true&role=" ~role ))
+       (-> (response/found (redirect-url "true" ~role))
            (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/header "Content-Type" "application/json"))
-       (catch Exception e#
-         (println (.getMessage e#))
-         (-> (response/found (str (env :server-uri) "#/app" "?success=false&role=" ~role))
+       (catch java.sql.BatchUpdateException e#
+         (log/error e#)
+         (-> (redirect-url "false" ~role e#)
+             (response/found)
              (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
+             (response/set-cookie "wt-error" (sql-error/msg (sql-error/type e#)) cookie-opts#)
+             (response/header "Content-Type" "application/json")))
+       (catch Exception e#
+         (log/error e#)
+         (-> (redirect-url "false" ~role e#)
+             (response/found)
+             (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
+             (response/set-cookie "wt-error" (sql-error/msg (sql-error/type e#)) cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
 
 (defn process-procurement-pdf
@@ -221,6 +248,7 @@
 
 (defn process-procurement-addendum
   [params]
+  (println "process-procurement-addendum : " params)
   (let [{:keys [file id number type]} params
         {:keys [tempfile size filename]} file
         uuid (make-uuid id)

@@ -4,6 +4,7 @@
             [clojure.walk :as walk]
             [clojure.java.io :refer [file]]
             [clj-fuzzy.metrics :as measure]
+            [cemerick.url :as curl]
             [ring.mock.request :as mock]
             [bond.james :refer [calls with-spy with-stub!]]
             [clj-time.format :as f]
@@ -34,10 +35,12 @@
             (auth-req :post "/upload/certification-csv"
                       (assoc :params {:file {:tempfile csv-file
                                              :file-name "certificates-clean.csv"
-                                             :size (.length csv-file)}}))]
+                                             :size (.length csv-file)}}))
+            redirect-url (-> (get headers "Location") curl/url)]
         (is (= 302 status))
         (is (nil? error))
-        (is (= (str (env :server-uri) "#/app?role=Certification") (get headers "Location")))
+        (is (=  "app" (:anchor redirect-url)))
+        (is (= {"success" "true" "role" "Certification"} (:query redirect-url)))
         (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie")))
         (is (= "" body))))
 
@@ -48,13 +51,16 @@
                       (assoc :params {:file {:tempfile csv-file
                                              :file-name "certificates-collisions.csv"
                                              :size (.length csv-file)}}))
+            redirect-url (-> (get headers "Location") curl/url)
             msg (-> headers (get "Set-Cookie") first cemerick.url/url-decode)
             {:keys [last_name cert_no first_name cert_type]}
             (-> (re-seq #"(\{.*?\})" msg) second second read-string)
             existing-cert (db/get-cert {:cert_no "BI-003-2006"})]
         (is (= 302 status))
         (is (nil? error))
-        (is (= (str (env :server-uri) "#/app?role=Certification") (get headers "Location")))
+        (is (=  "app" (:anchor redirect-url)))
+        (is (= "false" (get-in redirect-url [:query "success"])))
+        (is (= "Certification" (get-in redirect-url [:query "role"])))
         (is (= "" body))
         (is (= "Victor" (:first_name existing-cert)))
         (is (= "Jones" (:last_name existing-cert)))
@@ -73,13 +79,15 @@
                       (assoc :params {:file {:tempfile csv-file
                                              :file-name "certificates-renewal.csv"
                                              :size (.length csv-file)}}))
+            redirect-url (-> (get headers "Location") curl/url)
             S-03-127 (db/get-cert {:cert_no "S-03-127"})
             S-03-127-renewal (db/get-cert {:cert_no "S-03-127-renewal-1"})
             S-04-095 (db/get-cert {:cert_no "S-04-095"})
             S-04-095-renewal (db/get-cert {:cert_no "S-04-095-renewal-1"})]
         (is (= 302 status))
         (is (nil? error))
-        (is (= (str (env :server-uri) "#/app?role=Certification") (get headers "Location")))
+        (is (=  "app" (:anchor redirect-url)))
+        (is (= {"success" "true" "role" "Certification"} (:query redirect-url)))
         (is (= "" body))
 
         (is (equal-props? [:first_name :last_name :cert_type] S-03-127 S-03-127-renewal))
@@ -110,9 +118,11 @@
     (with-stub! [[wp/create-media (constantly "http://nil")]]
       (testing "should handle uploaded rfps"
         (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
+              spec (file "test/clj/webtools/test/rfp-sample.pdf")
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
-                        (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}}))]
+                        (assoc :params {:ann-file {:tempfile pdf :filename "rfp-sample.pdf" :size (.length pdf)}
+                                        :spec-file {:tempfile spec :filename "rfp-specs.pdf" :size (.length spec)}}))]
 
           (testing "should redirect after successful upload"
             (is (= 302 status))
@@ -125,14 +135,16 @@
               (is (= "Training on the Foundations of Reading and Guided Reading" (:title rfp)))))
 
           (testing "should create wp media"
-            (is (= 1 (-> wp/create-media calls count)))
+            (is (= 2 (-> wp/create-media calls count)))
             (is (= java.util.UUID (-> wp/create-media calls first :args last type))))))
 
       (testing "should handle uploaded ifbs"
         (let [pdf (file "test/clj/webtools/test/ifb-sample.pdf")
+              spec (file "test/clj/webtools/test/rfp-sample.pdf")
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
-                        (assoc :params {:file {:tempfile pdf :filename "sample-ifb.pdf" :size (.length pdf)}}))]
+                        (assoc :params {:ann-file {:tempfile pdf :filename "ifb-sample.pdf" :size (.length pdf)}
+                                        :spec-file {:tempfile spec :filename "ifb-specs.pdf" :size (.length spec)}}))]
 
           (testing "should redirect after successful upload"
             (is (= 302 status))
@@ -145,23 +157,50 @@
               (is (= "Purchase of 1 (One) Riding Mower for the Public School System" (:title ifb)))))
 
           (testing "should create wp media"
-            (is (= 2 (-> wp/create-media calls count)))
-            (is (= java.util.UUID (-> wp/create-media calls second :args last type))))))))
+            (is (= 4 (-> wp/create-media calls count))))))
+
+      (testing "should respond with helpful error messages to malformed dates"
+        (let [pdf (file "test/clj/webtools/test/rfp-malformed-dates.pdf")
+              {:keys [status body headers error params] :as response}
+              (auth-req :post "/upload/procurement-pdf"
+                        (assoc :params {:ann-file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}
+                                        :spec-file {:tempfile pdf :filename "sample-spec.pdf" :size (.length pdf)}}))]
+
+          (testing "should redirect after failed upload"
+            (is (= 302 status)))
+          
+          (testing "should supply an error code via url params"
+            (let [location (-> response :headers (get "Location") curl/url)
+                  error (get-in location [:query "error"])]
+              (is (= "bad-date" error))))
+
+          (testing "should supply an error message via cookie"
+            (let [cookies (-> response :headers (get "Set-Cookie"))]
+              (is (some (fn [cookie]
+                          (some?
+                           (re-seq
+                            #"wt\-error\=One\+of\+the\+required\+dates\+is\+incorrectly\+formatted."
+                            cookie)))
+                        cookies))))))
+
+      (testing "should handle multiline titles and dates")))
 
   (testing "POST /upload/procurement-addendum"
     (with-stub! [[wp/create-media (constantly "http://cnmipss.org/file-link.pdf")]
                  [email/notify-subscribers (constantly nil)]]
       (testing "should store uploaded addenda"
         (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
-              {:keys [status body headers error params]}
+              x (println pdf)
+              {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-addendum"
                         (assoc :params {:file {:tempfile pdf :filename "sample-addendum.pdf" :size (.length pdf)}
                                         :id "d0002906-6432-42b5-b82b-35f0d710f827"
                                         :type :rfp
                                         :number "NNN-STRING"}))]
           (testing "should redirect after successful upload"
+            (spit "test.html" (-> response :body str))
+            (println status headers error params)
             (is (= 302 status))
-            (is (nil? error))
             (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
 
           (testing "should store addendum info in postgres DB")

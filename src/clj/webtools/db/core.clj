@@ -9,6 +9,7 @@
    [clj-time.core :as t]
    [clj-time.local :as l]
    [clojure.java.jdbc :as jdbc]
+   [clojure.tools.logging :as log]
    [conman.core :as conman]
    [webtools.config :refer [env]]
    [webtools.constants :as const]
@@ -97,7 +98,7 @@
                   (util-dates/parse-date)
                   (c/to-sql-date))
                  (catch Exception e
-                   (println (.getMessage e))
+                   (log/error e)
                    nil)))
     m))
 
@@ -112,7 +113,7 @@
                   ((fn [date-at-time]
                      (-> date-at-time util-dates/parse-date-at-time c/to-sql-time))))
                  (catch Exception e
-                   (println e)
+                   (log/error e)
                    nil)))
     m))
 
