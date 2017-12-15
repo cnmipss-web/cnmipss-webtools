@@ -6,11 +6,6 @@
 
 (def ^:private jobs (atom {}))
 
-(defn- func
-  "Helper function for testing"
-  []
-  (println "HELP! I NEED SOMEBODY!"))
-
 (defn- -schedule [f start interval]
   (let [times (->> (p/periodic-seq start
                                    interval))]
