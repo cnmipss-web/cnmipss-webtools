@@ -78,7 +78,7 @@
 (defn wrap-no-cache [handler]
   (fn [request]
     (let [response (handler request)]
-      (assoc-in response [:headers "Cache-Control"] "no-cache, no-store, must-revalidate, private"))))
+      (assoc-in response [:headers "Cache-Control"] "no-cache, no-store, must-revalidate, private, max-age=60"))))
 
 (defn wrap-api [handler]
   (-> handler
