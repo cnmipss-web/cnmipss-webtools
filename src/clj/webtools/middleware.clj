@@ -75,10 +75,16 @@
       wrap-params
       wrap-multipart-params))
 
+(defn wrap-no-cache [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (assoc-in response [:headers "Cache-Control"] "no-cache, no-store, must-revalidate, private"))))
+
 (defn wrap-api [handler]
   (-> handler
       (wrap-cors :access-control-allow-origin #"https?://(localhost.test|cnmipss).*"
-                 :access-control-allow-methods [:get :post])))
+                 :access-control-allow-methods [:get :post])
+      (wrap-no-cache)))
 
 (defn wrap-base [handler]
   (-> ((:middleware defaults) handler)
@@ -94,5 +100,6 @@
       wrap-context
       wrap-internal-error
       (wrap-browser-caching {"application/javascript" (* 60 600 24)
+                             "application/json" (* 60 60 24)
                              "text/javascript" (* 60 60 24)
                              "text/html" (* 60 60 24 7)})))
