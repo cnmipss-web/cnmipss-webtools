@@ -39,6 +39,10 @@
                   (clojure.string/join " "))
         {:keys [wp-host wp-un server-uri]} env]
     (try
+      (log/info (str "Inviting new user: " name " with "
+                     (if (> (count roles) 0)
+                       (str roles " roles " (if admin (str "and admin access")))
+                       (if admin ("admin access.")))))
       (send-message {:from webmaster-email
                      :to email
                      :subject "Invitation to CNMI PSS Webtools"
