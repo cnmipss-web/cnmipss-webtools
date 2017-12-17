@@ -17,7 +17,7 @@
             [webtools.procurement.core :refer :all]
             [webtools.procurement.server :refer [create-pns-from-file]]
             [webtools.email :as email]
-            [webtools.error-handler.sql :as sql-error]
+            [webtools.error-handler.core :as handle-error]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce]
             [clj-time.format :as f])
@@ -211,7 +211,7 @@
    (-> (curl/url (str (env :server-uri)))
        (assoc :query {"success" success
                       "role" role
-                      "error" (sql-error/code (sql-error/type error))})
+                      "error" (handle-error/code error)})
        (assoc :anchor "app")
        (str))))
 
@@ -219,7 +219,6 @@
   [r handler role]
   `(let [params# (get ~r :params)
          cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
-     (println "post-file-route : " params# ~role)
      (try
        (~handler params#)
        (-> (response/found (redirect-url "true" ~role))
@@ -230,14 +229,14 @@
          (-> (redirect-url "false" ~role e#)
              (response/found)
              (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
-             (response/set-cookie "wt-error" (sql-error/msg (sql-error/type e#)) cookie-opts#)
+             (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
              (response/header "Content-Type" "application/json")))
        (catch Exception e#
          (log/error e#)
          (-> (redirect-url "false" ~role e#)
              (response/found)
              (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
-             (response/set-cookie "wt-error" (sql-error/msg (sql-error/type e#)) cookie-opts#)
+             (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
 
 (defn process-procurement-pdf

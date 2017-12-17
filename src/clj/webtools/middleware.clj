@@ -28,7 +28,8 @@
         (handler request)
         (error-page
          {:status 403
-          :title "Access Forbidden"})))))
+          :title "Access Forbidden"
+          :message "You do not have permission to access this resource."})))))
 
 (defn wrap-context [handler]
   (fn [request]
