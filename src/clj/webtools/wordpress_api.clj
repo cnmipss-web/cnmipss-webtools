@@ -11,7 +11,7 @@
 (defn wp-auth-token
   []
   (let [{:keys [wp-host]} env
-        {:keys [status body error]}
+        {:keys [status body error] :as response}
         (http/post (str wp-host wp-token-route)
                     {:headers {"Content-Type" "application/json"}
                      :body (clojure.data.json/write-str {:username (env :wp-un)
@@ -30,14 +30,16 @@
   (let [query-string (reduce reduce-media-opts "?" opts)]
     (try
       (let [{:keys [wp-host]} env
-            {:keys [body status error]}
+            {:keys [body status error headers] :as response}
             (http/post (str wp-host wp-media-route query-string)
                        {:headers {"Content-Type" "multipart/form-data"
                                   "Content-Disposition" (str "attachment; filename=\"" filename "\"")
                                   "Authorization" (wp-auth-token)}
-                        :multipart [{:name "file" :content (clojure.java.io/file file)}]})]
+                        :multipart [{:name "file" :content (clojure.java.io/file file)}]})
+            file-info (:body (http/get (get headers "Location")
+                                       {:headers {"Authorization" (wp-auth-token)}}))]
         (if error (throw error))
-        (-> body json->edn :source_url))
+        (-> file-info json->edn :source_url))
       (catch Exception e
         (log/error e)))))
 
