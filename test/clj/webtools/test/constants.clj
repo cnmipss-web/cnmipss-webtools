@@ -30,7 +30,8 @@
                 :close_date (java.sql.Date. -6105931200000)
                 :title "Dummy RFP"
                 :description "Nothing to see here.  Move along"
-                :file_link "http://link-to-dummy-rfp/rfp"})
+                :file_link "http://link-to-dummy-rfp/rfp"
+                :spec_link "http://spec_link.test"})
 
 (def dummy-ifb {:id (java.util.UUID/randomUUID)
                 :type :ifb
@@ -39,7 +40,8 @@
                 :close_date (java.sql.Date. -6105931200000)
                 :title "Dummy IFB"
                 :description "Nothing to see here.  Move along"
-                :file_link "http://link-to-dummy-ifb/ifb"})
+                :file_link "http://link-to-dummy-ifb/ifb"
+                :spec_link "http://spec_link.test"})
 
 (def user-seed-count 5)
 (def cert-seed-count 4)
