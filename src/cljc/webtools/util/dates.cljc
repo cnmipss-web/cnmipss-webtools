@@ -16,21 +16,22 @@
 
 
 (s/fdef parse-date
-        :args (s/cat :date (s/alt :string string?
-                                  :date-time (fn [x] (instance?
-                                                      #?(:clj org.joda.time.DateTime
-                                                         :cljs js/Function) x))))
-        :ret :webtools.spec.core/date)
+        :args (s/cat :date (s/alt :string :webtools.spec.dates/date-str
+                                  :date-time :webtools.spec.dates/date
+                                  :nil :webtools.spec.core/nil))
+        :ret :webtools.spec.dates/date)
 
 (s/fdef parse-datetime
-        :args (s/cat :date-time (s/alt :string string?
-                                       :date-time :webtools.spec.core/date))
-        :ret :webtools.spec.core/date)
+        :args (s/cat :date-time (s/alt :string :webtools.spec.dates/date-time-str
+                                       :date-time :webtools.spec.dates/date
+                                       :nil :webtools.spec.core/nil))
+        :ret :webtools.spec.dates/date)
 
 (s/fdef parse-date-at-time
-        :args (s/cat :date-at-time (s/or :string string?
-                                         :date-time :webtools.spec.core/date))
-        :ret :webtools.spec.core/date)
+        :args (s/cat :date-at-time (s/or :string :webtools.spec.dates/date-at-time-str
+                                         :date-time :webtools.spec.dates/date
+                                         :nil :webtools.spec.core/nil))
+        :ret :webtools.spec.dates/date)
 
 #?(:clj
    (extend-protocol parse-dates
@@ -71,12 +72,13 @@
 
 
 (defn print-date [date] (format/unparse const/date-formatter date))
+
+(s/fdef print-date
+        :args (s/cat :date :webtools.spec.dates/date)
+        :ret  (s/cat :date-str :webtools.spec.dates/date-str))
+
 (defn print-date-at-time [date] (format/unparse const/date-at-time-formatter date))
 
-;; (s/fdef print-date
-;;         :args :webtools.spec.core/date
-;;         :ret  string?)
-
-;; (s/fdef print-date-at-time
-;;         :args :webtools.spec.core/date
-;;         :ret  string?)
+(s/fdef print-date
+        :args (s/cat :date :webtools.spec.dates/date)
+        :ret  (s/cat :date-at-time-str :webtools.spec.dates/date-at-time-str))

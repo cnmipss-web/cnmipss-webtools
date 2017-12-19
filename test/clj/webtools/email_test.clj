@@ -6,6 +6,7 @@
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.test.fixtures :as fixtures]
+            [webtools.spec.internet]
             [bond.james :refer [calls with-spy with-stub!]]
             [postal.core :refer [send-message]]
             [clj-time.core :as t]
@@ -127,11 +128,11 @@
           original (->PSAnnouncement
                     (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
                     :rfp "123" open_date close_date
-                    "Title" "D" "L")
+                    "Title" "D" "L" "S")
           new-vers (->PSAnnouncement
                     (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
                     :rfp "123" open_date new_date
-                    "New Title" "D" "L")
+                    "New Title" "D" "L" "S")
           subscribers [(map->Subscription {:id (java.util.UUID/randomUUID)
                                            :proc_id (make-uuid "9d3ee41e-f79f-4e91-8a9a-535d959ba374")
                                            :subscription_number 0

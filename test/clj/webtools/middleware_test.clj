@@ -36,4 +36,6 @@
         (is (= 0 (-> handler calls count)))
         (is (= 1 (-> error-page calls count)))
         (is (= {:status 403
-                :title "Access Forbidden"} (-> error-page calls first :args first)))))))
+                :title "Access Forbidden"
+                :message "You do not have permission to access this resource."}
+               (-> error-page calls first :args first)))))))

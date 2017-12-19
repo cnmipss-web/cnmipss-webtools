@@ -1,5 +1,6 @@
 (ns webtools.core
-  (:require [webtools.spec]
+  (:require [webtools.spec.core]
+            [webtools.spec.dates]
             [webtools.config :refer [env]]
             [webtools.db.core :as db]
             [webtools.handler :as handler]

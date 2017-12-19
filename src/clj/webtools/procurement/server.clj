@@ -1,5 +1,7 @@
 (ns webtools.procurement.server
-  (:require [webtools.procurement.core :refer :all]
+  (:require [webtools.spec.core]
+            [webtools.spec.dates]
+            [webtools.procurement.core :refer :all]
             [webtools.db.core :as db]
             [webtools.wordpress-api :as wp]
             [webtools.constants :as const]
@@ -96,8 +98,8 @@
       (into {} rec)
       (assoc rec :type (-> rec :type clojure.string/lower-case keyword))
       (assoc rec :description desc)
-      (update rec :open_date util-dates/parse-date)
-      (update rec :close_date util-dates/parse-date-at-time)
+      (assoc rec :open_date (-> rec :open_date util-dates/parse-date))
+      (assoc rec :close_date (-> rec :close_date util-dates/parse-date-at-time))
       (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
       (assoc rec :file_link

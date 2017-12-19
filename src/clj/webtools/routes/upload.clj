@@ -247,7 +247,6 @@
 
 (defn process-procurement-addendum
   [params]
-  (println "process-procurement-addendum : " params)
   (let [{:keys [file id number type]} params
         {:keys [tempfile size filename]} file
         uuid (make-uuid id)

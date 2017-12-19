@@ -16,8 +16,8 @@
   ([method url] `(auth-req ~method ~url (identity)))
   ([method url & body]
    `((app) (-> (mock/request ~method ~url)
-               ~@body
-               authorize))))
+            ~@body
+            authorize))))
 
 (defn equal-props?
   [props a b]

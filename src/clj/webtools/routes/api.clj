@@ -39,7 +39,7 @@
       (json-response resp/ok (~q))
       (catch Exception e#
         (log/error e#)
-        (json-response resp/internal-server-error e#)))))
+        (json-response resp/internal-server-error (.getMessage e#))))))
 
 (defn get-all-procurement
   "Retrieve all procurements relations from the DB and return a hash-map containing those relations."

@@ -6,7 +6,7 @@
   (msg [x] "A human friendly error message based on the type of error in terms of our data model"))
 
 (extend-protocol HandleErrors
-  java.sql.SQLException
+  java.sql.BatchUpdateException
   (code [err]
     (sql-error/code err))
   (msg [err]
@@ -14,4 +14,5 @@
   
   Exception
   (code [err] "unknown-err")
-  (msg [err] "An unknown error occurred.  Please contact the developer."))
+  (msg [err] "An unknown error occurred.  Please contact the developer.")
+  )

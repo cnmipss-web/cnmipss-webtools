@@ -27,7 +27,7 @@
 
 (use-fixtures :each fixtures/with-rollback)
 
-(deftest test-upload-routes
+(deftest test-upload-certification
   (testing "POST /upload/certification-csv"
     (testing "should store certifications in the database"
       (let [csv-file (file "test/clj/webtools/test/certificates-clean.csv")
@@ -94,8 +94,9 @@
         (is (not-equal-props? [:start_date :expiry_date :cert_no] S-03-127 S-03-127-renewal))
         
         (is (equal-props? [:first_name :last_name :cert_type] S-04-095 S-04-095-renewal))
-        (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal)))))
+        (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal))))))
 
+(deftest test-upload-hro
   (testing "POST /upload/jva-pdf"
     (with-stub! [[wp/create-media (constantly "http://nil")]]
       (let [pdf (file "test/clj/webtools/test/jva-sample.pdf")
@@ -112,8 +113,9 @@
 
         (testing "should create wp media"
           (is (= 1 (-> wp/create-media calls count)))
-          (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))))
+          (is (= java.util.UUID (-> wp/create-media calls first :args last type))))))))
 
+(deftest test-upload-p&s
   (testing "POST /upload/procurement-pdf"
     (with-stub! [[wp/create-media (constantly "http://nil")]]
       (testing "should handle uploaded rfps"
@@ -183,23 +185,22 @@
                             cookie)))
                         cookies))))))
 
-      (testing "should handle multiline titles and dates")))
-
+      (testing "should handle multiline titles and dates"))))
+  
+(deftest test-upload-p&s-addendum
+  ;; This is seperated from test-upload-p&s because the DB changes made by those tests cause this one to fail
   (testing "POST /upload/procurement-addendum"
     (with-stub! [[wp/create-media (constantly "http://cnmipss.org/file-link.pdf")]
                  [email/notify-subscribers (constantly nil)]]
       (testing "should store uploaded addenda"
         (let [pdf (file "test/clj/webtools/test/rfp-sample.pdf")
-              x (println pdf)
-              {:keys [status body headers error params] :as response}
+              {:keys [status body headers params] :as response}
               (auth-req :post "/upload/procurement-addendum"
-                        (assoc :params {:file {:tempfile pdf :filename "sample-addendum.pdf" :size (.length pdf)}
+                        (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}
                                         :id "d0002906-6432-42b5-b82b-35f0d710f827"
                                         :type :rfp
-                                        :number "NNN-STRING"}))]
+                                        :number "18-001"}))]
           (testing "should redirect after successful upload"
-            (spit "test.html" (-> response :body str))
-            (println status headers error params)
             (is (= 302 status))
             (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
 

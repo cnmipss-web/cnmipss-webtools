@@ -21,8 +21,9 @@
                (-> http/post calls first :args first)))))))
 
 (deftest test-create-media
-  (testing "posts a file to wordpress server"
-    (with-stub! [[http/post (constantly {:body (edn->json {:source_url "https://dummyl.ink"})})]]
+  (testing "POSTs a file to wordpress server, then GETs information about that file"
+    (with-stub! [[http/post (constantly {:body (edn->json {})})]
+                 [http/get (constantly {:body (edn->json {:source_url "https://dummyl.ink"})})]]
       (let [slug (java.util.UUID/randomUUID)
             file_link (wp/create-media "test.pdf" "test/clj/webtools/test/jva-sample.pdf"
                                        :date "today"
@@ -36,13 +37,14 @@
           (is (= "https://dummyl.ink" file_link)))
 
         (testing "should call http/post with correct url"
-          (let [url (str "http://localhost//wp-json/wp/v2/media?caption=Testing123&date=today&slug="
+          (let [url (str "http://localhost.com//wp-json/wp/v2/media?caption=Testing123&date=today&slug="
                          slug "&alt_text=alt-text&title=Title&author=SomeDude&")]
-            (is (= 2 (-> http/post calls count)))
+            (is (= 1 (-> http/get calls count)))
+            (is (= 3 (-> http/post calls count)))
             (is (= url (-> http/post calls second :args first)))))))))
 
 (deftest test-delete-media
-  (testing "deletes a file from the wordpress server"
+  (testing "DELETEs a file from the wordpress server"
     (with-stub-ns [[clj-http.client (constantly {:body (edn->json [{:id "1234"}])})]]
       (let [slug "f9869a17-7a64-40a9-ba5b-83e53f855268"
               url (str (:wp-host env) wp-media-route "/1234")]
