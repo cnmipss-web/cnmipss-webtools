@@ -23,7 +23,7 @@
             [conman.core :refer [bind-connection] :as conman]
             [mount.core :as mount]))
 
-(use-fixtures :once fixtures/prep-db)
+(use-fixtures :once fixtures/prep-db fixtures/instrument)
 
 (use-fixtures :each fixtures/with-rollback)
 

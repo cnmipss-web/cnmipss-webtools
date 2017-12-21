@@ -200,43 +200,29 @@
                              :slug (:id jva-record)))
      (db/create-jva!))))
 
-(defn redirect-url
-  ([success role]
-   (-> (curl/url (str (env :server-uri)))
-       (assoc :query {"success" success
-                      "role" role})
-       (assoc :anchor "app")
-       (str)))
-  ([success role error]
-   (-> (curl/url (str (env :server-uri)))
-       (assoc :query {"success" success
-                      "role" role
-                      "error" (handle-error/code error)})
-       (assoc :anchor "app")
-       (str))))
-
 (defmacro post-file-route
   [r handler role]
   `(let [params# (get ~r :params)
          cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
      (try
        (~handler params#)
-       (-> (response/found (redirect-url "true" ~role))
+       (-> (response/found (str (env :server-uri) "#/app"))
            (response/set-cookie "wt-success" "true" cookie-opts#)
+           (response/set-cookie "wt-role" ~role cookie-opts#)
            (response/header "Content-Type" "application/json"))
        (catch java.sql.BatchUpdateException e#
          (log/error e#)
-         (-> (redirect-url "false" ~role e#)
-             (response/found)
-             (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
+         (-> (response/found (str (env :server-uri) "#/app"))
+             (response/set-cookie "wt-success" "false" cookie-opts#)
              (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
+             (response/set-cookie "wt-role" ~role cookie-opts#)
              (response/header "Content-Type" "application/json")))
        (catch Exception e#
          (log/error e#)
-         (-> (redirect-url "false" ~role e#)
-             (response/found)
-             (response/set-cookie "wt-success" (str "false_" (.getMessage e#)) cookie-opts#)
+         (-> (response/found (str (env :server-uri) "#/app"))
+             (response/set-cookie "wt-success" "false" cookie-opts#)
              (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
+             (response/set-cookie "wt-role" ~role cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
 
 (defn process-procurement-pdf
