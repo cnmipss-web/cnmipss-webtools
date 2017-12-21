@@ -51,7 +51,6 @@
              (time/after? (time/now) (util-dates/parse-date close_date))))
     (catch js/Error e
       (println "Exception in webtools.components.tables.force-close?" e)
-      (println close_date)
       false)))
 
 (defn jva-row [jva]
@@ -133,7 +132,7 @@
     [:a {:on-click (events/delete-procurement item)}
      [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
 
-(defn procurement-table [k m] 
+(defn procurement-table [k m]
   [:div.procurement-table-box.col-xs-12
    [:h2.procurement-title.text-center (key->name k)]
    [:table.procurement-list
