@@ -679,3 +679,11 @@ th.custom-col-20 {
     caption-side: top;
     color: darkred;
     font-weight: 600; }
+
+.slow-fade {
+  transition-delay: 0s;
+  transition-timing-function: ease-in-out;
+  transition: opacity 1.5s;
+  opacity: 1; }
+  .slow-fade[data-invis="true"] {
+    opacity: 0; }
