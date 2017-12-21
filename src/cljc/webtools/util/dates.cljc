@@ -14,24 +14,27 @@
   (parse-datetime [date] "Convert date-time to formatted string")
   (parse-date-at-time [date] "Convert date-time to formatted string w/ word 'at' between date and time"))
 
-
-(s/fdef parse-date
-        :args (s/cat :date (s/alt :string :webtools.spec.dates/date-str
-                                  :date-time :webtools.spec.dates/date
-                                  :nil :webtools.spec.core/nil))
-        :ret :webtools.spec.dates/date)
-
-(s/fdef parse-datetime
-        :args (s/cat :date-time (s/alt :string :webtools.spec.dates/date-time-str
-                                       :date-time :webtools.spec.dates/date
-                                       :nil :webtools.spec.core/nil))
-        :ret :webtools.spec.dates/date)
-
-(s/fdef parse-date-at-time
-        :args (s/cat :date-at-time (s/or :string :webtools.spec.dates/date-at-time-str
-                                         :date-time :webtools.spec.dates/date
-                                         :nil :webtools.spec.core/nil))
-        :ret :webtools.spec.dates/date)
+;;These specs cause cryptic errors in clojurescript
+#?(:clj
+   (s/fdef parse-date
+           :args (s/cat :date (s/alt :string :webtools.spec.dates/date-str
+                                     :date-time :webtools.spec.dates/date
+                                     :nil :webtools.spec.core/nil))
+           :ret :webtools.spec.dates/date))
+   
+#?(:clj
+   (s/fdef parse-datetime
+           :args (s/cat :date-time (s/alt :string :webtools.spec.dates/date-time-str
+                                          :date-time :webtools.spec.dates/date
+                                          :nil :webtools.spec.core/nil))
+           :ret :webtools.spec.dates/date))
+   
+#?(:clj
+   (s/fdef parse-date-at-time
+           :args (s/cat :date-at-time (s/alt :string :webtools.spec.dates/date-at-time-str
+                                             :date-time :webtools.spec.dates/date
+                                             :nil :webtools.spec.core/nil))
+           :ret :webtools.spec.dates/date))
 
 #?(:clj
    (extend-protocol parse-dates
@@ -68,7 +71,12 @@
      object
      (parse-date [date] date)
      (parse-datetime [date] date)
-     (parse-date-at-time [date] date)))
+     (parse-date-at-time [date] date)
+
+     nil
+     (parse-date [date] nil)
+     (parse-datetime [date] nil)
+     (parse-date-at-time [date] nil)))
 
 
 (defn print-date [date] (format/unparse const/date-formatter date))
