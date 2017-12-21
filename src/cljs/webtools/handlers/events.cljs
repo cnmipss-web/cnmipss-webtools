@@ -5,7 +5,8 @@
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.constants :as const]
-            [webtools.procurement.core :as p]))
+            [webtools.procurement.core :as p]
+            [webtools.cookies :refer [set-cookie]]))
 
 (def jq js/jQuery)
 
@@ -14,8 +15,8 @@
   (fn [event]
     (.preventDefault event)
     (rf/dispatch [:set-active-role role])
-    (set! js/location.hash (str "#/app?role=" role))))
-
+    (set-cookie :role role)))
+ 
 (defn get-all-roles
   "For each role in const/role-list, check if the checkbox at #${role}-${id-stem} is checked.
   Return a comma seperated list of all check marked roles."
@@ -72,7 +73,7 @@
 (defn edit-jva [jva]
   (fn [e]
     (.preventDefault e)
-   (println "Setting: " jva)
+    (println "Setting: " jva)
     (ajax/ajax-request {:uri "/webtools/api/update-jva"
                         :method :post
                         :format (ajax/json-request-format)

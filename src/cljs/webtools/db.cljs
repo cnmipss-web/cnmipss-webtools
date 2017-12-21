@@ -1,7 +1,8 @@
 (ns webtools.db)
 
 (def default-db
-  {:page :login
+  {:active-role nil
+   :page :login
    :session {}
    :bad-login false
    :success nil

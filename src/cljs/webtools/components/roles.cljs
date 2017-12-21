@@ -8,6 +8,13 @@
             [webtools.util :as util]
             [webtools.cookies :refer [get-cookie]]))
 
+(defn- error-message
+  [error]
+  (if error
+    [:div.col-xs-12.text-center.mt-1
+     [:p#err-msg.slow-fade {:style {:color "red"}}
+      (str "Error: " (clojure.string/replace error "+" " "))]]))
+
 (defn- certification []
   [:div.row
    [:div.col-xs-12.col-sm-10.offset-sm-1
@@ -36,23 +43,27 @@
    [tables/existing-certifications]])
 
 (defn- hro []
-  [:div.row
-   [:div.col-xs-12.col-sm-10.offset-sm-1
-    [forms/upload-form {:path (.-hash js/location)
-                        :action "/webtools/upload/jva-pdf"
-                        :accept ".pdf"
-                        :label "Upload New JVA"
-                        :multiple true}]]
-   [:div.col-xs-12.col-sm-10.offset-sm-1
-    [forms/jva-search]
-    [tables/jva-list @(rf/subscribe [:jva-list])]]])
+  (let [error @(rf/subscribe [:error])]
+    [:div.row
+     [:div.col-xs-12.col-sm-10.offset-sm-1
+      [forms/upload-form {:path (.-hash js/location)
+                          :action "/webtools/upload/jva-pdf"
+                          :accept ".pdf"
+                          :label "Upload New JVA"
+                          :multiple true}]]
+     (error-message error)
+     [:div.col-xs-12.col-sm-10.offset-sm-1
+      [forms/jva-search]
+      [tables/jva-list @(rf/subscribe [:jva-list])]]]))
 
 (defn- procurement []
-  [:div.row
-   [:div.col-xs-12
-    [forms/procurement-upload]]
-   [:div.col-xs-12
-    [tables/rfp-ifb-list @(rf/subscribe [:procurement-list])]]])
+  (let [error @(rf/subscribe [:error])]
+    [:div.row
+     [:div.col-xs-12
+      [forms/procurement-upload]]
+     (error-message error)
+     [:div.col-xs-12
+      [tables/rfp-ifb-list @(rf/subscribe [:procurement-list])]]]))
 
 (defn manage-users []
   [:div.row

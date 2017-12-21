@@ -1,25 +1,26 @@
 (ns webtools.core
-  (:require [ajax.core :as ajax]
-            cljsjs.jquery
-            [webtools.handlers.reframe]
-            [webtools.handlers.reframe-subs]
-            [reagent.core :as r]
-            [re-frame.core :as rf]
-            [webtools.ajax :refer [load-interceptors!]]
-            [webtools.handlers.api :as ajax-handlers]
-            [webtools.components.forms :as forms]
-            [webtools.components.nav :as nav]
-            [webtools.components.roles :as roles]
-            [webtools.components.modals :refer [all-modals]]
-            [webtools.util :as util]
-            [webtools.timeout :as timeout]
-            [webtools.cookies :refer [get-cookie] :as cookies]
-            [webtools.procurement.front-end]
-            [cemerick.url :refer [url-decode]]
-            [goog.events :as events]
-            [goog.history.EventType :as HistoryEventType]
-            [markdown.core :refer [md->html]]
-            [secretary.core :as secretary])
+  (:require
+   [webtools.actions.reframe]
+   [webtools.subscriptions.reframe-subs]
+   [webtools.handlers.api :as ajax-handlers]
+   [webtools.ajax :refer [load-interceptors!]]
+   [webtools.components.forms :as forms]
+   [webtools.components.nav :as nav]
+   [webtools.components.roles :as roles]
+   [webtools.components.modals :refer [all-modals]]
+   [webtools.util :as util]
+   [webtools.timeout :as timeout]
+   [webtools.cookies :refer [get-cookie]]
+   [webtools.procurement.front-end]
+   [ajax.core :as ajax]
+   [cemerick.url :refer [url-decode]]
+   cljsjs.jquery
+   [goog.events :as events]
+   [goog.history.EventType :as HistoryEventType]
+   [markdown.core :refer [md->html]]
+   [reagent.core :as r]
+   [re-frame.core :as rf]
+   [secretary.core :as secretary])
   (:import goog.History))
 
 (defn main-view [& children]
@@ -64,21 +65,31 @@
 
 (secretary/defroute "/login" []
   (if-let [matches (re-seq #"login_failed=true" (.-hash js/location))]
-    (rf/dispatch [:bad-login]))
+    (rf/dispatch [:bad-login true])
+    (rf/dispatch [:bad-login false]))
   (rf/dispatch [:set-active-page :login]))
 
 (secretary/defroute "/app" []
-  (let [token (get-cookie :token)
-        email (url-decode (get-cookie :email))
-        success (get (first (re-seq #"&?success=(true|false)&?" (.-hash js/location))) 1)
-        current-role (get (first (re-seq #"role=(.*)&?" (.-hash js/location))) 1)]
+  (let [token (get-cookie :wt-token)
+        email (url-decode (get-cookie :wt-email))
+        success (get-cookie :wt-success)
+        current-role (get-cookie :wt-role)
+        error (get-cookie :wt-error)]
+    
     (case success
-      "true" (rf/dispatch [:action-success])
+      "true" (rf/dispatch [:action-success]) 
       "false" (rf/dispatch [:action-failed])
       "")
-    (when current-role
-      (rf/dispatch [:set-active-role current-role])
-      (rf/dispatch [:hide-roles]))
+    
+    (if current-role
+      (do 
+        (rf/dispatch [:set-active-role current-role])
+        (rf/dispatch [:hide-roles]))
+      (rf/dispatch [:set-active-role nil]))
+
+    (if error
+      (rf/dispatch [:display-error error]))
+      
     (ajax/ajax-request {:uri "/webtools/api/verify-token"
                         :method :post
                         :format (ajax/json-request-format)
