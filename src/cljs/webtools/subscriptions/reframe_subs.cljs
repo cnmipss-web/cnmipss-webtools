@@ -1,4 +1,4 @@
-(ns webtools.handlers.reframe-subs
+(ns webtools.subscriptions.reframe-subs
   (:require [re-frame.core :refer [reg-sub]]))
 
 (reg-sub
@@ -88,6 +88,10 @@
 (reg-sub :error-list
  (fn [db _]
    (:error-list db)))
+
+(reg-sub :error
+ (fn [db _]
+   (:error db)))
 
 (reg-sub :add-addendum
  (fn [db _]
