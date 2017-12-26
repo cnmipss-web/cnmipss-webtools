@@ -21,3 +21,4 @@ out/
 *.iml
 .vscode
 __pycache__
+settings.py

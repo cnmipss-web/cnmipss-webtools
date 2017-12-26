@@ -3,12 +3,8 @@ Provides a login method for functional tests to use
 """
 from os import environ
 
-DEFAULT_ID = environ.get('WT_ID')
-DEFAULT_PWD = environ.get('WT_PASS')
-DEFAULT_URL = 'http://localhost.com/webtools'
 
-
-def login(browser, ident=DEFAULT_ID, pwd=DEFAULT_PWD, url=DEFAULT_URL):
+def login(browser, ident, pwd, url):
     "Automatically login using Google OAuth"
     browser.get(url)
     browser.implicitly_wait(5)
