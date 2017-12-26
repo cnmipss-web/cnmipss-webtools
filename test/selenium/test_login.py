@@ -8,7 +8,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import NoSuchElementException
 
-url_root = 'https://www.cnmipss.org'
+from login import login
+from settings import WT_ID, WT_URL, WT_PWD
 
 
 class LoginTests(unittest.TestCase):
@@ -18,7 +19,7 @@ class LoginTests(unittest.TestCase):
         chrome_options = Options()
         # chrome_options.add_argument('--headless')
         self.browser = webdriver.Chrome(chrome_options=chrome_options)
-        self.browser.get('http://cnmipss.org/webtools')
+        self.browser.get(WT_URL)
 
     def tearDown(self):
         self.browser.close()
@@ -32,7 +33,7 @@ class LoginTests(unittest.TestCase):
         login_form = self.browser.find_element_by_id('login-form')
         login_button = self.browser.find_element_by_id('oauth-button')
 
-        form_action_url = urljoin(url_root, '/webtools/oauth/oauth-init')
+        form_action_url = urljoin(WT_URL, '/webtools/oauth/oauth-init')
 
         self.assertIsNotNone(login_form)
         self.assertIsNotNone(login_button)
@@ -43,15 +44,7 @@ class LoginTests(unittest.TestCase):
 
     def test_oauth_workflow(self):
         "Test Google Oauth Workflow for Webtools"
-        self.browser.implicitly_wait(5)
-        self.browser.find_element_by_id('oauth-button').click()
-        self.browser.find_element_by_id(
-            'identifierId').send_keys(environ.get('WT_ID'))
-        self.browser.find_element_by_id('identifierNext').click()
-        self.browser.find_element_by_name(
-            'password').send_keys(environ.get('WT_PASS'))
-        self.browser.execute_script(
-            'document.getElementById("passwordNext").click()')
+        login(self.browser, ident=WT_ID, pwd=WT_PWD, url=WT_URL)
 
         try:
             logout_link = self.browser.find_element_by_link_text('Logout')
