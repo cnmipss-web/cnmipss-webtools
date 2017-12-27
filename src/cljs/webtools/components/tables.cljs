@@ -57,7 +57,7 @@
   (let [{:keys [status close_date]} jva]
     [:tr.row.jva-list-row {:class (if (force-close? jva) "closed")}
      [:td.custom-col-1 (jva :announce_no)]
-     [:td.custom-col-4 (jva :position)]
+     [:th.custom-col-4 {:scope "row"} (jva :position)]
      [:td.custom-col-1
       (if (force-close? jva)
         [:em "Closed"]
@@ -70,15 +70,17 @@
      [:td.custom-col-5 (jva :salary)]
      [:td.custom-col-2 (jva :location)]
      [:td.custom-col-3 
-      [:a {:href (jva :file_link)}
-       [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
-      [:a {:on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
-       [:button.btn.btn-warning.file-link {:title "Edit"
-                                           :data-toggle "modal"
-                                           :data-target "#jva-modal"
-                                           :aria-controls "jva-modal"} [:i.fa.fa-pencil]]]
-      [:a {:on-click (events/delete-jva jva)}
-       [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
+      [:a.btn.btn-info.file-link {:title "Download"
+                                  :href (jva :file_link)
+                                  :role "button"} [:i.fa.fa-download]]
+      [:button.btn.btn-warning.file-link {:title "Edit"
+                                          :data-toggle "modal"
+                                          :data-target "#jva-modal"
+                                          :aria-controls "jva-modal"
+                                          :on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
+       [:i.fa.fa-pencil]]
+      [:button.btn.btn-danger.file-link {:title "Delete"
+                                         :on-click (events/delete-jva jva)} [:i.fa.fa-trash]]]]))
 
 (defn sort-jvas [jvas]
   (concat (->> jvas (filter (comp not force-close?)) (sort-by :announce_no) reverse)
@@ -89,14 +91,14 @@
    [:caption.sr-only "List of current and past JVAs"]
    [:thead
     [:tr.row.jva-list-row
-     [:th.w-1.text-center {:scope "col"} "Number"]
-     [:th.w-4.text-center {:scope "col"} "Position/Title"]
-     [:th.w-1.text-center {:scope "col"} "Status"]
-     [:th.w-2.text-center {:scope "col"} "Opening Date"]
-     [:th.w-2.text-center {:scope "col"} "Closing Date"]
-     [:th.w-5.text-center {:scope "col"} "Salary"]
-     [:th.w-2.text-center {:scope "col"} "Location"]
-     [:th.w-3.text-center {:scope "col"} "Links"]]]
+     [:th.custom-col-1.text-center {:scope "col"} "Number"]
+     [:th.custom-col-4.text-center {:scope "col"} "Position/Title"]
+     [:th.custom-col-1.text-center {:scope "col"} "Status"]
+     [:th.custom-col-2.text-center {:scope "col"} "Opening Date"]
+     [:th.custom-col-2.text-center {:scope "col"} "Closing Date"]
+     [:th.custom-col-5.text-center {:scope "col"} "Salary"]
+     [:th.custom-col-2.text-center {:scope "col"} "Location"]
+     [:th.custom-col-3.text-center {:scope "col"} "Links"]]]
    [:tbody
     (for [jva (-> jvas filter-jvas sort-jvas)]
       ^{:key (str "jva-" (jva :announce_no))} [jva-row jva])]])
@@ -191,13 +193,17 @@
      [:td.custom-col-3
       [:p.text-center expiry_date]]
      [:td.custom-col-3 {:style {:text-align "center"}}
-      [:a {:on-click (fn [] (rf/dispatch [:set-cert-modal row]))}
-       [:button.btn.btn-warning.file-link {:title "Edit"
-                                           :data-toggle "modal"
-                                           :data-target "#cert-modal"
-                                           :aria-controls "cert-modal"} [:i.fa.fa-pencil]]]
-      [:a {:on-click delete-cert}
-       [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]]))
+      [:button.btn.btn-warning.file-link {:title "Edit"
+                                          :aria-label "Edit"
+                                          :data-toggle "modal"
+                                          :data-target "#cert-modal"
+                                          :aria-controls "cert-modal"
+                                          :on-click (fn []
+                                                      (println "ROW: " row)
+                                                      (rf/dispatch [:set-cert-modal row]))} [:i.fa.fa-pencil]]
+      [:button.btn.btn-danger.file-link {:title "Delete"
+                                         :aria-label "Delete"
+                                         :on-click delete-cert} [:i.fa.fa-trash]]]]))
 
 (defn- flatten-errors [list next-error]
   (let [certs (->> (clojure.string/split next-error #"\n")
