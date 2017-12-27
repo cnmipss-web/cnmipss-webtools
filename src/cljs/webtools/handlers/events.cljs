@@ -73,7 +73,6 @@
 (defn edit-jva [jva]
   (fn [e]
     (.preventDefault e)
-    (println "Setting: " jva)
     (ajax/ajax-request {:uri "/webtools/api/update-jva"
                         :method :post
                         :format (ajax/json-request-format)
@@ -104,7 +103,6 @@
 (defn edit-procurement [item]
   (fn [e]
     (.preventDefault e)
-    (println "Setting: " item)
     (ajax/ajax-request {:uri "/webtools/api/update-procurement"
                         :method :post
                         :format (ajax/json-request-format)
@@ -138,7 +136,6 @@
 (defn edit-cert [cert]
   (fn [e]
     (.preventDefault e)
-   (println "Setting: " cert)
     (ajax/ajax-request {:uri "/webtools/api/update-cert"
                         :method :post
                         :format (ajax/json-request-format)
