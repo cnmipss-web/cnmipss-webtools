@@ -29,8 +29,15 @@
      [:br]
      [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept accept :multiple multiple}]]
     [:div.form-group.col-xs-3
-     [:input {:style {:display "none"} :on-change nil :type "text" :name "path" :value path}  ]
+     [:label {:for "path" :aria-hidden "true"} ""]
+     [:input {:style {:display "none"}
+              :aria-hidden "true"
+              :on-change nil
+              :type "text"
+              :name "path"
+              :value path}]
      [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
+                                                       :aria-label "Upload"
                                                        :style {:width "100%"
                                                               :height "100%"}} "Upload"]]]])
 
@@ -58,14 +65,14 @@
 
 (defn edit-cert [cert]
   [:form#edit-cert.edit-modal {:on-submit (event-handlers/edit-cert cert)}
-   (for [[key val] cert]
+   (for [[key val] cert] 
      (let [field-name (key cert-fields)]
        [:div.form-group.form-inline {:key (str key)}
         [:label.bold {:for field-name} field-name]
         [:input.form-control {:type "text"
                               :id (name key)
                               :name field-name
-                              :default-value val
+                              :value val
                               :on-change #(->> (-> (str "#" (name key)) jq .val)
                                                (conj [:edit-cert key])
                                                (rf/dispatch))}]]))])

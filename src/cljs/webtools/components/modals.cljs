@@ -5,9 +5,9 @@
 
 (defn cert-modal [cert]
   [:div#cert-modal.modal.fade {:role "dialog"
-                              :tabIndex "-1"
-                              :aria-labelledby "cert-modal-label"
-                              :aria-hidden "true"}
+                               :tabIndex "-1"
+                               :aria-labelledby "cert-modal-label"
+                               :aria-hidden "true"}
    [:div.modal-dialog {:role "document"}
     [:div.modal-content
      [:div.modal-header
