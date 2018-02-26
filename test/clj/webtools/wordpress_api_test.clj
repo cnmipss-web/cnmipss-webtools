@@ -37,7 +37,8 @@
           (is (= "https://dummyl.ink" file_link)))
 
         (testing "should call http/post with correct url"
-          (let [url (str "http://localhost.com//wp-json/wp/v2/media?caption=Testing123&date=today&slug="
+          (let [{:keys [wp-host]} env
+                url (str wp-host wp-media-route "?caption=Testing123&date=today&slug="
                          slug "&alt_text=alt-text&title=Title&author=SomeDude&")]
             (is (= 1 (-> http/get calls count)))
             (is (= 3 (-> http/post calls count)))
