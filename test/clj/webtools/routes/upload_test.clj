@@ -39,38 +39,30 @@
             redirect-url (-> (get headers "Location") curl/url)]
         (is (= 302 status))
         (is (nil? error))
-        (is (=  "app" (:anchor redirect-url)))
-        (is (= {"success" "true" "role" "Certification"} (:query redirect-url)))
-        (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie")))
+        (is (=  "/app" (:anchor redirect-url)))
+        (is (= '("wt-success=true;Path=/webtools;Max-Age=60"
+                 "wt-role=Certification;Path=/webtools;Max-Age=60") (get headers "Set-Cookie")))
         (is (= "" body))))
 
     (testing "should reject certification collisions that are not renewals"
       (let [csv-file (file "test/clj/webtools/test/certificates-collisions.csv")
-            {:keys [status body headers error] :as response}
+            {:keys [status body headers] :as response}
             (auth-req :post "/upload/certification-csv"
                       (assoc :params {:file {:tempfile csv-file
                                              :file-name "certificates-collisions.csv"
                                              :size (.length csv-file)}}))
-            redirect-url (-> (get headers "Location") curl/url)
-            msg (-> headers (get "Set-Cookie") first cemerick.url/url-decode)
-            {:keys [last_name cert_no first_name cert_type]}
-            (-> (re-seq #"(\{.*?\})" msg) second second read-string)
+            redirect-url (-> headers (get "Location") curl/url)
+            cookies (get headers "Set-Cookie")
+            success (cookie->map (cemerick.url/url-decode (first cookies)))
+            error (cookie->map (cemerick.url/url-decode (second cookies)))
             existing-cert (db/get-cert {:cert_no "BI-003-2006"})]
         (is (= 302 status))
-        (is (nil? error))
-        (is (=  "app" (:anchor redirect-url)))
-        (is (= "false" (get-in redirect-url [:query "success"])))
-        (is (= "Certification" (get-in redirect-url [:query "role"])))
+        (is (=  "/app" (:anchor redirect-url)))
         (is (= "" body))
-        (is (= "Victor" (:first_name existing-cert)))
-        (is (= "Jones" (:last_name existing-cert)))
-        (is (= "Basic I" cert_type))
-        
-        (testing "should respond with a cookie that identifies the rejected certification"
-          (is (= "Terra" first_name))
-          (is (= "Allen" last_name))
-          (is (= "Basic I" cert_type))
-          (is (= "BI-003-2006" cert_no)))))
+        (is (= "A database collision has occurred between certification BI-003-2006 for Victor Jones and BI-003-2006 for Terra Allen.  Please correct the error."
+               (get  error "wt-error")))
+        (is (= "false"
+               (get  success "wt-success")))))
 
     (testing "should mark certification collisions that are renewals and save them without error"
       (let [csv-file (file "test/clj/webtools/test/certificates-renewal.csv")
@@ -80,14 +72,19 @@
                                              :file-name "certificates-renewal.csv"
                                              :size (.length csv-file)}}))
             redirect-url (-> (get headers "Location") curl/url)
+            cookies (get headers "Set-Cookie")
+            success (cookie->map (cemerick.url/url-decode (first cookies)))
+            role (cookie->map (cemerick.url/url-decode (second cookies)))
             S-03-127 (db/get-cert {:cert_no "S-03-127"})
             S-03-127-renewal (db/get-cert {:cert_no "S-03-127-renewal-1"})
             S-04-095 (db/get-cert {:cert_no "S-04-095"})
             S-04-095-renewal (db/get-cert {:cert_no "S-04-095-renewal-1"})]
         (is (= 302 status))
         (is (nil? error))
-        (is (=  "app" (:anchor redirect-url)))
-        (is (= {"success" "true" "role" "Certification"} (:query redirect-url)))
+        (is (=  "/app" (:anchor redirect-url)))
+        (println success)
+        (is (= "true" (get success "wt-success")))
+        (is (= "Certification" (get role "wt-role")))
         (is (= "" body))
 
         (is (equal-props? [:first_name :last_name :cert_type] S-03-127 S-03-127-renewal))

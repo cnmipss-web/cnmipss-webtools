@@ -107,3 +107,11 @@
   (->> (clojure.string/split (str s) #"\b") 
        (map clojure.string/capitalize)
        clojure.string/join))
+
+(defn cookie->map
+  [cookie-string]
+  (when cookie-string
+    (into {}
+          (for [cookie (.split cookie-string ";")]
+            (let [keyval (map #(.trim %) (.split cookie "=" 2))]
+              [(first keyval) (second keyval)])))))

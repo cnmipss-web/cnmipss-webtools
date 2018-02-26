@@ -96,10 +96,13 @@
   [new-cert orig-cert errors]
   (let [[new-only orig-only joint] (diff new-cert orig-cert)
         same-name? (not-any? nil? (map joint [:first_name :last_name])) 
-        same-cert? (some? (:cert_type joint))
+        same-cert-type? (some? (:cert_type joint))
         same-dates? (not-any? nil? (map joint [:start_date :expiry_date])) ]
-    (if (not (and same-name? same-cert?))
-      (swap! errors conj (.getMessage (Exception. (str orig-cert "\n" new-cert "\n\n"))))
+    (if (not (and same-name? same-cert-type?))
+      (swap! errors conj (ex-info
+                          (str "Certificate Collision: " (:cert_no orig-cert))
+                          {:orig-cert orig-cert
+                           :new-cert new-cert}))
       (if (not same-dates?)
         (if (is-renewal? orig-cert new-cert)
           (renew-cert! new-cert)
@@ -126,7 +129,10 @@
       (if (> (count rem) 0)
         (recur (first rem) (next rem) errors)
         (if (> (count @errors) 0)
-          (throw (Exception. (apply str (take 5 @errors)))))))))
+          (let [five-errors (take 5 @errors)]
+            (throw (ex-info "Certification Collisions"
+                            {:err-type :cert-collision
+                             :errors five-errors}))))))))
 
 (def jva-regexes
   "Regexes to parse JVA for key information"
@@ -210,15 +216,8 @@
            (response/set-cookie "wt-success" "true" cookie-opts#)
            (response/set-cookie "wt-role" ~role cookie-opts#)
            (response/header "Content-Type" "application/json"))
-       (catch java.sql.BatchUpdateException e#
-         (log/error e#)
-         (-> (response/found (str (env :server-uri) "#/app"))
-             (response/set-cookie "wt-success" "false" cookie-opts#)
-             (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
-             (response/set-cookie "wt-role" ~role cookie-opts#)
-             (response/header "Content-Type" "application/json")))
        (catch Exception e#
-         (log/error e#)
+         ;; (log/error e#)
          (-> (response/found (str (env :server-uri) "#/app"))
              (response/set-cookie "wt-success" "false" cookie-opts#)
              (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
