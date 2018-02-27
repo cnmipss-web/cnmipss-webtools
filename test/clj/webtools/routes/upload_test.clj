@@ -36,12 +36,15 @@
                       (assoc :params {:file {:tempfile csv-file
                                              :file-name "certificates-clean.csv"
                                              :size (.length csv-file)}}))
-            redirect-url (-> (get headers "Location") curl/url)]
+            redirect-url (-> (get headers "Location") curl/url)
+            cookies (get headers "Set-Cookie")
+            success-cookie (cookie->map (first cookies))
+            role-cookie (cookie->map (second cookies))]
         (is (= 302 status))
         (is (nil? error))
         (is (=  "/app" (:anchor redirect-url)))
-        (is (= '("wt-success=true;Path=/webtools;Max-Age=60"
-                 "wt-role=Certification;Path=/webtools;Max-Age=60") (get headers "Set-Cookie")))
+        (is (= "true" (get success-cookie "wt-success")))
+        (is (= "Certification" (get role-cookie "wt-role")))
         (is (= "" body))))
 
     (testing "should reject certification collisions that are not renewals"
@@ -82,7 +85,6 @@
         (is (= 302 status))
         (is (nil? error))
         (is (=  "/app" (:anchor redirect-url)))
-        (println success)
         (is (= "true" (get success "wt-success")))
         (is (= "Certification" (get role "wt-role")))
         (is (= "" body))
@@ -121,12 +123,16 @@
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
                         (assoc :params {:ann-file {:tempfile pdf :filename "rfp-sample.pdf" :size (.length pdf)}
-                                        :spec-file {:tempfile spec :filename "rfp-specs.pdf" :size (.length spec)}}))]
+                                        :spec-file {:tempfile spec :filename "rfp-specs.pdf" :size (.length spec)}}))
+              cookies (get headers "Set-Cookie")
+              success-cookie (cookie->map (first cookies))
+              role-cookie (cookie->map (second cookies))]
 
           (testing "should redirect after successful upload"
             (is (= 302 status))
             (is (nil? error))
-            (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
+            (is (= "true" (get success-cookie "wt-success")))
+            (is (= "Procurement" (get role-cookie "wt-role"))))
 
           (testing "should store rfp info in postgres database"
             (let [rfp (db/get-pnsa-by-no {:number "17-041"})]
@@ -143,12 +149,16 @@
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
                         (assoc :params {:ann-file {:tempfile pdf :filename "ifb-sample.pdf" :size (.length pdf)}
-                                        :spec-file {:tempfile spec :filename "ifb-specs.pdf" :size (.length spec)}}))]
+                                        :spec-file {:tempfile spec :filename "ifb-specs.pdf" :size (.length spec)}}))
+              cookies (get headers "Set-Cookie")
+              success-cookie (cookie->map (first cookies))
+              role-cookie (cookie->map (second cookies))]
 
           (testing "should redirect after successful upload"
             (is (= 302 status))
             (is (nil? error))
-            (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
+            (is (= "true" (get success-cookie "wt-success")))
+            (is (= "Procurement" (get role-cookie "wt-role"))))
 
           (testing "should store ifb info in postgres database"
             (let [ifb (db/get-pnsa-by-no {:number "17-051"})]
@@ -163,15 +173,19 @@
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
                         (assoc :params {:ann-file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}
-                                        :spec-file {:tempfile pdf :filename "sample-spec.pdf" :size (.length pdf)}}))]
+                                        :spec-file {:tempfile pdf :filename "sample-spec.pdf" :size (.length pdf)}}))
+              [success-cookie
+               error-cookie
+               code-cookie] (map cookie->map (get headers "Set-Cookie"))]
 
           (testing "should redirect after failed upload"
             (is (= 302 status)))
+
+          (testing "should indicate that upload did not succeed via cookie"
+            (is (= "false" (get success-cookie "wt-success"))))
           
-          (testing "should supply an error code via url params"
-            (let [location (-> response :headers (get "Location") curl/url)
-                  error (get-in location [:query "error"])]
-              (is (= "bad-date" error))))
+          (testing "should supply an error code via cookie"
+            (is (= "bad-date" (get code-cookie "wt-code"))))
 
           (testing "should supply an error message via cookie"
             (let [cookies (-> response :headers (get "Set-Cookie"))]
@@ -196,10 +210,14 @@
                         (assoc :params {:file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}
                                         :id "d0002906-6432-42b5-b82b-35f0d710f827"
                                         :type :rfp
-                                        :number "18-001"}))]
+                                        :number "18-001"}))
+              cookies (get headers "Set-Cookie")
+              success-cookie (cookie->map (first cookies))
+              role-cookie (cookie->map (second cookies))]
           (testing "should redirect after successful upload"
             (is (= 302 status))
-            (is (= '("wt-success=true;Path=/webtools;Max-Age=60") (get headers "Set-Cookie"))))
+            (is (= "true" (get success-cookie "wt-success")))
+            (is (= "Procurement" (get role-cookie "wt-role"))))
 
           (testing "should store addendum info in postgres DB")
 

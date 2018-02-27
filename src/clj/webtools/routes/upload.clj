@@ -221,6 +221,7 @@
          (-> (response/found (str (env :server-uri) "#/app"))
              (response/set-cookie "wt-success" "false" cookie-opts#)
              (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
+             (response/set-cookie "wt-code" (handle-error/code e#) cookie-opts#)
              (response/set-cookie "wt-role" ~role cookie-opts#)
              (response/header "Content-Type" "application/json"))))))
 
