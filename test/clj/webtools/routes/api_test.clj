@@ -74,7 +74,8 @@
         (is (every? #(s/valid? :webtools.spec.subscription/record %) (map convert-sub-from-map subscriptions))))))
 
   (testing "POST /api/subscribe-procurement"
-    (with-stub! [[email/confirm-subscription (constantly nil)]]
+    (with-stub! [[email/confirm-subscription (constantly nil)]
+                 [email/notify-procurement (constantly nil)]]
       (testing "should handle subscriptions to rfps"
         (let [subscriber {:company "Test Centers of America"
                           :person "TV's Adam West"
