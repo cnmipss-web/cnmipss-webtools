@@ -60,7 +60,7 @@
 
   :min-lein-version "2.0.0"
 
-  :jvm-opts ["-server" "-Dconf=.lein-env"]
+  :jvm-opts ["-server" "-Dconf=.lein-env" "-Duser.timezone=GMT"]
   :source-paths ["src/clj" "src/cljc"]
   :test-paths ["test/clj"]
   :resource-paths ["resources" "target/cljsbuild"]
