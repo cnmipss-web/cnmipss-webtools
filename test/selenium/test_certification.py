@@ -1,12 +1,15 @@
 import unittest
 import time
+import logging
 from login import login
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
+from selenium.common.exceptions import (
+    NoSuchElementException, WebDriverException)
+from selenium.webdriver.common.keys import Keys
 
 from settings import WT_ID, WT_PWD, WT_URL
 
@@ -26,6 +29,15 @@ class CertificationTests(unittest.TestCase):
         self.browser.find_element_by_css_selector(
             'button[aria-label="Certification role"]').click()
         self.browser.find_element_by_id('main-container').click()
+
+        self.logger = logging.getLogger('testLogger')
+        self.logger.setLevel(logging.DEBUG)
+        fh = logging.FileHandler('test.log')
+        fh.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
 
     def tearDown(self):
         self.browser.close()
@@ -71,6 +83,7 @@ class CertificationTests(unittest.TestCase):
         Test that edit modals correctly load the information of the selected
         row and that data entered into the edit form is submitted correctly.
         """
+        TEST_TXT = 'THING'
         table_body = self.browser.find_elements_by_css_selector(TR_SELECTOR)
         data_rows = [row for row in table_body if len(
             row.find_elements_by_css_selector('td')) == DATA_CELLS_PER_ROW]
@@ -83,6 +96,7 @@ class CertificationTests(unittest.TestCase):
 
         modal = WebDriverWait(self.browser, 5).until(
             EC.visibility_of(self.browser.find_element_by_id('cert-modal')))
+        form = modal.find_element_by_tag_name('form')
 
         # Modal is visible
         self.assertEqual(modal.get_attribute('style'), 'display: block;')
@@ -92,8 +106,7 @@ class CertificationTests(unittest.TestCase):
 
         orig_cert_type = modal.find_element_by_id(
             'cert_type').get_attribute('value')
-        set_data(modal.find_element_by_tag_name(
-            'form'), 'cert_type', "TEST")
+        set_data(form, 'cert_type', TEST_TXT)
         modal.find_element_by_css_selector(
             'button[data-dismiss="modal"].btn.btn-secondary').click()
 
@@ -102,53 +115,54 @@ class CertificationTests(unittest.TestCase):
 
         # Value is changed in form and row data matches
         self.assertEqual(modal.find_element_by_id(
-            'cert_type').get_attribute('value'), 'TEST')
+            'cert_type').get_attribute('value'), TEST_TXT)
         compare_edit_form_to_row(self, selected_row, modal)
 
         # Reset Cert Type
-        set_data(modal.find_element_by_tag_name(
-            'form'), 'cert_type', orig_cert_type)
+        set_data(form, 'cert_type', orig_cert_type)
         modal.find_element_by_css_selector(
             'button[data-dismiss="modal"].btn.btn-secondary').click()
 
         # Choose a new row and repeat test
-        new_row = data_rows[1]
+        # new_row = data_rows[1]
 
-        edit_button = new_row.find_element_by_css_selector(
-            'button[data-target="#cert-modal"]')
+        # edit_button = new_row.find_element_by_css_selector(
+        #     'button[data-target="#cert-modal"]')
 
-        WebDriverWait(self.browser, 5).until(element_is_clicked(edit_button))
-        modal = WebDriverWait(self.browser, 5).until(
-            EC.visibility_of(self.browser.find_element_by_id('cert-modal')))
+        # WebDriverWait(self.browser, 5).until(element_is_clicked(edit_button))
+        # modal = WebDriverWait(self.browser, 5).until(
+        #     EC.visibility_of(self.browser.find_element_by_id('cert-modal')))
+        # form = modal.find_element_by_tag_name('form')
 
         # Modal is visible
-        self.assertEqual(modal.get_attribute('style'), 'display: block;')
+        # self.assertEqual(modal.get_attribute('style'), 'display: block;')
 
         # Compare form values to row data
-        compare_edit_form_to_row(self, new_row, modal)
-        time.sleep(1)
+        # compare_edit_form_to_row(self, new_row, modal)
 
-        orig_cert_type = modal.find_element_by_id(
-            'cert_type').get_attribute('value')
-        set_data(modal.find_element_by_tag_name(
-            'form'), 'cert_type', "TEST")
-        time.sleep(1)
-        modal.find_element_by_css_selector(
-            'button[data-dismiss="modal"].btn.btn-secondary').click()
+        # orig_cert_type = modal.find_element_by_id(
+        #     'cert_type').get_attribute('value')
 
-        WebDriverWait(self.browser, 5).until(element_is_clicked(edit_button))
-        WebDriverWait(self.browser, 5).until(EC.visibility_of(modal))
+        # input_field = form.find_element_by_id('cert_type')
+        # input_field.clear()
+        # input_field.send_keys(TEST_TXT)
+        # form.submit()
+
+        # modal.find_element_by_css_selector(
+        #     'button[data-dismiss="modal"].btn.btn-secondary').click()
+
+        # WebDriverWait(self.browser, 5).until(element_is_clicked(edit_button))
+        # WebDriverWait(self.browser, 5).until(EC.visibility_of(modal))
 
         # Value is changed in form and row data matches
-        self.assertEqual(modal.find_element_by_id(
-            'cert_type').get_attribute('value'), 'TEST')
-        compare_edit_form_to_row(self, new_row, modal)
+        # self.assertEqual(modal.find_element_by_id(
+        #     'cert_type').get_attribute('value'), TEST_TXT)
+        # compare_edit_form_to_row(self, new_row, modal)
 
         # Reset Cert Type
-        set_data(modal.find_element_by_tag_name(
-            'form'), 'cert_type', orig_cert_type)
-        modal.find_element_by_css_selector(
-            'button[data-dismiss="modal"].btn.btn-secondary').click()
+        # set_data(form, 'cert_type', orig_cert_type)
+        # modal.find_element_by_css_selector(
+        #     'button[data-dismiss="modal"].btn.btn-secondary').click()
 
     def test_delete_buttons(self):
         pass
@@ -178,12 +192,11 @@ class CertificationTests(unittest.TestCase):
                     'th').find_element_by_tag_name('p').text, search_text)
 
 
-def set_data(form, field_id, orig_value):
-    field = form.find_element_by_id(field_id)
-    field.clear()
-    time.sleep(1)
-    field.clear()
-    field.send_keys(orig_value)
+def set_data(form, field_id, value):
+    input_field = form.find_element_by_id(field_id)
+    for i in range(100):
+        input_field.send_keys(Keys.BACKSPACE)
+    input_field.send_keys(value)
     form.submit()
 
 

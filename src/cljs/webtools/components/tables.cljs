@@ -198,9 +198,7 @@
                                           :data-toggle "modal"
                                           :data-target "#cert-modal"
                                           :aria-controls "cert-modal"
-                                          :on-click (fn []
-                                                      (println "ROW: " row)
-                                                      (rf/dispatch [:set-cert-modal row]))} [:i.fa.fa-pencil]]
+                                          :on-click (fn [] (rf/dispatch [:set-cert-modal row]))} [:i.fa.fa-pencil]]
       [:button.btn.btn-danger.file-link {:title "Delete"
                                          :aria-label "Delete"
                                          :on-click delete-cert} [:i.fa.fa-trash]]]]))
