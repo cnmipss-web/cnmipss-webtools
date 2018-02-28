@@ -26,7 +26,7 @@
     (random-match source target))
 
   NAPRegistration
-  (match-probability [source target]
+  (match-probability [target source]
     (random-match source target)))
 
 
