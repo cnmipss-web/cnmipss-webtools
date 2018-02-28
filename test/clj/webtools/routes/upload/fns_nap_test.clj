@@ -9,9 +9,9 @@
 (use-fixtures :once fixtures/instrument)
 
 (def ^:private valid-fns-file (file "test/clj/webtools/test/valid-fns.xlsx"))
-(def ^:private typical-valid-fns-file (file "test/clj/webtools/test/typical-fns.xlsx"))
 (def ^:private valid-nap-file (file "test/clj/webtools/test/valid-nap.xlsx"))
-(def ^:private typical-valid-nap-file (file "test/clj/webtools/test/typical-nap.xlsx"))
+(def ^:private typical-fns-file (file "test/clj/webtools/test/typical-fns.xlsx"))
+(def ^:private typical-nap-file (file "test/clj/webtools/test/typical-nap.xlsx"))
 
 (deftest test-parsing
   (testing "fns-parse"
@@ -21,7 +21,7 @@
       (testing "all values in map should be valid FNSRegistrations"
         (is (empty? (:invalid result)))))
 
-    (let [result (fns-nap/fns-parse typical-valid-fns-file)]
+    (let [result (fns-nap/fns-parse typical-fns-file)]
       (testing "should return a map containing valid and invalid records"
         (is (map? result))
         (is (some? (:valid result)))
@@ -40,7 +40,7 @@
       (testing "all values in map should be valid NAPRegistrations"
         (is (empty? (:invalid results)))))
 
-    (let [results (fns-nap/nap-parse typical-valid-nap-file)]
+    (let [results (fns-nap/nap-parse typical-nap-file)]
       (testing "should return a map containing valid and invalid records"
         (is (map? results))
         (is (some? (:valid results)))
