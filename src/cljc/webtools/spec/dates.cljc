@@ -4,15 +4,24 @@
             #?(:clj  [clj-time.core :refer [date-time]]
                :cljs [cljs-time.core :refer [date-time]])))
 
-(s/def ::date (s/with-gen
-                (partial instance? #?(:clj org.joda.time.DateTime
-                                      :cljs js/Object))
-                (fn [] (gen/fmap (partial apply #(date-time %1 %2 %3))
-                                 (gen/tuple
-                                  (gen/choose 2000 2025) ;year
-                                  (gen/choose 1 12) ;month
-                                  (gen/choose 1 28) ;day
-                                  )))))
+(s/def ::joda-date (s/with-gen
+                     (partial instance? #?(:clj org.joda.time.DateTime
+                                           :cljs js/Object))
+                     (fn [] (gen/fmap (partial apply #(date-time %1 %2 %3))
+                                      (gen/tuple
+                                       (gen/choose 2000 2025) ;year
+                                       (gen/choose 1 12) ;month
+                                       (gen/choose 1 28) ;day
+                                       )))))
+
+(s/def ::java-date (s/with-gen
+                     (partial instance? #?(:clj java.util.Date
+                                           :cljs js/Object))
+                     (fn [] (gen/fmap #(java.util.Date. %)
+                                      (gen/choose 1400000000000
+                                                  1800000000000)))))
+
+(s/def ::date ::joda-date)
 
 (s/def ::date-str (s/with-gen
                     string?
