@@ -3,7 +3,8 @@
             [clojure.java.io :refer [input-stream]]
             [clojure.spec.alpha :as s]
             [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration] :as mr]
-            [webtools.util.dates :refer [parse-nap-date]]))
+            [webtools.util.dates :refer [parse-nap-date]]
+            [webtools.meals-registration.matching.algorithms :as malgo]))
 
 (defn- -nils-to-empty-string [row]
   (map (fn [cell]
@@ -166,6 +167,8 @@
     (update result-map :valid (partial map (partial apply ->NAPRegistration)))))
 
 
+(defn- -matching-algorithm [fns-records nap-records]
+  (malgo/match-dob fns-records nap-records))
 
 (defn process-upload [params]
   (let [{uploaded-fns :fns-file
@@ -173,5 +176,6 @@
         {fns-file :tempfile} uploaded-fns
         {nap-file :tempfile} uploaded-nap
         fns-records (fns-parse fns-file)
-        nap-records (nap-parse fns-file)]
-    (println fns-records nap-records)))
+        nap-records (nap-parse fns-file)
+        [matched-fns unmatched-fns] (-matching-algorithm (:valid fns-records) (:valid nap-records))]
+    (println matched-fns unmatched-fns)))
