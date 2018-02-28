@@ -33,7 +33,7 @@
 (s/def ::last-name string?)
 (s/def ::first-name string?)
 (s/def ::grade int?)
-(s/def ::dob (s/nilable :webtools.spec.dates/date))
+(s/def ::dob :webtools.spec.dates/date)
 (s/def ::school string?)
 (s/def ::prev-school string?)
 (s/def ::date-registered (s/nilable :webtools.spec.dates/date))

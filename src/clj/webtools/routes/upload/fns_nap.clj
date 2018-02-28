@@ -1,7 +1,9 @@
 (ns webtools.routes.upload.fns-nap
   (:require [dk.ative.docjure.spreadsheet :as ss]
             [clojure.java.io :refer [input-stream]]
-            [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration]]))
+            [clojure.spec.alpha :as s]
+            [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration] :as mr]
+            [webtools.util.dates :refer [parse-nap-date]]))
 
 (defn- -nils-to-empty-string [row]
   (map (fn [cell]
@@ -47,29 +49,73 @@
         (assoc 7 normalize-rgstr)
         (seq))))
 
+(defn- -is-valid-fns? [row]
+  "Predicate function to evaluate whether row represents a valid FNSRegistration"
+  (let [[fns-type last-name first-name
+         grade dob school prev-school
+         date-registered guardian gender
+         citizenship ethnicity homeroom
+         school-year school-no uid apid] row]
+    (and (s/valid? ::mr/fns-type fns-type)
+         (s/valid? ::mr/last-name last-name)
+         (s/valid? ::mr/first-name first-name)
+         (s/valid? ::mr/grade grade)
+         (s/valid? ::mr/dob dob)
+         (s/valid? ::mr/school school)
+         (s/valid? ::mr/prev-school prev-school)
+         (s/valid? ::mr/date-registered date-registered)
+         (s/valid? ::mr/guardian guardian)
+         (s/valid? ::mr/gender gender)
+         (s/valid? ::mr/citizenship citizenship)
+         (s/valid? ::mr/ethnicity ethnicity)
+         (s/valid? ::mr/homeroom homeroom)
+         (s/valid? ::mr/school-year school-year)
+         (s/valid? ::mr/school-no school-no)
+         (s/valid? ::mr/uid uid)
+         (s/valid? ::mr/apid apid))))
+
+(def ^:private -fns-row-parser (comp -fns-normalize-dates
+                                     -convert-gender
+                                     -convert-fns-type
+                                     -numbers-to-int
+                                     -nils-to-empty-string
+                                     (partial map ss/read-cell)))
+
+(defn- -separate-invalid-fns [{:keys [valid invalid]} row]
+  "Reducer function to iterate over rows in fns-file and create a hash-map containing
+   a seq of :valid values and a seq of :invalid values."
+  (let [value-row (-fns-row-parser row)]
+    (if (-is-valid-fns? value-row)
+      {:valid (conj valid value-row)
+       :invalid invalid}
+      {:valid valid
+       :invalid (conj invalid value-row)})))
+
+(defn- -ss-file-to-seq [file]
+  "Convert a java.io.File object pointing at a MS Excel file to a seq of rows, 
+   each row being a seq of cell values"
+  (->> (input-stream file)
+       (ss/load-workbook)
+       (ss/sheet-seq)
+       (first)                 ;; take first sheet
+       (ss/row-seq)           
+       (next)                  ;; skip header row
+       (map ss/cell-seq)))
+
 (defn fns-parse [fns-file]
   "Create a sequence of FNSRegistration records from fns-file"
-  (let [row-parser (comp #(apply ->FNSRegistration %)
-                         -fns-normalize-dates
-                         -convert-gender
-                         -convert-fns-type
-                         -numbers-to-int
-                         -nils-to-empty-string
-                         #(map ss/read-cell %)
-                         ss/cell-seq)]
-    (->> (input-stream fns-file)
-         (ss/load-workbook)
-         (ss/sheet-seq)
-         (first)
-         (ss/row-seq)
-         (next)
-         (map row-parser))))
+  (let [result-map (reduce -separate-invalid-fns 
+                           {:valid nil :invalid nil} 
+                           (-ss-file-to-seq fns-file))]
+    (update result-map :valid (partial map (partial apply ->FNSRegistration)))))
 
 (defn -nap-normalize-dates [row]
   (let [[_ _ _ _ dob] row
+        nap-date-fmt (re-pattern "\\d{2}\\-[a-zA-z]{3}\\-\\d{2}")
         normalize-dob (cond
                           (instance? java.util.Date dob) (clj-time.coerce/from-date dob)
-                          (string? dob) (clj-time.coerce/from-string dob)
+                          (and (string? dob)
+                               (re-matches nap-date-fmt dob)) (parse-nap-date dob)
                           :else nil)]
     (-> (apply vector row)
         (assoc 4 normalize-dob)
@@ -85,22 +131,39 @@
         (assoc 0 (Integer/parseInt case-no))
         (seq))))
 
+(defn- -is-valid-nap? [row]
+  "Predicate function to evaluate whether row represents a valid FNSRegistration"
+  (let [[case-no last-name first-name
+         ethnicity dob age] row]
+    (and (s/valid? ::mr/case-no case-no)
+         (s/valid? ::mr/last-name last-name)
+         (s/valid? ::mr/first-name first-name)
+         (s/valid? ::mr/dob dob)
+         (s/valid? ::mr/ethnicity ethnicity)
+         (s/valid? ::mr/age age))))
+
+(def ^:private -nap-row-parser (comp -nap-case-nos
+                                     -nap-normalize-dates
+                                     -numbers-to-int
+                                     -nils-to-empty-string
+                                     (partial map ss/read-cell)))
+
+(defn- -separate-invalid-nap [{:keys [valid invalid]} row]
+  "Reducer function to iterate over rows in fns-file and create a hash-map containing
+   a seq of :valid values and a seq of :invalid values."
+  (let [value-row (-nap-row-parser row)]
+    (if (-is-valid-nap? value-row)
+      {:valid (conj valid value-row)
+       :invalid invalid}
+      {:valid valid
+       :invalid (conj invalid value-row)})))
+
 (defn nap-parse [nap-file]
   "Create a sequence of NAPRegistration records from nap-file"
-  (let [row-parser (comp #(apply ->NAPRegistration %)
-                         -nap-case-nos
-                         -nap-normalize-dates
-                         -numbers-to-int
-                         -nils-to-empty-string
-                         #(map ss/read-cell %)
-                         ss/cell-seq)]
-    (->> (input-stream nap-file)
-         (ss/load-workbook)
-         (ss/sheet-seq)
-         (first)
-         (ss/row-seq)
-         (next)
-         (map row-parser))))
+  (let [result-map (reduce -separate-invalid-nap 
+                           {:valid nil :invalid nil} 
+                           (-ss-file-to-seq nap-file))]
+    (update result-map :valid (partial map (partial apply ->NAPRegistration)))))
 
 
 
@@ -111,5 +174,4 @@
         {nap-file :tempfile} uploaded-nap
         fns-records (fns-parse fns-file)
         nap-records (nap-parse fns-file)]
-    (println fns-records nap-records)
-    ))
+    (println fns-records nap-records)))

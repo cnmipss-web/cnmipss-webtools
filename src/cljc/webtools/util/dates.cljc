@@ -10,9 +10,10 @@
                :cljs [cljs-time.format :as format])))
 
 (defprotocol parse-dates
-  (parse-date [date] "Convert date to formatted string")
-  (parse-datetime [date] "Convert date-time to formatted string")
-  (parse-date-at-time [date] "Convert date-time to formatted string w/ word 'at' between date and time"))
+  (parse-date [date] "Read date from formatted string")
+  (parse-datetime [date] "Read date-time from formatted string")
+  (parse-date-at-time [date] "Read date-time from formatted string w/ word 'at' between date and time")
+  (parse-nap-date [date] "Read date from NAP registration records "))
 
 ;;These specs cause cryptic errors in clojurescript
 #?(:clj
@@ -42,16 +43,19 @@
      (parse-date [date] (format/parse const/date-formatter date))
      (parse-datetime [date] (format/parse const/date-time-formatter date))
      (parse-date-at-time [date] (format/parse const/date-at-time-formatter date))
+     (parse-nap-date [date] (format/parse const/nap-date-formatter date))
      
      org.joda.time.DateTime
      (parse-date [date] date)
      (parse-datetime [date] date)
      (parse-date-at-time [date] date)
+     (parse-nap-date [date] date)
 
      nil
      (parse-date [date] nil)
      (parse-datetime [date] nil)
-     (parse-date-at-time [date] nil))
+     (parse-date-at-time [date] nil)
+     (parse-nap-date [date] nil))
 
    :cljs
    (extend-protocol parse-dates

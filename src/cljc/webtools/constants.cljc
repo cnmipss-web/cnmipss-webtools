@@ -16,10 +16,12 @@
 (def date-string "MMMM dd, YYYY")
 (def date-at-time-string "MMMM dd, YYYY 'at' h:mm a")
 (def date-time-string "MMMM dd, YYYY h:mm a")
+(def nap-date-string "dd-MMM-YY")
 
-(def date-formatter (f/formatter date-string))
+(def date-formatter         (f/formatter date-string))
 (def date-at-time-formatter (f/formatter date-at-time-string))
-(def date-time-formatter (f/formatter date-time-string))
+(def date-time-formatter    (f/formatter date-time-string))
+(def nap-date-formatter     (f/formatter nap-date-string))
 
 ;(def procurement-date-format date-string)
 ;(def procurement-datetime-format "MMMM dd, YYYY 'at' h:mm a")
