@@ -18,6 +18,7 @@
             [webtools.procurement.server :refer [create-pns-from-file]]
             [webtools.email :as email]
             [webtools.error-handler.core :as handle-error]
+            [webtools.routes.upload.fns-nap :as fns-nap]
             [clj-time.core :as t]
             [clj-time.coerce :as coerce]
             [clj-time.format :as f])
@@ -264,4 +265,6 @@
   (POST "/upload/procurement-pdf" req
         (post-file-route req process-procurement-pdf "Procurement"))
   (POST "/upload/procurement-addendum" req
-        (post-file-route req process-procurement-addendum "Procurement")))
+        (post-file-route req process-procurement-addendum "Procurement"))
+  (POST "/upload/fns-nap" req
+        (post-file-route req fns-nap/process-upload "FNS-NAP")))
