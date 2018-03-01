@@ -4,18 +4,14 @@
             [clj-time.core :as time]
             [webtools.meals-registration.matching.algorithms :as malgo]
             [webtools.routes.upload.fns-nap :refer [fns-parse nap-parse]]
-            [webtools.test.fixtures :as fixtures])
+            [webtools.test.fixtures :as fixtures]
+            [webtools.test.constants :as test-const])
   (:import [webtools.meals_registration.core FNSRegistration NAPRegistration]))
 
 (use-fixtures :once fixtures/instrument)
 
-(def ^:private valid-fns-file (file "test/clj/webtools/test/valid-fns.xlsx"))
-(def ^:private valid-nap-file (file "test/clj/webtools/test/valid-nap.xlsx"))
-(def ^:private typical-fns-file (file "test/clj/webtools/test/typical-fns.xlsx"))
-(def ^:private typical-nap-file (file "test/clj/webtools/test/typical-nap.xlsx"))
-
-(def ^:private fns-records (-> typical-fns-file fns-parse :valid))
-(def ^:private nap-records (-> typical-nap-file nap-parse :valid))
+(def ^:private fns-records (-> test-const/typical-fns-file fns-parse :valid))
+(def ^:private nap-records (-> test-const/typical-nap-file nap-parse :valid))
 
 (deftest test-match-dob
   (let [[matches unmatched] (malgo/match-dob fns-records nap-records)]
