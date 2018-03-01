@@ -212,11 +212,12 @@
   `(let [params# (get ~r :params)
          cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
      (try
-       (~handler params#)
-       (-> (response/found (str (env :server-uri) "#/app"))
-           (response/set-cookie "wt-success" "true" cookie-opts#)
-           (response/set-cookie "wt-role" ~role cookie-opts#)
-           (response/header "Content-Type" "application/json"))
+       (let [code# (~handler params#)]
+         (-> (response/found (str (env :server-uri) "#/app"))
+             (response/set-cookie "wt-success" "true" cookie-opts#)
+             (response/set-cookie "wt-role" ~role cookie-opts#)
+             (response/set-cookie "wt-code" code# cookie-opts#)
+             (response/header "Content-Type" "application/json")))
        (catch Exception e#
          ;; (log/error e#)
          (-> (response/found (str (env :server-uri) "#/app"))

@@ -167,7 +167,7 @@
     (update result-map :valid (partial map (partial apply ->NAPRegistration)))))
 
 
-(defn- -matching-algorithm [fns-records nap-records]
+(defn -matching-algorithm [fns-records nap-records]
   (malgo/match-dob fns-records nap-records))
 
 (defn process-upload [params]
@@ -178,4 +178,5 @@
         fns-records (fns-parse fns-file)
         nap-records (nap-parse fns-file)
         [matched-fns unmatched-fns] (-matching-algorithm (:valid fns-records) (:valid nap-records))]
-    (println matched-fns unmatched-fns)))
+    (println matched-fns unmatched-fns)
+    "1234567890"))

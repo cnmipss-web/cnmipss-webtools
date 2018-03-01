@@ -20,6 +20,7 @@
             [webtools.test.fixtures :as fixtures]
             [webtools.test.tools :refer [auth-req equal-props? not-equal-props?]]
             [webtools.wordpress-api :as wp]
+            [webtools.routes.upload.fns-nap :as fns-nap]
             [conman.core :refer [bind-connection] :as conman]
             [mount.core :as mount]))
 
@@ -222,3 +223,33 @@
           (testing "should store addendum info in postgres DB")
 
           (testing "should create wp media"))))))
+
+(deftest test-fns
+  (testing "POST /upload/fns-nap"
+    (with-stub! [[fns-nap/fns-parse (constantly {:valid [1] :invalid nil})]
+                 [fns-nap/nap-parse (constantly {:valid [2] :invalid nil})]
+                 [fns-nap/-matching-algorithm (constantly [[1] [2]])]]
+      (let [fns-file test-const/typical-fns-file
+            nap-file test-const/typical-nap-file
+            {:keys [status body headers params] :as response}
+            (auth-req :post "/upload/fns-nap"
+                      (assoc :params {:fns-file {:tempfile fns-file
+                                                 :filename "fns.xlsx"
+                                                 :size (.length fns-file)}
+                                      :nap-file {:tempfile nap-file
+                                                 :filename "nap.xlsx"
+                                                 :size (.length nap-file)}}))
+            [wt-success wt-role wt-code] (map cookie->map (get headers "Set-Cookie"))]
+
+        (is (= 302 status))
+        (is (= "true" (get wt-success "wt-success")))
+        (is (= "FNS-NAP" (get wt-role "wt-role")))
+        
+        (testing "should take two xlsx files and pass them through parsing and matching algorithms"
+          (is (= 1 (count (calls fns-nap/fns-parse))))
+          (is (= 1 (count (calls fns-nap/nap-parse))))
+          (is (= 1 (count (calls fns-nap/-matching-algorithm)))))
+
+        (testing "should respond with wt-code cookie that gives client an api endpoint to get result data"
+          (is (some? wt-code))
+          (is (some? (get wt-code "wt-code"))))))))
