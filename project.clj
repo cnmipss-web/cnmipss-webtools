@@ -5,7 +5,7 @@
 
   :dependencies [[cheshire "5.7.1"]
                  [cider/cider-nrepl "0.14.0"]
-                 [clj-fuzzy "0.4.0"]
+                 [clj-fuzzy "0.4.1"]
                  [clj-http "3.6.1"]
                  [clj-time "0.14.0"]
                  [cljs-ajax "0.6.0"]
