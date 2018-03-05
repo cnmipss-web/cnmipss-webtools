@@ -55,4 +55,6 @@
 (def valid-nap-file (file "test/clj/webtools/test/valid-nap.xlsx"))
 (def typical-fns-file (file "test/clj/webtools/test/typical-fns.xlsx"))
 (def typical-nap-file (file "test/clj/webtools/test/typical-nap.xlsx"))
+(def full-fns-file (file "test/clj/webtools/test/full-fns.xlsx"))
+(def full-nap-file (file "test/clj/webtools/test/full-nap.xlsx"))
 
