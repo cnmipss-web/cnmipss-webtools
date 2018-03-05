@@ -168,7 +168,33 @@
 
 
 (defn -matching-algorithm [fns-records nap-records]
-  (malgo/match-dob fns-records nap-records))
+  (malgo/jw-match-names fns-records nap-records))
+
+(defn- -gen-matched-headers [matched]
+  (let [{:keys [fns nap]} (first matched)
+        parser (comp clojure.string/upper-case name first)]
+    (map parser (sort-by first (concat (seq fns) (seq nap))))))
+
+(defn- -clean-values-for-export [val]
+  (cond
+    (keyword? val) (name val)
+    (instance? org.joda.time.DateTime val) (clj-time.coerce/to-date val)
+    :else val))
+
+(defn- -match-to-ss-row [{:keys [fns nap]}]
+  (map
+   -clean-values-for-export
+   (map second (sort-by first (concat (seq fns) (seq nap))))))
+
+(defn- -create-ss-file [matched unmatched]
+  (let [wb (ss/create-workbook "FNS-NAP Matches"
+                               (vec (cons (-gen-matched-headers matched)
+                                          (map -match-to-ss-row matched))))
+        sheet (ss/select-sheet "FNS-NAP Matches" wb)
+        header-row (first (ss/row-seq sheet))]
+    (ss/set-row-style! header-row (ss/create-cell-style! wb {:background :yellow,
+                                                             :font {:bold true}}))
+    (ss/save-workbook! "spreadsheet.xlsx" wb)))
 
 (defn process-upload [params]
   (let [{uploaded-fns :fns-file
@@ -176,7 +202,7 @@
         {fns-file :tempfile} uploaded-fns
         {nap-file :tempfile} uploaded-nap
         fns-records (fns-parse fns-file)
-        nap-records (nap-parse fns-file)
+        nap-records (nap-parse nap-file)
         [matched-fns unmatched-fns] (-matching-algorithm (:valid fns-records) (:valid nap-records))]
-    (println matched-fns unmatched-fns)
+    (-create-ss-file matched-fns unmatched-fns)
     "1234567890"))
