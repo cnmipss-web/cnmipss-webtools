@@ -229,8 +229,8 @@
     (with-stub! [[fns-nap/fns-parse (constantly {:valid [1] :invalid nil})]
                  [fns-nap/nap-parse (constantly {:valid [2] :invalid nil})]
                  [fns-nap/-matching-algorithm (constantly [[1] [2]])]]
-      (let [fns-file test-const/typical-fns-file
-            nap-file test-const/typical-nap-file
+      (let [fns-file test-const/valid-fns-file
+            nap-file test-const/valid-nap-file
             {:keys [status body headers params] :as response}
             (auth-req :post "/upload/fns-nap"
                       (assoc :params {:fns-file {:tempfile fns-file
