@@ -1,7 +1,8 @@
 (ns webtools.routes.upload.fns-nap
   (:require [dk.ative.docjure.spreadsheet :as ss]
             [clojure.java.io :refer [input-stream]]
-            [clojure.spec.alpha :as s]
+            [clojure.spec.alpha :as spec]
+            [clojure.string :as cstr]
             [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration] :as mr]
             [webtools.util.dates :refer [parse-nap-date]]
             [webtools.meals-registration.matching.algorithms :as malgo]))
@@ -57,23 +58,23 @@
          date-registered guardian gender
          citizenship ethnicity homeroom
          school-year school-no uid apid] row]
-    (and (s/valid? ::mr/fns-type fns-type)
-         (s/valid? ::mr/last-name last-name)
-         (s/valid? ::mr/first-name first-name)
-         (s/valid? ::mr/grade grade)
-         (s/valid? ::mr/dob dob)
-         (s/valid? ::mr/school school)
-         (s/valid? ::mr/prev-school prev-school)
-         (s/valid? ::mr/date-registered date-registered)
-         (s/valid? ::mr/guardian guardian)
-         (s/valid? ::mr/gender gender)
-         (s/valid? ::mr/citizenship citizenship)
-         (s/valid? ::mr/ethnicity ethnicity)
-         (s/valid? ::mr/homeroom homeroom)
-         (s/valid? ::mr/school-year school-year)
-         (s/valid? ::mr/school-no school-no)
-         (s/valid? ::mr/uid uid)
-         (s/valid? ::mr/apid apid))))
+    (and (spec/valid? ::mr/fns-type fns-type)
+         (spec/valid? ::mr/last-name last-name)
+         (spec/valid? ::mr/first-name first-name)
+         (spec/valid? ::mr/grade grade)
+         (spec/valid? ::mr/dob dob)
+         (spec/valid? ::mr/school school)
+         (spec/valid? ::mr/prev-school prev-school)
+         (spec/valid? ::mr/date-registered date-registered)
+         (spec/valid? ::mr/guardian guardian)
+         (spec/valid? ::mr/gender gender)
+         (spec/valid? ::mr/citizenship citizenship)
+         (spec/valid? ::mr/ethnicity ethnicity)
+         (spec/valid? ::mr/homeroom homeroom)
+         (spec/valid? ::mr/school-year school-year)
+         (spec/valid? ::mr/school-no school-no)
+         (spec/valid? ::mr/uid uid)
+         (spec/valid? ::mr/apid apid))))
 
 (def ^:private -fns-row-parser (comp -fns-normalize-dates
                                      -convert-gender
@@ -136,12 +137,12 @@
   "Predicate function to evaluate whether row represents a valid FNSRegistration"
   (let [[case-no last-name first-name
          ethnicity dob age] row]
-    (and (s/valid? ::mr/case-no case-no)
-         (s/valid? ::mr/last-name last-name)
-         (s/valid? ::mr/first-name first-name)
-         (s/valid? ::mr/dob dob)
-         (s/valid? ::mr/ethnicity ethnicity)
-         (s/valid? ::mr/age age))))
+    (and (spec/valid? ::mr/case-no case-no)
+         (spec/valid? ::mr/last-name last-name)
+         (spec/valid? ::mr/first-name first-name)
+         (spec/valid? ::mr/dob dob)
+         (spec/valid? ::mr/ethnicity ethnicity)
+         (spec/valid? ::mr/age age))))
 
 (def ^:private -nap-row-parser (comp -nap-case-nos
                                      -nap-normalize-dates
@@ -172,7 +173,7 @@
 
 (defn- -gen-matched-headers [matched]
   (let [{:keys [fns nap]} (first matched)
-        parser (comp clojure.string/upper-case name first)]
+        parser (comp cstr/upper-case name first)]
     (map parser (sort-by first (concat (seq fns) (seq nap))))))
 
 (defn- -clean-values-for-export [val]
@@ -186,14 +187,57 @@
    -clean-values-for-export
    (map second (sort-by first (concat (seq fns) (seq nap))))))
 
-(defn- -create-ss-file [matched unmatched]
+(defn- -gen-unmatched-headers [[fns _]]
+  (let [parser (comp cstr/upper-case name first)]
+    (map parser (sort-by first fns))))
+
+(defn- -fns-to-ss-row [fns]
+  (map
+   -clean-values-for-export
+   (map second (sort-by first fns))))
+
+(defn- -set-col-style [style col-no row]
+  (ss/set-cell-style! (nth (ss/cell-seq row) col-no) style) row)
+
+(defn- -create-ss-file [matched unm-fns unm-nap]
   (let [wb (ss/create-workbook "FNS-NAP Matches"
                                (vec (cons (-gen-matched-headers matched)
-                                          (map -match-to-ss-row matched))))
+                                          (map -match-to-ss-row matched)))
+                               "Unmatched FNS Records"
+                               (vec (cons (-gen-unmatched-headers unm-fns)
+                                          (map -fns-to-ss-row unm-fns)))
+                               "Unmatched NAP Records"
+                               (vec (cons (-gen-unmatched-headers unm-nap)
+                                          (map -fns-to-ss-row unm-nap))))
         sheet (ss/select-sheet "FNS-NAP Matches" wb)
-        header-row (first (ss/row-seq sheet))]
-    (ss/set-row-style! header-row (ss/create-cell-style! wb {:background :yellow,
+        header-row (first (ss/row-seq sheet))
+        bm-date-rows (filter
+                      (fn dates-dont-match? [row]
+                        (let [[_ _ _ _ _ dob1 dob2] (map ss/read-cell (ss/cell-seq row))]
+                          (not= dob1 dob2)))
+                      (ss/row-seq sheet))
+        bm-name-rows (filter
+                      (fn lastnames-dont-match? [row]
+                        (let [[ln1 nln] (->> (map ss/read-cell (ss/cell-seq row)) (take 18) (drop 16))
+                              jr-index (cstr/index-of ln1 "Jr.")
+                              fln (if (some? jr-index)
+                                    (apply str (take jr-index ln1))
+                                    ln1)
+                              normalize (comp cstr/trim cstr/lower-case)]
+                          (not= (normalize fln) (normalize nln))))
+                      (ss/row-seq sheet))
+        x (println (count bm-name-rows))
+        x (println (count bm-date-rows))
+        bm-date-style (ss/create-cell-style! wb {:background :rose
+                                                 :data-format "MM/DD/YYYY"})
+        bm-name-style (ss/create-cell-style! wb {:background :rose
+                                                 :data-format "@"})]
+    (ss/set-row-style! header-row (ss/create-cell-style! wb {:background :pale_blue
                                                              :font {:bold true}}))
+    (doall (map (partial -set-col-style bm-date-style 5) bm-date-rows))
+    (doall (map (partial -set-col-style bm-date-style 6) bm-date-rows))
+    (doall (map (partial -set-col-style bm-name-style 16) bm-name-rows))
+    (doall (map (partial -set-col-style bm-name-style 17) bm-name-rows))
     (ss/save-workbook! "spreadsheet.xlsx" wb)))
 
 (defn process-upload [params]
@@ -203,6 +247,6 @@
         {nap-file :tempfile} uploaded-nap
         fns-records (fns-parse fns-file)
         nap-records (nap-parse nap-file)
-        [matched-fns unmatched-fns] (-matching-algorithm (:valid fns-records) (:valid nap-records))]
-    (-create-ss-file matched-fns unmatched-fns)
+        [matched-fns unmatched-fns unmatched-nap] (-matching-algorithm (:valid fns-records) (:valid nap-records))]
+    (-create-ss-file matched-fns unmatched-fns unmatched-nap)
     "1234567890"))

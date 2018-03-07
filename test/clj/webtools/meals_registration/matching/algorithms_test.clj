@@ -15,7 +15,7 @@
 
 (deftest test-match-dob
   (println "\n\n------------------------------------------------------------\n\n")
-  (println "testing match-dob: ")
+  (println "testing w.m.m.a/match-dob: ")
   (let [[matches unmatched] (time (malgo/match-dob fns-records nap-records))]
     (println "Matched: " (count matches) "Unmatched: " (count unmatched))
     (testing "should return vector containing two seqable elements"
@@ -35,12 +35,15 @@
 
 (deftest test-jw-match-names
   (println "\n\n------------------------------------------------------------\n\n")
-  (println "testing jw-match-names: ")
-  (let [[matches unmatched] (time (malgo/jw-match-names fns-records nap-records))]
-    (println "Matched: " (count matches) "Unmatched: " (count unmatched))
+  (println "testing w.m.m.a/jw-match-names: ")
+  (let [[matches um-fns um-nap] (time (malgo/jw-match-names fns-records nap-records))]
+    (println "Matched: " (count matches)
+             "Unmatched FNS: " (count um-fns)
+             "Unmatched NAP: " (count um-nap))
     (testing "should return vector containing two seqable elements"
       (is (seqable? matches))
-      (is (seqable? unmatched)))
+      (is (seqable? um-fns))
+      (is (seqable? um-nap)))
 
     (testing "all matches should contain a fns-nap pair with matching :dob values"
       (let [bad-matches (filter (fn [{:keys [fns nap]}]
@@ -49,5 +52,8 @@
                                 matches)]
         (is (empty? bad-matches))))
 
-    (testing "all unmatched values are instances of FNSRegistration"
-      (is (every? (partial instance? FNSRegistration) unmatched)))))
+    (testing "all unmatched fns values are instances of FNSRegistration"
+      (is (every? (partial instance? FNSRegistration) um-fns)))
+
+    (testing "all unmatched nap values are instances of NAPRegistration"
+      (is (every? (partial instance? NAPRegistration) um-nap)))))
