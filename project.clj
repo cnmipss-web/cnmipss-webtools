@@ -19,6 +19,7 @@
                  [compojure "1.6.0"]
                  [conman "0.6.4"]
                  [cprop "0.1.10"]
+                 [criterium "0.4.4"]
                  [dk.ative/docjure "1.12.0"]
                  [funcool/struct "1.0.0"]
                  [hiccup "1.0.5"]
