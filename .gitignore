@@ -22,3 +22,4 @@ out/
 .vscode
 __pycache__
 settings.py
+/spreadsheet.xlsx
