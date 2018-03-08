@@ -3,7 +3,8 @@
             #?(:clj [clj-time.format :as f]
                :cljs [cljs-time.format :as f])))
 
-(def role-list ["Certification" "HRO" "Procurement" "Manage Users" "Manage DB"])
+(def role-list ["Certification" "HRO" "Procurement" "FNS"
+                "Manage Users" "Manage DB"])
 
 (def wp-host (:wp-host env))
 
