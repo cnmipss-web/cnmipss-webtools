@@ -169,7 +169,7 @@
 
 
 (defn -matching-algorithm [fns-records nap-records]
-  (malgo/jw-match-names fns-records nap-records))
+  (malgo/fuzzy-match fns-records nap-records))
 
 (defn- -gen-matched-headers [matched]
   (let [{:keys [fns nap]} (first matched)

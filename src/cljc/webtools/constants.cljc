@@ -29,3 +29,17 @@
 ;(def procurement-datetime-format "MMMM dd, YYYY 'at' h:mm a")
 (def date-at-time-re #"(\w+\s\d+,\s\d{4} at \d+\:\d\d\s\w{2})")
 
+(def fns-nap-ethnicity-mapping {"BA" "Bangladeshi"
+                                "BL" "Bangladeshi"
+                                "CH" "Chamorro"
+                                "CL" "Carolinian"
+                                "CN" "Chinese"
+                                "FL" "Filipino"
+                                "KO" "Korean"
+                                "MA" "Marshallese"
+                                "PA" "Palauan"
+                                "PO" "Pohnpeian"
+                                "TA" "Thai"
+                                "TI" "Thai"
+                                "TR" "Chuukese"
+                                "YA" "Yapese"})
