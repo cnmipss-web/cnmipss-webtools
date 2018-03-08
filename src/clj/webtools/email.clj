@@ -12,6 +12,7 @@
             [clojure.tools.logging :as log]
             [clojure.data :refer [diff]]
             [clojure.spec.alpha :as s]
+            [clojure.string :as cstr]
             [webtools.spec.procurement]
             [webtools.spec.subscription]))
 
@@ -35,8 +36,8 @@
         name (->> email
                   (re-find #"^(.*?)\.(.*)@")
                   (drop 1)
-                  (map clojure.string/capitalize)
-                  (clojure.string/join " "))
+                  (map cstr/capitalize)
+                  (cstr/join " "))
         {:keys [wp-host wp-un server-uri]} env]
     (try
       (log/info (str "Inviting new user: " name " with "
@@ -58,10 +59,10 @@
                                                    (if (> (count roles) 0)
                                                      (str
                                                        (-> roles
-                                                           (clojure.string/split #",")
+                                                           (cstr/split #",")
                                                            (#(conj (vec (butlast %)) (str "and " (last %))))
-                                                           (#(clojure.string/join #", " %))
-                                                           (clojure.string/replace #"^and " ""))
+                                                           (#(cstr/join #", " %))
+                                                           (cstr/replace #"^and " ""))
                                                        (if admin
                                                          " roles with admin access."
                                                          " roles."))
@@ -127,7 +128,7 @@
 
 (defn notify-changes [new orig subscribers]
   (log/info "Notifying subscribers of PSAnnouncement Changes:" new orig subscribers)
-  (let [title-string (str (-> new :type name clojure.string/upper-case)
+  (let [title-string (str (-> new :type name cstr/upper-case)
                           "# " (:number orig) " " (:title orig))
         send-fn
         (fn [{:keys [email contact_person] :as sub}]
@@ -157,7 +158,7 @@
 (defn notify-deletion [{:keys [number title] :as pns} subscribers]
   (log/info "Deleting: " pns subscribers)
   (if-let [not-closed? (:status (util/make-status pns))]
-    (let [title-string (str (-> pns :type name clojure.string/upper-case) "# " number " " title)
+    (let [title-string (str (-> pns :type name cstr/upper-case) "# " number " " title)
           send-fn
           (fn [{:keys [email contact_person] :as sub}]
             (try
@@ -188,7 +189,7 @@
 
 (defn notify-addenda [addendum pns subscribers]
   (log/info "Notify-Addenda:\n\nPNS: " pns "\n\nAdd: " addendum "\n\nSubs: " subscribers)
-  (let [title-string (str (-> pns :type name clojure.string/upper-case) "# " (:number pns) " " (:title pns))
+  (let [title-string (str (-> pns :type name cstr/upper-case) "# " (:number pns) " " (:title pns))
         send-fn
         (fn [{:keys [email contact_person] :as sub}]
           (try
@@ -237,7 +238,7 @@
     (send-message {:to email
                    :from procurement-email
                    :subject (str "24-hour Notice: Submissions for "
-                                 (-> pns :type name clojure.string/upper-case) "# "
+                                 (-> pns :type name cstr/upper-case) "# "
                                  (:number pns)
                                  " are due.")
                    :body [{:type "text/html"
@@ -246,7 +247,7 @@
                                        [:body
                                         [:p (str "Greetings " contact_person ",")]
                                         [:p (str "We would like to notify you that all submissions for "
-                                                 (-> pns :type name clojure.string/upper-case) "# "
+                                                 (-> pns :type name cstr/upper-case) "# "
                                                  (:number pns)
                                                  " " (:title pns)
                                                  " must be turned in to the PSS Procurement office no later than "
@@ -273,7 +274,7 @@
     (send-message {:to email
                    :from procurement-email
                    :subject (str "CLOSED: Deadline for submissions for "
-                                 (-> pns :type name clojure.string/upper-case) "# "
+                                 (-> pns :type name cstr/upper-case) "# "
                                  (:number pns)
                                  " has passed.")
                    :body [{:type "text/html"
@@ -282,7 +283,7 @@
                                        [:body
                                         [:p (str "Greetings " contact_person ",")]
                                         [:p (str "We would like to notify you that the deadline to submit a response for "
-                                                 (-> pns :type name clojure.string/upper-case) "# "
+                                                 (-> pns :type name cstr/upper-case) "# "
                                                  (:number pns)
                                                  " " (:title pns)
                                                  " has passed as of "
@@ -302,7 +303,7 @@
 (defn notify-procurement [{:keys [company_name contact_person email telephone] :as sub}
                           {:keys [type number title] :as pns}]
   (doseq [user (db/get-proc-users)]
-    (let [title-string (str (-> type name clojure.string/upper-case) "# " number " " title)]
+    (let [title-string (str (-> type name cstr/upper-case) "# " number " " title)]
       (try
         (send-message {:to (:email user)
                        :from "no-reply@cnmipss.org"
