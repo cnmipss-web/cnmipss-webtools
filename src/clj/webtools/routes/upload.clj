@@ -207,25 +207,25 @@
                              :slug (:id jva-record)))
      (db/create-jva!))))
 
-(defmacro post-file-route
+(defn post-file-route
   [r handler role]
-  `(let [params# (get ~r :params)
-         cookie-opts# {:max-age 60 :path "/webtools" :http-only false}]
-     (try
-       (let [code# (~handler params#)]
-         (-> (response/found (str (env :server-uri) "#/app"))
-             (response/set-cookie "wt-success" "true" cookie-opts#)
-             (response/set-cookie "wt-role" ~role cookie-opts#)
-             (response/set-cookie "wt-code" code# cookie-opts#)
-             (response/header "Content-Type" "application/json")))
-       (catch Exception e#
-         ;; (log/error e#)
-         (-> (response/found (str (env :server-uri) "#/app"))
-             (response/set-cookie "wt-success" "false" cookie-opts#)
-             (response/set-cookie "wt-error" (handle-error/msg e#) cookie-opts#)
-             (response/set-cookie "wt-code" (handle-error/code e#) cookie-opts#)
-             (response/set-cookie "wt-role" ~role cookie-opts#)
-             (response/header "Content-Type" "application/json"))))))
+  (let [params (get r :params)
+        cookie-opts {:max-age 60 :path "/webtools" :http-only false}]
+    (try
+      (let [code (str (handler params))]
+        (-> (response/found (str (env :server-uri) "#/app"))
+            (response/set-cookie "wt-success" "true" cookie-opts)
+            (response/set-cookie "wt-role" role cookie-opts)
+            (response/set-cookie "wt-code" code cookie-opts)
+            (response/header "Content-Type" "application/json")))
+      (catch Exception e
+        (log/error e)
+        (-> (response/found (str (env :server-uri) "#/app"))
+            (response/set-cookie "wt-success" "false" cookie-opts)
+            (response/set-cookie "wt-error" (handle-error/msg e) cookie-opts)
+            (response/set-cookie "wt-code" (handle-error/code e) cookie-opts)
+            (response/set-cookie "wt-role" role cookie-opts)
+            (response/header "Content-Type" "application/json"))))))
 
 (defn process-procurement-pdf
   [params]

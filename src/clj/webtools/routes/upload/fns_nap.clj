@@ -7,10 +7,10 @@
             [webtools.util.dates :refer [parse-nap-date]]
             [webtools.meals-registration.matching.algorithms :as malgo]))
 
-(defn- -nils-to-empty-string [row]
+(defn- -nils-to-string [row]
   (map (fn [cell]
-         (if-not (some? cell)
-           ""
+         (if (nil? cell)
+           (str cell)
            cell))
        row))
 
@@ -80,7 +80,7 @@
                                      -convert-gender
                                      -convert-fns-type
                                      -numbers-to-int
-                                     -nils-to-empty-string
+                                     -nils-to-string
                                      (partial map ss/read-cell)))
 
 (defn- -separate-invalid-fns [{:keys [valid invalid]} row]
@@ -109,6 +109,7 @@
   (let [result-map (reduce -separate-invalid-fns 
                            {:valid nil :invalid nil} 
                            (-ss-file-to-seq fns-file))]
+    ;; Need to handle Invalid records for passing to output.
     (update result-map :valid (partial map (partial apply ->FNSRegistration)))))
 
 (defn -nap-normalize-dates [row]
@@ -147,7 +148,7 @@
 (def ^:private -nap-row-parser (comp -nap-case-nos
                                      -nap-normalize-dates
                                      -numbers-to-int
-                                     -nils-to-empty-string
+                                     -nils-to-string
                                      (partial map ss/read-cell)))
 
 (defn- -separate-invalid-nap [{:keys [valid invalid]} row]
@@ -187,9 +188,11 @@
    -clean-values-for-export
    (map second (sort-by first (concat (seq fns) (seq nap))))))
 
-(defn- -gen-unmatched-headers [[fns _]]
-  (let [parser (comp cstr/upper-case name first)]
-    (map parser (sort-by first fns))))
+(defn- -gen-unmatched-headers [rows]
+  (println rows)
+  (let [header-row (first rows)
+        parser (comp cstr/upper-case name first)]
+    (map parser (sort-by first header-row))))
 
 (defn- -fns-to-ss-row [fns]
   (map
@@ -200,6 +203,7 @@
   (ss/set-cell-style! (nth (ss/cell-seq row) col-no) style) row)
 
 (defn- -create-ss-file [matched unm-fns unm-nap]
+  (println unm-fns unm-nap)
   (let [wb (ss/create-workbook "FNS-NAP Matches"
                                (vec (cons (-gen-matched-headers matched)
                                           (map -match-to-ss-row matched)))
@@ -226,8 +230,6 @@
                               normalize (comp cstr/trim cstr/lower-case)]
                           (not= (normalize fln) (normalize nln))))
                       (ss/row-seq sheet))
-        x (println (count bm-name-rows))
-        x (println (count bm-date-rows))
         bm-date-style (ss/create-cell-style! wb {:background :rose
                                                  :data-format "MM/DD/YYYY"})
         bm-name-style (ss/create-cell-style! wb {:background :rose
@@ -247,6 +249,6 @@
         {nap-file :tempfile} uploaded-nap
         fns-records (fns-parse fns-file)
         nap-records (nap-parse nap-file)
-        [matched-fns unmatched-fns unmatched-nap] (-matching-algorithm (:valid fns-records) (:valid nap-records))]
-    (-create-ss-file matched-fns unmatched-fns unmatched-nap)
+        matching-results (-matching-algorithm (:valid fns-records) (:valid nap-records))]
+    (apply -create-ss-file matching-results)
     "1234567890"))

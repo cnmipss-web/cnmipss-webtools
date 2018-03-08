@@ -226,9 +226,9 @@
 
 (deftest test-fns
   (testing "POST /upload/fns-nap"
-    (with-stub! [[fns-nap/fns-parse (constantly {:valid [1] :invalid nil})]
-                 [fns-nap/nap-parse (constantly {:valid [2] :invalid nil})]
-                 [fns-nap/-matching-algorithm (constantly [[1] [2]])]]
+    (with-spy [fns-nap/fns-parse 
+               fns-nap/nap-parse 
+               fns-nap/-matching-algorithm]
       (let [fns-file test-const/valid-fns-file
             nap-file test-const/valid-nap-file
             {:keys [status body headers params] :as response}
