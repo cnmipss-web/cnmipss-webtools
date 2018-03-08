@@ -4,7 +4,7 @@
   :url "http://www.cnmipss.org/webtools/"
 
   :dependencies [[cheshire "5.7.1"]
-                 [cider/cider-nrepl "0.14.0"]
+                 [cider/cider-nrepl "0.16.0"]
                  [clj-fuzzy "0.4.1"]
                  [clj-http "3.6.1"]
                  [clj-time "0.14.0"]
@@ -78,7 +78,8 @@
             [lein-immutant "2.1.0"]
             [lein-sassc "0.10.4"]
             [migratus-lein "0.4.9"]
-            [lein-doo "0.1.7"]]
+            [lein-doo "0.1.7"]
+            [jonase/eastwood "0.2.5"]]
 
   :sassc
   [{:src "resources/scss/screen.scss"
@@ -125,7 +126,7 @@
    :test          [:project/dev :project/test :profiles/test]
 
    :project/dev  {:dependencies [[binaryage/devtools "0.9.4"]
-
+                                 [jonase/eastwood "0.2.5" :exclusions [org.clojure/clojure]]
                                  [circleci/bond "0.3.0"]
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.7"]
