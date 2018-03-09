@@ -187,31 +187,6 @@ input[type='search'] {
   margin: 10px;
   margin-top: 0px; }
 
-.edit-user-roles {
-  margin: 0px !important;
-  padding: 0px; }
-
-.edit-user-roles, .invite-users {
-  border: none; }
-  .edit-user-roles input[type="checkbox"], .invite-users input[type="checkbox"] {
-    margin: 0 auto; }
-  .edit-user-roles label, .invite-users label {
-    margin: 0px;
-    border: none; }
-  .edit-user-roles .btn, .invite-users .btn {
-    margin-left: 20px;
-    margin-top: 10px;
-    margin-bottom: 5px; }
-  .edit-user-roles > div.form-group, .invite-users > div.form-group {
-    padding-top: 20px; }
-
-.invite-users {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch; }
-  .invite-users input[type="text"] {
-    margin-top: 10px; }
-
 form.edit-modal {
   box-shadow: none;
   border: none;
