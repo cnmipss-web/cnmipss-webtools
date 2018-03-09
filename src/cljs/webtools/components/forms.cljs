@@ -4,9 +4,21 @@
             [webtools.handlers.events :as event-handlers]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
-            [webtools.cookies :as cookies]))
+            [webtools.cookies :as cookies]
+            [webtools.components.forms.manage-users :as m-users]))
 
 (def jq js/jQuery)
+
+;; -----------------------------------------------
+;; Forms for Administrators in "Manage Users" Role
+;;------------------------------------------------
+
+(def edit-user-roles m-users/edit-user-roles)
+(def invite-users m-users/invite-users)
+
+;; -----------------------------------------------
+;; Other Forms
+;;------------------------------------------------
 
 (defn login-form []
   [:form#login-form {:action "/webtools/oauth/oauth-init" :method "get"}
@@ -89,53 +101,6 @@
    [:div.form-group
     [:label.sr-only {:for "submit-btn"} "Revert"]
     [:button#submit-btn.btn.btn-primary.form-control "Revert DB"]]])
-
-(defn admin-checkbox
-  [id-stem default]
-  [:div.form-group
-   [:label.form-control "Admin"]
-   [:input.form-control {:type "checkbox"
-                         :id (str "admin-" id-stem)
-                         :value "is admin"
-                         :default-checked default}]])
-
-(defn roles-checklist
-  ([id-stem] (roles-checklist id-stem false false))
-  ([id-stem user-roles admin]
-   [:fieldset.form-group.d-flex.flex-row
-    [:legend.sr-only "Roles"]
-    (for [role const/role-list]
-      (let [role-id (->> (re-seq #"\S" role)
-                         (apply str))
-            id (str role-id "-" id-stem)]
-        [:div.form-group {:key (str "form-group-" role-id)}
-         [:label.form-control {:for (str "role." role-id)} role]
-         [:input.form-control {:type "checkbox"
-                               :id id
-                               :value role
-                               :default-checked (if user-roles (some #{role} user-roles))}]]))
-    [admin-checkbox id-stem admin]]))
-
-(defn edit-user-roles [{:keys [email roles admin]}]
-  (let [clean-email (->> email
-                         (re-seq #"[\w]")
-                         (apply str))
-        user-roles (clojure.string/split roles #",")]
-    [:form.edit-user-roles.form-inline {:id clean-email :on-submit (event-handlers/update-user email)}
-     [roles-checklist clean-email user-roles admin]
-     [:button.btn.btn-primary {:type "submit" :title "Save"} [:i.fa.fa-save] [:p.sr-only "Save"]]
-     [:button.btn.btn-danger  {:title "Delete" :on-click (event-handlers/delete-user email)} [:i.fa.fa-trash-o] [:p.sr-only "Delete"]]]))
-
-(defn invite-users []
-  [:form.invite-users {:on-submit event-handlers/invite-user}
-   [:div.form-group
-    [:label "Email"]
-    [:input.form-control {:id "new-user-email" :type "text" :placeholder "Email"}]]
-   [:div.form-group.form-inline
-    [:label "Roles"]
-    [:br]
-    [roles-checklist "new-user"]]
-   [:button.btn.btn-primary {:type "submit"} "Invite"]])
 
 (defn replace-jva [jva]
   [:form#replace-jva.edit-modal
