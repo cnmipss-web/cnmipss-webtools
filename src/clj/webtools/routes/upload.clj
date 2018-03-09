@@ -138,12 +138,14 @@
    :location #"(?i)^LOCATION\s*:\s*(.*\w)"})
 
 (defn jva-reducer
-  ""
+  "Reducer fn that turns a sequence of strings from JVA file into a map of JVA 
+  data using jva-regexes to grab data from the sequence of strings."
   [jva next-line]
   (let [this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re next-line)}) jva-regexes))]
     (merge-with util/select-non-nil this-line jva)))
 
 (defn jva-desc
+  "Returns a string description based on JVA data"
   [jva]
   (str "Job Vacancy Announcement for "
        (:position jva) " open from " (:open_date jva)
@@ -170,10 +172,7 @@
                                                                 (:position jva))
                                                  :description (jva-desc jva)
                                                  :slug (:id jva))))]
-        (try
-          (db/create-jva! jva-record)
-          (catch java.sql.BatchUpdateException e
-            (log/error e))))
+        (db/create-jva! jva-record))
       (mapv (comp process-jva-pdf #(into {} [[:file %]])) file))))
 
 (defn process-reannouncement
