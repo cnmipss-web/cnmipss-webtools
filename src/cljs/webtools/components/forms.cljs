@@ -5,7 +5,8 @@
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.cookies :as cookies]
-            [webtools.components.forms.manage-users :as m-users]))
+            [webtools.components.forms.manage-users :as m-users]
+            [webtools.components.forms.fns :as fns]))
 
 (def jq js/jQuery)
 
@@ -15,6 +16,12 @@
 
 (def edit-user-roles m-users/edit-user-roles)
 (def invite-users m-users/invite-users)
+
+;; -----------------------------------------------
+;; Forms for FNS Role
+;; -----------------------------------------------
+
+(def fns-upload-form fns/fns-upload-form)
 
 ;; -----------------------------------------------
 ;; Other Forms

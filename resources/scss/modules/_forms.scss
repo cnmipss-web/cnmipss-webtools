@@ -1,3 +1,6 @@
+/*************************************
+  Base styles for forms
+**************************************/
 form {
     margin-top: 25px;
     border: $form-border;
@@ -10,9 +13,22 @@ form {
     }
 }
 
-#upload-form {
-    border: $table-border;
-    border-radius: 0px;
+/*************************************
+  Upload forms
+**************************************/
+
+.upload-form {
+    border: $upload-form-border;
+    border-radius: $upload-form-border-radius;
+}
+
+.upload-form__input {
+    border: $upload-form-border;
+    padding: 10px;
+}
+
+.upload-form__submit {
+    margin-top: 35px;
 }
 
 input[type='search'] {

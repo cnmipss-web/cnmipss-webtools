@@ -166,6 +166,9 @@ button.file-link, a.file-link {
 button.jva-reannounce {
   margin-right: auto; }
 
+/*************************************
+  Base styles for forms
+**************************************/
 form {
   margin-top: 25px;
   border: none;
@@ -175,9 +178,19 @@ form {
   form label {
     margin-bottom: 15px; }
 
-#upload-form {
+/*************************************
+  Upload forms
+**************************************/
+.upload-form {
   border: 1px solid #ddd;
   border-radius: 0px; }
+
+.upload-form__input {
+  border: 1px solid #ddd;
+  padding: 10px; }
+
+.upload-form__submit {
+  margin-top: 35px; }
 
 input[type='search'] {
   text-align: center; }

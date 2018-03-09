@@ -6,7 +6,8 @@
             [webtools.components.tables :as tables]
             [webtools.handlers.api :as ajax-handlers]
             [webtools.util :as util]
-            [webtools.cookies :refer [get-cookie]]))
+            [webtools.cookies :refer [get-cookie]]
+            [webtools.components.roles.fns :refer [fns-view]]))
 
 (defn- error-message
   [error]
@@ -82,6 +83,7 @@
     "Procurement" (procurement)
     "Manage Users" (manage-users)
     "Manage DB" (manage-db)
+    "FNS" (fns-view)
     (if (not= ""  (first @(rf/subscribe [:roles])))
       [:div]
       [:div.no-role
