@@ -1,6 +1,6 @@
 (ns webtools.actions.role
     (:require
-     [webtools.handlers.api :as ajax-handlers]
+     [webtools.handlers.api :as api-handlers]
      [webtools.util :as util]
      [ajax.core :as ajax]
      [re-frame.core :refer [reg-event-db]]))
@@ -22,16 +22,19 @@
  (fn [db [_ role]]
    (case role
      "Certification" (ajax-get {:uri "/webtools/api/all-certs"
-                                :handler ajax-handlers/all-certs})
+                                :handler api-handlers/all-certs})
 
      "HRO" (ajax-get {:uri "/webtools/api/all-jvas"
-                      :handler ajax-handlers/all-jvas})
+                      :handler api-handlers/all-jvas})
 
      "Procurement" (ajax-get {:uri "/webtools/api/all-procurement"
-                              :handler ajax-handlers/all-procurement})
+                              :handler api-handlers/all-procurement})
 
      "Manage Users" (ajax-get {:uri "/webtools/api/all-users"
-                               :handler ajax-handlers/all-users})
+                               :handler api-handlers/all-users})
+
+     "FNS" (ajax-get {:uri "/webtools/api/fns-nap"
+                      :handler api-handlers/fns-nap})
 
      nil)
    (assoc db :active-role role)))

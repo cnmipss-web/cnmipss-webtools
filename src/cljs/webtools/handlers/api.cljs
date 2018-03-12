@@ -51,3 +51,9 @@
     (if ok
       (rf/dispatch [:store-cert-list (clojure.walk/keywordize-keys body)])
       (erro! response))))
+
+(defn fns-nap
+  [[ok {:keys [body] :as response}]]
+  (if ok
+    (println "Received FNS-NAP Records")
+    (println "NO FNS-NAP Records")))
