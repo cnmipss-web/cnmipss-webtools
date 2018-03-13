@@ -36,7 +36,8 @@
                         "sql/subscription-queries.sql"
                         "sql/jva-queries.sql"
                         "sql/user-queries.sql" 
-                        "sql/cert-queries.sql")
+                        "sql/cert-queries.sql"
+                        "sql/fns-nap-queries.sql")
 
 (extend-protocol jdbc/IResultSetReadColumn
   java.sql.Date

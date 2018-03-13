@@ -6,6 +6,7 @@ delete from procurement_rfps_and_ifbs where true;
 delete from jvas where true;
 delete from certifications where true;
 delete from users where true;
+delete from fns_nap where true;
 
 -- :name seed-users :! :n
 -- :doc create user data in database
@@ -131,3 +132,30 @@ values ('2af76ca0-3711-7551-a9a3-903d93a42f65', 'cf82deed-c84f-446c-a3f0-0d82642
 -- :name clear-subscriptions :! :n
 -- :doc clear the db of all procurement subscriptions
 delete from procurement_subscriptions where true;
+
+-- :name seed-fns-nap :! :n
+-- :doc seed the database with dummy fns-nap registration match records
+insert into fns_nap
+(id, date_created, fns_file_link, nap_file_link, matched_file_link)
+values
+('2af76ca0-3711-7551-a9a3-903d93a42f65', '2018-01-15', 'http://dummy.ln/fns-file4.xlsx', 'http://dummy.ln/nap-file4.xlsx', 'http://dummy.ln/match-file4.xlsx');
+insert into fns_nap
+(id, date_created, fns_file_link, nap_file_link, matched_file_link)
+values
+('2af76ca0-3611-7551-a9a3-903d93a42f65', '2017-06-25', 'http://dummy.ln/fns-file3.xlsx', 'http://dummy.ln/nap-file3.xlsx', 'http://dummy.ln/match-file3.xlsx');
+insert into fns_nap
+(id, date_created, fns_file_link, nap_file_link, matched_file_link)
+values
+('2af76ca0-3511-7551-a9a3-903d93a42f65', '2017-01-13', 'http://dummy.ln/fns-file2.xlsx', 'http://dummy.ln/nap-file2.xlsx', 'http://dummy.ln/match-file2.xlsx');
+insert into fns_nap
+(id, date_created, fns_file_link, nap_file_link, matched_file_link)
+values
+('2af76ca0-3411-7551-a9a3-903d93a42f65', '2016-06-05', 'http://dummy.ln/fns-file1.xlsx', 'http://dummy.ln/nap-file1.xlsx', 'http://dummy.ln/match-file1.xlsx');
+insert into fns_nap
+(id, date_created, fns_file_link, nap_file_link, matched_file_link)
+values
+('2af76ca0-3311-7551-a9a3-903d93a42f65', '2016-01-02', 'http://dummy.ln/fns-file.xlsx', 'http://dummy.ln/nap-file.xlsx', 'http://dummy.ln/match-file.xlsx');
+
+-- :name clear-fns-nap :! :n
+-- :doc clear the db of all fns-nap data
+delete from fns_nap where true;
