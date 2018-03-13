@@ -21,6 +21,7 @@
   (db/seed-ifbs)
   (db/seed-addenda)
   (db/seed-subscriptions)
+  (db/seed-fns-nap)
   (ts)
   (mount/stop))
 

@@ -108,9 +108,11 @@
                     :sub nil?)
         :fn   (s/and (fn [record]
                        (every?
+                        identity
                         (map
                          (fn [[key val]]
-                           (= val (-> record :args key))))))))
+                           (= val (-> record :args key)))
+                         record)))))
 
 (s/fdef map->Subscription
         :args (s/cat :map (s/alt :sub :webtools.spec.subscription/record
@@ -119,9 +121,11 @@
                     :nil nil?)
         :fn   (s/and (fn [record]
                        (every?
+                        identity
                         (map
                          (fn [[key val]]
-                           (= val (-> record :args key))))))))
+                           (= val (-> record :args key)))
+                         record)))))
 
 
 

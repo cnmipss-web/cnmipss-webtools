@@ -127,7 +127,8 @@
        (let [wt-token (get-in request [:cookies "wt-token" :value])
              wt-email (get-in request [:cookies "wt-email" :value])
              cookie-opts {:http-only true :max-age max-cookie-age :path "/webtools"}]
-         (-> (resp/ok "Refreshing session")
+         (log/info "Refreshing session for: " wt-email)
+         (-> (resp/ok)
              (resp/set-cookie "wt-token" wt-token cookie-opts)
              (resp/set-cookie "wt-email" wt-email cookie-opts))))
   
@@ -202,6 +203,8 @@
         (let [ifb (convert-pns-from-map body)]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :delete :ifbs ifb))
-                       (clear-procurement :ifb ifb)))))
+                       (clear-procurement :ifb ifb))))
+  
+  (GET "/api/fns-nap" request (query-route db/get-all-fns-nap)))
 
 
