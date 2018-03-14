@@ -53,7 +53,8 @@
       (erro! response))))
 
 (defn fns-nap
-  [[ok {:keys [body] :as response}]]
-  (if ok
-    (println "Received FNS-NAP Records")
-    (println "NO FNS-NAP Records")))
+  [[ok {:keys [body status headers] :as response}]]
+  (when ok
+    (rf/dispatch [:store-fns-nap body]))
+  (when (not ok)
+    (erro! "Error fetching fns-nap: " status body)))

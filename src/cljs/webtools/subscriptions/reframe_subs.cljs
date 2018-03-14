@@ -102,9 +102,13 @@
    (:change-specs db)))
 
 (reg-sub :addenda
- (fn [db _]
-   (:addenda db)))
+         (fn [db _]
+           (:addenda db)))
 
 (reg-sub :subscriber-modal
- (fn [db _]
-   (:subscriber-modal db)))
+         (fn [db _]
+           (:subscriber-modal db)))
+
+(reg-sub :fns-nap
+         (fn [db _]
+           (:fns-nap db)))

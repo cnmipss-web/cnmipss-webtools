@@ -10,7 +10,8 @@
    [webtools.actions.login]
    [webtools.actions.role]
    [webtools.actions.jvas]
-   [webtools.actions.errors]))
+   [webtools.actions.errors]
+   [webtools.actions.fns]))
 
 (reg-event-db
   :initialize-db
