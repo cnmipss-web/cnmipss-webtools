@@ -1,5 +1,5 @@
 (ns webtools.components.forms.fns
-  (:require [webtools.components.forms.generic :refer [upload-group]]))
+  (:require [webtools.components.forms.generic :refer [upload-group csrf-token]]))
 
 (defn fns-upload-form []
   (let [accept ".xlsx"
@@ -18,7 +18,7 @@
                      :multiple multiple
                      :label "Upload NAP Registration Records"
                      :class "col-xs-4"}]
-
+      [csrf-token]
       [:div.form-group.col-xs-4
        [:input {:style {:display "none"}
                 :on-change nil

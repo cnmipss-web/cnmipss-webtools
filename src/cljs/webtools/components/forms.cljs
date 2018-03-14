@@ -5,8 +5,10 @@
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.cookies :as cookies]
+            [webtools.components.forms.generic :as gforms]
             [webtools.components.forms.manage-users :as m-users]
-            [webtools.components.forms.fns :as fns]))
+            [webtools.components.forms.fns :as fns]
+            [webtools.components.forms.certification :as cforms]))
 
 (def jq js/jQuery)
 
@@ -18,6 +20,13 @@
 (def invite-users m-users/invite-users)
 
 ;; -----------------------------------------------
+;; Forms for Certification Role
+;; -----------------------------------------------
+
+(def cert-search cforms/search-certification-records)
+(def edit-cert cforms/edit-certification-record)
+
+;; -----------------------------------------------
 ;; Forms for FNS Role
 ;; -----------------------------------------------
 
@@ -26,6 +35,9 @@
 ;; -----------------------------------------------
 ;; Other Forms
 ;;------------------------------------------------
+
+(def upload-form gforms/upload-form)
+
 
 (defn login-form []
   [:form#login-form {:action "/webtools/oauth/oauth-init" :method "get"}
@@ -36,66 +48,6 @@
         [:p.bad-login-text "Your session has timed out.  Please login again to continue."]
         [:p.bad-login-text "Sorry, that login attempt failed.  Please try again or contact the Webmaster."]))
     [:button#oauth-button.btn.btn-primary.form-control {:type "submit"} "Login"]]])
-
-
-(defn upload-form
-  "Multipurpose upload form"
-  [{:keys [path action accept label multiple]}]
-  [:form#upload-form {:action action :method "post" :enc-type "multipart/form-data"}
-   [:div.form-inline.row
-    [:div.form-group.col-xs-6
-     [:label {:for "file"} label]
-     [:br]
-     [:input#upload-jva.form-control {:type "file" :id "file" :name "file" :accept accept :multiple multiple}]]
-    [:div.form-group.col-xs-3
-     [:label {:for "path" :aria-hidden "true"} ""]
-     [:input {:style {:display "none"}
-              :aria-hidden "true"
-              :on-change nil
-              :type "text"
-              :name "path"
-              :value path}]
-     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
-                                                       :aria-label "Upload"
-                                                       :style {:width "100%"
-                                                              :height "100%"}} "Upload"]]]])
-
-
-(defn cert-search
-  [placeholder]
-  [:div#cert-search
-   [:form {:role "search"}
-    [:div.form-group
-     [:label.sr-only {:for "search-certs"} placeholder]
-     [:input.form-control {:type "search"
-                           :id "search-certs"
-                           :placeholder placeholder
-                           :on-change event-handlers/search-certs
-                           :ref "search-certified"}]]]])
-
-(def cert-fields
-  {:cert_no "Cert Number"
-   :last_name "Last Name"
-   :first_name "First Name"
-   :mi "Middle Name"
-   :cert_type "Cert Type"
-   :start_date "Effective Date"
-   :expiry_date "Expiration Date"})
-
-(defn edit-cert [cert]
-  [:form#edit-cert.edit-modal {:on-submit (event-handlers/edit-cert cert)}
-   (for [[key val] cert] 
-     (let [field-name (key cert-fields)]
-       [:div.form-group.form-inline {:key (str key)}
-        [:label.bold {:for field-name} field-name]
-        [:input.form-control {:type "text"
-                              :id (name key)
-                              :name field-name
-                              :value val
-                              :on-change #(->> (-> (str "#" (name key)) jq .val)
-                                               (conj [:edit-cert key])
-                                               (rf/dispatch))}]]))])
-
 
 (defn revert-backup-form []
   [:form#revert-form
