@@ -138,23 +138,23 @@ delete from procurement_subscriptions where true;
 insert into fns_nap
 (id, date_created, fns_file_link, nap_file_link, matched_file_link)
 values
-('2af76ca0-3711-7551-a9a3-903d93a42f65', '2018-01-15', 'http://dummy.ln/fns-file4.xlsx', 'http://dummy.ln/nap-file4.xlsx', 'http://dummy.ln/match-file4.xlsx');
+('2af76ca0-3711-7551-a9a3-903d93a42f65', '2018-01-15 08:00:00.00', 'http://dummy.ln/fns-file4.xlsx', 'http://dummy.ln/nap-file4.xlsx', 'http://dummy.ln/match-file4.xlsx');
 insert into fns_nap
 (id, date_created, fns_file_link, nap_file_link, matched_file_link)
 values
-('2af76ca0-3611-7551-a9a3-903d93a42f65', '2017-06-25', 'http://dummy.ln/fns-file3.xlsx', 'http://dummy.ln/nap-file3.xlsx', 'http://dummy.ln/match-file3.xlsx');
+('2af76ca0-3611-7551-a9a3-903d93a42f65', '2017-06-25 08:00:00.00', 'http://dummy.ln/fns-file3.xlsx', 'http://dummy.ln/nap-file3.xlsx', 'http://dummy.ln/match-file3.xlsx');
 insert into fns_nap
 (id, date_created, fns_file_link, nap_file_link, matched_file_link)
 values
-('2af76ca0-3511-7551-a9a3-903d93a42f65', '2017-01-13', 'http://dummy.ln/fns-file2.xlsx', 'http://dummy.ln/nap-file2.xlsx', 'http://dummy.ln/match-file2.xlsx');
+('2af76ca0-3511-7551-a9a3-903d93a42f65', '2017-01-13 08:00:00.00', 'http://dummy.ln/fns-file2.xlsx', 'http://dummy.ln/nap-file2.xlsx', 'http://dummy.ln/match-file2.xlsx');
 insert into fns_nap
 (id, date_created, fns_file_link, nap_file_link, matched_file_link)
 values
-('2af76ca0-3411-7551-a9a3-903d93a42f65', '2016-06-05', 'http://dummy.ln/fns-file1.xlsx', 'http://dummy.ln/nap-file1.xlsx', 'http://dummy.ln/match-file1.xlsx');
+('2af76ca0-3411-7551-a9a3-903d93a42f65', '2016-06-05 08:00:00.00', 'http://dummy.ln/fns-file1.xlsx', 'http://dummy.ln/nap-file1.xlsx', 'http://dummy.ln/match-file1.xlsx');
 insert into fns_nap
 (id, date_created, fns_file_link, nap_file_link, matched_file_link)
 values
-('2af76ca0-3311-7551-a9a3-903d93a42f65', '2016-01-02', 'http://dummy.ln/fns-file.xlsx', 'http://dummy.ln/nap-file.xlsx', 'http://dummy.ln/match-file.xlsx');
+('2af76ca0-3311-7551-a9a3-903d93a42f65', '2016-01-02 08:00:00.00', 'http://dummy.ln/fns-file.xlsx', 'http://dummy.ln/nap-file.xlsx', 'http://dummy.ln/match-file.xlsx');
 
 -- :name clear-fns-nap :! :n
 -- :doc clear the db of all fns-nap data
