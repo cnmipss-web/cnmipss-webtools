@@ -161,7 +161,8 @@ button.nav-link {
 
 button.file-link, a.file-link {
   padding: 4px 6px;
-  margin: 0px 5px; }
+  margin: 0px 5px;
+  font-weight: 600; }
 
 button.jva-reannounce {
   margin-right: auto; }
@@ -237,15 +238,12 @@ form#procurement-uploads.col-xs-12 {
 
 #edit-cert form {
   width: 100%; }
-
 #edit-cert div.form-group {
   display: flex;
   flex-direction: row;
   justify-content: space-between; }
-
 #edit-cert label {
   margin-top: 10px; }
-
 #edit-cert input {
   margin-right: 30%; }
 
@@ -371,31 +369,26 @@ form#procurement-uploads.col-xs-12 {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
-
 @-o-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
-
 @-ms-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
-
 @-webkit-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
-
 @-moz-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
-
 div.no-role {
   margin-top: 25%;
   font-size: 21px; }
@@ -448,7 +441,7 @@ header.navbar {
 .sidebar-btn.active {
   background-color: rgba(223, 194, 83, 0.85); }
 
-table {
+.record-table {
   margin-top: 15px;
   width: 100%;
   box-shadow: none;
@@ -457,20 +450,23 @@ table {
   font-weight: 400;
   font-size: 14px;
   line-height: 1.25em; }
-  table tr.row:nth-of-type(even), table tr.row:nth-of-type(even) label {
-    background-color: #fbf7ea; }
-  table form {
-    box-shadow: none; }
 
-th, td {
-  padding: 10px 0px; }
-
-tr, tr.row {
+.record-table__row {
   margin: 0px;
   padding: 0px;
   border-bottom: 1px solid #ddd; }
-  tr td:not(:first-child), tr.row td:not(:first-child) {
+  .record-table__row th {
+    font-weight: 600;
+    text-align: center; }
+  .record-table__row:nth-of-type(even) {
+    background-color: #fbf7ea; }
+  .record-table__row th, .record-table__row td {
+    padding: 10px 5px; }
+  .record-table__row td:not(:first-child) {
     border-left: 1px solid #ddd; }
+
+.record-table__th--center, .record-table__td--center {
+  text-align: center; }
 
 tr.row.user-list-row {
   width: 100%;
@@ -648,7 +644,6 @@ th.custom-col-20 {
 #existing-addenda caption, #pns-subscriber-table caption {
   margin-left: 15px;
   caption-side: top; }
-
 #existing-addenda, #existing-addenda td, #existing-addenda th, #existing-addenda tr, #pns-subscriber-table, #pns-subscriber-table td, #pns-subscriber-table th, #pns-subscriber-table tr {
   box-shadow: none;
   border: none; }
@@ -709,3 +704,5 @@ th.custom-col-20 {
 
 .invite-user-form__submit-btn {
   width: 150px; }
+
+/*# sourceMappingURL=screen.css.map */

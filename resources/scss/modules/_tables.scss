@@ -1,4 +1,4 @@
-table {
+.record-table {
     margin-top: 15px;
     width: 100%;
     box-shadow: $drop-shadow;
@@ -6,31 +6,44 @@ table {
     font-family: $base-font-family;
     font-weight: $base-font-weight;
     font-size: $base-font-size;
-    line-height: 1.25em;
-    
-    tr.row:nth-of-type(even) {
-        &, label {
-            background-color: lighten($light-gold, 35);
-        }
-    }
-    form {
-        box-shadow: none;
-    }
+    line-height: 1.25em;    
 }
 
-th, td {
-    padding: 10px 0px;;
-}
-
-tr, tr.row {
+.record-table__row {
     margin: 0px;
     padding: 0px;
     border-bottom: 1px solid #ddd;
+
+    th {
+        font-weight: $bold;
+        text-align: center;
+    }
+
+    &:nth-of-type(even) {
+        background-color: lighten($light-gold, 35);
+    }
+
+    th, td {
+        padding: 10px 5px;
+    }
 
     td:not(:first-child) {
         border-left: 1px solid #ddd;
     }
 }
+
+.record-table__thead {
+
+}
+
+.record-table__th, .record-table__td {
+ 
+}
+
+.record-table__th--center, .record-table__td--center {
+    text-align: center;
+}
+
 
 tr.row.user-list-row {
     width: 100%;
@@ -99,8 +112,8 @@ div.procurement-table-box {
 }
 
 
-@include custom-columns(20, td)
-@include custom-columns(20, th)
+@include custom-columns(20, td);
+@include custom-columns(20, th);
 
 #existing-addenda {
     width: 250px;
