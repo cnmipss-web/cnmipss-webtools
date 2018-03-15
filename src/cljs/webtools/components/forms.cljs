@@ -182,7 +182,7 @@
                                                          :style {:width "100%"
                                                                  :height "100%"}} "Upload"]]]]))
 
-(defn edit-procurement [item]
+(defn edit-procurement [item] 
   [:form#edit-procurement.edit-modal {:on-submit (event-handlers/edit-procurement item)
                                       :key (random-uuid)} ;;HACK: key forces :default-values to update
    (for [[key val] (->> item

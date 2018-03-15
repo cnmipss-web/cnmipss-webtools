@@ -52,7 +52,7 @@
                           :accept ".pdf"
                           :label "Upload New JVA"
                           :multiple true}]]
-     (error-message error)
+     [error-message error]
      [:div.col-xs-12.col-sm-10.offset-sm-1
       [forms/jva-search]
       [tables/jva-list @(rf/subscribe [:jva-list])]]]))

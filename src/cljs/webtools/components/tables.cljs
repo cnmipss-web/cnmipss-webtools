@@ -1,26 +1,30 @@
 (ns webtools.components.tables
-  (:require [re-frame.core :as rf]
-            [cljs.reader :refer [read-string]]
-            [cljs.spec.alpha :as s]
-            [cljs-time.core :as time]
-            [cljs-time.format :as f]
-            [clojure.string :refer [join]]
-            [webtools.components.forms :as forms]
-            [webtools.handlers.events :as events]
-            [webtools.procurement.core :as p]
-            [webtools.constants :as const]
-            [webtools.util :as util]
-            [webtools.util.dates :as util-dates]
-            [webtools.spec.procurement]
-            [webtools.spec.subscription]
-            [webtools.timeout :refer [throttle]]))
+  (:require
+   [cljs-time.core :as time]
+   [cljs-time.format :as f]
+   [cljs.reader :refer [read-string]]
+   [cljs.spec.alpha :as s]
+   [clojure.string :as cstr]
+   [re-frame.core :as rf]
+   [webtools.components.forms :as forms]
+   [webtools.components.tables.fns :as tfns]
+   [webtools.constants :as const]
+   [webtools.handlers.events :as events]
+   [webtools.procurement.core :as p]
+   [webtools.spec.procurement]
+   [webtools.spec.subscription]
+   [webtools.timeout :refer [throttle]]
+   [webtools.util :as util]
+   [webtools.util.dates :as util-dates]))
+
+(def fns-recent-results tfns/fns-recent-results)
 
 (defn- filter-by
   [rows & ks]
   (filter
    (fn [row] (let [searches @(rf/subscribe [:search-text])]
                (every? #(re-seq (re-pattern (str "(?i)" %))
-                                (clojure.string/join " " (map row ks))) searches)))
+                                (cstr/join " " (map row ks))) searches)))
    rows))
 
 (defn- filter-jvas
@@ -204,7 +208,7 @@
                                          :on-click delete-cert} [:i.fa.fa-trash]]]]))
 
 (defn- flatten-errors [list next-error]
-  (let [certs (->> (clojure.string/split next-error #"\n")
+  (let [certs (->> (cstr/split next-error #"\n")
                    (mapv read-string))]
     (concat list certs)))
 
@@ -248,7 +252,7 @@
       [:tbody
        (if (< 0 (count @(rf/subscribe [:search-text])))
          (for [cert  table]
-           ^{:key (join " " (map cert [:cert_no :first_name :last_name]))} [cert-row cert]))]]]))
+           ^{:key (cstr/join " " (map cert [:cert_no :first_name :last_name]))} [cert-row cert]))]]]))
 
 (defn existing-certifications
   [state]

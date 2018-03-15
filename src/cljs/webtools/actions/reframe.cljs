@@ -1,17 +1,19 @@
 (ns webtools.actions.reframe
   (:require
-   [webtools.db :as db]
-   [webtools.constants :as const]
-   [webtools.util :as util]
-   [webtools.util.dates :as util-dates]
-   [webtools.handlers.api :as ajax-handlers]
-   [webtools.procurement.core :as p]
+   [cemerick.url :as curl]
+   [clojure.string :as cstr]
    [re-frame.core :refer [dispatch reg-event-db]]
+   [webtools.actions.errors]
+   [webtools.actions.fns]
+   [webtools.actions.jvas]
    [webtools.actions.login]
    [webtools.actions.role]
-   [webtools.actions.jvas]
-   [webtools.actions.errors]
-   [webtools.actions.fns]))
+   [webtools.constants :as const]
+   [webtools.db :as db]
+   [webtools.handlers.api :as ajax-handlers]
+   [webtools.procurement.core :as p]
+   [webtools.util :as util]
+   [webtools.util.dates :as util-dates]))
 
 (reg-event-db
   :initialize-db
@@ -85,7 +87,7 @@
      (-> db
          (assoc :user-list users)
          (assoc-in [:session :admin] admin)
-         (assoc :roles (clojure.string/split roles #","))))))
+         (assoc :roles (cstr/split roles #","))))))
 
 (reg-event-db
  :store-procurement-list
@@ -125,11 +127,11 @@
      (assoc db :procurement-modal (assoc procurement-modal key val)))))
 
 (reg-event-db :error-list
- (fn [db [_ errors]]
-   (println (type errors))
-   (assoc db :error-list (-> errors cemerick.url/url-decode
-                             (clojure.string/replace "+" " ")
-                             (clojure.string/split #"\n\n")))))
+              (fn [db [_ errors]]
+                (println (type errors))
+                (assoc db :error-list (-> errors curl/url-decode
+                                          (cstr/replace "+" " ")
+                                          (cstr/split #"\n\n")))))
 
 (reg-event-db :add-addendum
  (fn [db [_ setting]]
