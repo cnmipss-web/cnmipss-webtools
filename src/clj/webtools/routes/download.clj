@@ -36,6 +36,16 @@
         (response/header "Content-Disposition"
                          (str "attachment;filename=" "subscribers.csv")))))
 
+(defn get-fns-nap-file [file]
+  (-> (response/file-response (str "fns-nap/" file))
+      (response/header "Content-Type"
+                       "application/octet-stream")
+      (response/header "Content-Disposition"
+                       (str "attachment;filename=\"" file "\""))))
+
 (defroutes download-routes
   (GET "/download/subscribers/:id" [id]
-       (subscriber-list-csv id)))
+       (subscriber-list-csv id))
+
+  (GET "/download/fns-nap/:file" [file]
+       (get-fns-nap-file file)))

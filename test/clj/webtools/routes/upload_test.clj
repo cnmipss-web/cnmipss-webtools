@@ -34,9 +34,9 @@
       (let [csv-file (file "test/clj/webtools/test/certificates-clean.csv")
             {:keys [status body headers error] :as response}
             (auth-req :post "/upload/certification-csv"
-                      (assoc :params {:file {:tempfile csv-file
-                                             :file-name "certificates-clean.csv"
-                                             :size (.length csv-file)}}))
+              (assoc :params {:file {:tempfile csv-file
+                                     :file-name "certificates-clean.csv"
+                                     :size (.length csv-file)}}))
             redirect-url (-> (get headers "Location") curl/url)
             cookies (get headers "Set-Cookie")
             success-cookie (cookie->map (first cookies))
@@ -52,9 +52,9 @@
       (let [csv-file (file "test/clj/webtools/test/certificates-collisions.csv")
             {:keys [status body headers] :as response}
             (auth-req :post "/upload/certification-csv"
-                      (assoc :params {:file {:tempfile csv-file
-                                             :file-name "certificates-collisions.csv"
-                                             :size (.length csv-file)}}))
+              (assoc :params {:file {:tempfile csv-file
+                                     :file-name "certificates-collisions.csv"
+                                     :size (.length csv-file)}}))
             redirect-url (-> headers (get "Location") curl/url)
             cookies (get headers "Set-Cookie")
             success (cookie->map (cemerick.url/url-decode (first cookies)))
@@ -72,9 +72,9 @@
       (let [csv-file (file "test/clj/webtools/test/certificates-renewal.csv")
             {:keys [status body headers error] :as response}
             (auth-req :post "/upload/certification-csv"
-                      (assoc :params {:file {:tempfile csv-file
-                                             :file-name "certificates-renewal.csv"
-                                             :size (.length csv-file)}}))
+              (assoc :params {:file {:tempfile csv-file
+                                     :file-name "certificates-renewal.csv"
+                                     :size (.length csv-file)}}))
             redirect-url (-> (get headers "Location") curl/url)
             cookies (get headers "Set-Cookie")
             success (cookie->map (cemerick.url/url-decode (first cookies)))
@@ -90,11 +90,11 @@
         (is (= "Certification" (get role "wt-role")))
         (is (= "" body))
 
-        (is (equal-props? [:first_name :last_name :cert_type] S-03-127 S-03-127-renewal))
-        (is (not-equal-props? [:start_date :expiry_date :cert_no] S-03-127 S-03-127-renewal))
+        (is (equal-props? S-03-127 S-03-127-renewal :first_name :last_name :cert_type ))
+        (is (not-equal-props? S-03-127 S-03-127-renewal :start_date :expiry_date :cert_no ))
         
-        (is (equal-props? [:first_name :last_name :cert_type] S-04-095 S-04-095-renewal))
-        (is (not-equal-props? [:start_date :expiry_date :cert_no] S-04-095 S-04-095-renewal))))))
+        (is (equal-props? S-04-095 S-04-095-renewal :first_name :last_name :cert_type ))
+        (is (not-equal-props?  S-04-095 S-04-095-renewal :start_date :expiry_date :cert_no))))))
 
 (deftest test-upload-hro
   (testing "POST /upload/jva-pdf"

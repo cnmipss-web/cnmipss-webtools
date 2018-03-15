@@ -1,8 +1,10 @@
 (ns webtools.routes.upload.fns-nap
   (:require [dk.ative.docjure.spreadsheet :as ss]
-            [clojure.java.io :refer [input-stream]]
+            [clj-time.core :as time]
+            [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
             [clojure.string :as cstr]
+            [webtools.db.core :as db]
             [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration] :as mr]
             [webtools.util.dates :refer [parse-nap-date]]
             [webtools.meals-registration.matching.algorithms :as malgo]))
@@ -96,7 +98,7 @@
 (defn- -ss-file-to-seq [file]
   "Convert a java.io.File object pointing at a MS Excel file to a seq of rows, 
    each row being a seq of cell values"
-  (->> (input-stream file)
+  (->> (io/input-stream file)
        (ss/load-workbook)
        (ss/sheet-seq)
        (first)                 ;; take first sheet
@@ -189,7 +191,6 @@
    (map second (sort-by first (concat (seq fns) (seq nap))))))
 
 (defn- -gen-unmatched-headers [rows]
-  (println rows)
   (let [header-row (first rows)
         parser (comp cstr/upper-case name first)]
     (map parser (sort-by first header-row))))
@@ -203,52 +204,75 @@
   (ss/set-cell-style! (nth (ss/cell-seq row) col-no) style) row)
 
 (defn- -create-ss-file [matched unm-fns unm-nap]
-  (println unm-fns unm-nap)
-  (let [wb (ss/create-workbook "FNS-NAP Matches"
-                               (vec (cons (-gen-matched-headers matched)
-                                          (map -match-to-ss-row matched)))
-                               "Unmatched FNS Records"
-                               (vec (cons (-gen-unmatched-headers unm-fns)
-                                          (map -fns-to-ss-row unm-fns)))
-                               "Unmatched NAP Records"
-                               (vec (cons (-gen-unmatched-headers unm-nap)
-                                          (map -fns-to-ss-row unm-nap))))
-        sheet (ss/select-sheet "FNS-NAP Matches" wb)
-        header-row (first (ss/row-seq sheet))
-        bm-date-rows (filter
-                      (fn dates-dont-match? [row]
-                        (let [[_ _ _ _ _ dob1 dob2] (map ss/read-cell (ss/cell-seq row))]
-                          (not= dob1 dob2)))
-                      (ss/row-seq sheet))
-        bm-name-rows (filter
-                      (fn lastnames-dont-match? [row]
-                        (let [[ln1 nln] (->> (map ss/read-cell (ss/cell-seq row)) (take 18) (drop 16))
-                              jr-index (cstr/index-of ln1 "Jr.")
-                              fln (if (some? jr-index)
-                                    (apply str (take jr-index ln1))
-                                    ln1)
-                              normalize (comp cstr/trim cstr/lower-case)]
-                          (not= (normalize fln) (normalize nln))))
-                      (ss/row-seq sheet))
-        bm-date-style (ss/create-cell-style! wb {:background :rose
-                                                 :data-format "MM/DD/YYYY"})
-        bm-name-style (ss/create-cell-style! wb {:background :rose
-                                                 :data-format "@"})]
+  (let [wb                (ss/create-workbook "FNS-NAP Matches"
+                                              (vec (cons (-gen-matched-headers matched)
+                                                         (map -match-to-ss-row matched)))
+                                              "Unmatched FNS Records"
+                                              (vec (cons (-gen-unmatched-headers unm-fns)
+                                                         (map -fns-to-ss-row unm-fns)))
+                                              "Unmatched NAP Records"
+                                              (vec (cons (-gen-unmatched-headers unm-nap)
+                                                         (map -fns-to-ss-row unm-nap))))
+        sheet             (ss/select-sheet "FNS-NAP Matches" wb)
+        header-row        (first (ss/row-seq sheet))
+        bm-date-rows      (filter
+                           (fn dates-dont-match? [row]
+                             (let [[_ _ _ _ _ dob1 dob2] (map ss/read-cell (ss/cell-seq row))]
+                               (not= dob1 dob2)))
+                           (ss/row-seq sheet))
+        bm-name-rows      (filter
+                           (fn lastnames-dont-match? [row]
+                             (let [[ln1 nln] (->> (map ss/read-cell (ss/cell-seq row)) (take 18) (drop 16))
+                                   jr-index  (cstr/index-of ln1 "Jr.")
+                                   fln       (if (some? jr-index)
+                                               (apply str (take jr-index ln1))
+                                               ln1)
+                                   normalize (comp cstr/trim cstr/lower-case)]
+                               (not= (normalize fln) (normalize nln))))
+                           (ss/row-seq sheet))
+        bm-date-style     (ss/create-cell-style! wb {:background  :rose
+                                                     :data-format "MM/DD/YYYY"})
+        bm-name-style     (ss/create-cell-style! wb {:background  :rose
+                                                     :data-format "@"})
+        uuid              (apply str (take 8 (str (java.util.UUID/randomUUID))))
+        matched-file-name (str "fns-nap/matched-" uuid  ".xlsx")]
     (ss/set-row-style! header-row (ss/create-cell-style! wb {:background :pale_blue
-                                                             :font {:bold true}}))
+                                                             :font       {:bold true}}))
     (doall (map (partial -set-col-style bm-date-style 5) bm-date-rows))
     (doall (map (partial -set-col-style bm-date-style 6) bm-date-rows))
     (doall (map (partial -set-col-style bm-name-style 16) bm-name-rows))
     (doall (map (partial -set-col-style bm-name-style 17) bm-name-rows))
-    (ss/save-workbook! "spreadsheet.xlsx" wb)))
+    (ss/save-workbook! matched-file-name wb)
+    uuid))
+
+(defn- link->filepath [link]
+  (let [fn-start (cstr/index-of link "fns-nap/")]
+    (subs link fn-start)))
 
 (defn process-upload [params]
   (let [{uploaded-fns :fns-file
          uploaded-nap :nap-file} params
-        {fns-file :tempfile} uploaded-fns
-        {nap-file :tempfile} uploaded-nap
-        fns-records (fns-parse fns-file)
-        nap-records (nap-parse nap-file)
-        matching-results (-matching-algorithm (:valid fns-records) (:valid nap-records))]
-    (apply -create-ss-file matching-results)
-    "1234567890"))
+        {fns-file :tempfile}     uploaded-fns
+        {nap-file :tempfile}     uploaded-nap
+        fns-records              (fns-parse fns-file)
+        nap-records              (nap-parse nap-file)
+        matching-results         (-matching-algorithm (:valid fns-records) (:valid nap-records))
+        uuid                     (apply -create-ss-file matching-results)]
+    (if (<= 5 (count (db/get-all-fns-nap)))
+      (let [{:keys [fns_file_link nap_file_link matched_file_link] :as oldest} (db/get-oldest-fns-nap)]
+        (try
+          (if fns_file_link (io/delete-file fns_file_link))
+          (if nap_file_link (io/delete-file nap_file_link))
+          (if matched_file_link (io/delete-file matched_file_link))
+          (catch java.io.IOException ex
+            (println (.getMessage ex)))
+          (finally
+            (db/drop-oldest-fns-nap!)))))
+    (with-open [fns-out (io/output-stream (str "fns-nap/fns-" uuid ".xlsx"))
+                nap-out (io/output-stream (str "fns-nap/nap-" uuid ".xlsx"))]
+      (io/copy fns-file fns-out)
+      (io/copy nap-file nap-out))
+    (db/create-fns-nap! {:id                (java.util.UUID/randomUUID)
+                         :fns_file_link     (str "/webtools/download/fns-nap/fns-" uuid ".xlsx")
+                         :nap_file_link     (str "/webtools/download/fns-nap/nap-" uuid ".xlsx")
+                         :matched_file_link (str "/webtools/download/fns-nap/matched-" uuid ".xlsx")})))
