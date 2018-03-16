@@ -1,0 +1,59 @@
+/*******************************************************
+  CSS Rules for tables displaying records from database
+********************************************************/
+
+.record-table {
+    margin-top: 15px;
+    width: 100%;
+    box-shadow: $drop-shadow;
+    border: $table-border;
+}
+
+.record-table__row {
+    margin: 0px;
+    padding: 0px;
+    border-bottom: 1px solid #ddd;
+
+    th[scope="col"] {
+        font-weight: $bold;
+        text-align: center;
+    }
+
+    &:nth-of-type(even) {
+        background-color: lighten($light-gold, 35);
+    }
+
+    th, td {
+        padding: 10px 5px;
+    }
+
+    td:not(:first-child) {
+        border-left: 1px solid #ddd;
+    }
+
+    strong {
+        font-weight: $bold;
+    }
+}
+
+.record-table__row--closed {
+    background-color: lightgrey !important;
+
+    strong {
+        color: red;        
+    } 
+}
+
+.record-table__thead {
+
+}
+
+.record-table__th, .record-table__td {
+}
+
+.record-table__th--center, .record-table__td--center {
+    text-align: center;
+}
+
+
+

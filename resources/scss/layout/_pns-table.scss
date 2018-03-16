@@ -1,0 +1,23 @@
+/*********************************
+  CSS rules for P&S .record-tables
+**********************************/
+
+.pns-table-box {
+    box-shadow: $drop-shadow;
+    display: table;
+    margin-top: 20px;
+    margin-top: 20px;
+    max-height: 800px;
+    overflow-y: scroll;
+    padding: 0px;
+    padding-top: 10px;
+}
+
+.pns-table-box__title {
+    font-family: $title-font-family;
+    font-size:   $title-font-size;
+    font-weight: $title-font-weight;
+    line-height: $title-font-line-height;
+    text-align: center;
+}
+

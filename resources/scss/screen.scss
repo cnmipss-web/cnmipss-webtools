@@ -1,4 +1,4 @@
- @import "base/variables";
+@import "base/variables";
 @import "base/reset";
 @import "base/mixins";
 @import "base/breakpoints";
@@ -7,6 +7,9 @@
 
 @import "layout/main";
 @import "layout/sidebar";
+@import "layout/pns-table";
+
+@import "tables/record-table";
 
 @import "modules/buttons";
 @import "modules/forms";
@@ -16,6 +19,7 @@
 @import "modules/navbar";
 @import "modules/sidebar";
 @import "modules/tables";
+@import "modules/text";
 
 @import "state/fade";
 

@@ -23,16 +23,30 @@
     display: flex;
     flex-direction: column;
     flex-flow: column wrap;
-    height: 200px;
+
+    @include for-xs {
+        width: 100%;
+    }
+
+    @include for-md {
+        height: 250px;        
+    }
 }
 
 .user-role-checklist__group {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin: 15px 5px;
     padding: 0px 5px;
-    width: 40%;   
+
+    @include for-xs {
+        margin: 15px auto;
+        width: 75%;
+    }
+
+    @include for-md {
+        width: 35%;
+    }
 }
 
 .user-role-checklist__label,
