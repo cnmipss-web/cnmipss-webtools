@@ -155,11 +155,13 @@
                           :response-format (util/full-response-format ajax/json-response-format)
                           :handler ajax-handlers/all-certs}))))
 
-;; (defn lazy-load 
-;;   "Used for on-scroll events to lazy-load large tables for display"
-;;   [target load-count]
-;;   (let [window-top (-> js/window jq .scrollTop)
-;;         window-bot (+ window-top (-> js/window jq .height))
-;;         target-top (-> (jq target) .offset .-top)]
-;;     (when (< target-top window-bot)
-;;       (rf/dispatbch [:lazy-load load-count]))))
+(defn delete-fns-nap [record]
+  (fn delete-fns-record [e]
+    (.preventDefault e)
+    (if (js/confirm "Are you sure you want to DELETE these documents?  DELETEING is permanent.")
+      (ajax/ajax-request {:uri "/webtools/api/delete-fns-nap"
+                          :method :post
+                          :format (ajax/json-request-format)
+                          :params record
+                          :response-format (util/full-response-format ajax/json-response-format)
+                          :handler ajax-handlers/fns-nap}))))

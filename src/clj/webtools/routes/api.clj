@@ -2,6 +2,7 @@
   (:require [compojure.core :refer [defroutes GET POST]]
             [ring.util.http-response :as resp]
             [clojure.data.json :as json]
+            [clojure.java.io :as io]
             [webtools.db.core :as db]
             [webtools.email :as email]
             [webtools.config :refer [env]]
@@ -27,7 +28,7 @@
   "Performs a db query and places the results in the response object as {:body results} in 
   JSON format with JSON headers. 
 
-  Will perform body parameter before making querying (useful for post routes that modify the db
+  Will perform body parameter before performing query (useful for post routes that modify the db
   before returning the results of a query).
 
   If there is an error, the response object becomes {:body {:error error}}
@@ -205,6 +206,15 @@
                        (future (email/notify-subscribers :delete :ifbs ifb))
                        (clear-procurement :ifb ifb))))
   
-  (GET "/api/fns-nap" request (query-route db/get-all-fns-nap)))
+  (GET "/api/fns-nap" request (query-route db/get-all-fns-nap))
+
+  (POST "/api/delete-fns-nap" request
+        (let [{record :body} request
+              sub-str (fn substring [s] (subs s (count "/webtools/download/")))]
+          (query-route db/get-all-fns-nap
+                       (db/delete-fns-nap! record)
+                       (io/delete-file (sub-str (:fns_file_link record)))
+                       (io/delete-file (sub-str (:nap_file_link record)))
+                       (io/delete-file (sub-str (:matched_file_link record)))))))
 
 
