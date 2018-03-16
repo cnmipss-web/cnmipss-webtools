@@ -21,6 +21,12 @@
                          :placeholder (if hide-label label)
                          :on-change on-change}]])
 
+(defn search-form
+  "Wraps the search-group component in a form"
+  [opts]
+  [:form.search-form {:role "search"}
+   [search-group opts]])
+
 (defn upload-group
   "Creates a Bootstrap form group with col-xs-WIDTH containing a label and file 
   upload input.  Accepts a map with the following values:

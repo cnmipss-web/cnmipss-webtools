@@ -19,8 +19,8 @@
     (set-cookie :role role)))
  
 (defn get-all-roles
-  "For each role in const/role-list, check if the checkbox at #${role}-${id-stem} is checked.
-  Return a comma seperated list of all check marked roles."
+  "For each role in const/role-list, check if the checkbox at #${role}-${id-stem} 
+  is checked.  Returns a comma seperated list of all check marked roles."
   [id-stem]
   (->> (for [role const/role-list]
          (if-let [checked (as-> (apply str (re-seq #"\S" role)) role-id
@@ -31,7 +31,9 @@
        (cstr/join ",")))
 
 (defn update-user
-  "Returns an event-handler function specific to a single user's email.  Event handler will grab the new roles and admin status of this user from their form and send them to the server to update the user."
+  "Returns an event-handler function specific to a single user's email.  Event 
+  handler will grab the new roles and admin status of this user from their 
+  form and send them to the server to update the user."
   [email]
   (fn 
     [event]

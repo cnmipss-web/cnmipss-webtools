@@ -1,5 +1,5 @@
 (ns webtools.components.forms.manage-users
-  "Forms for Administrators in \"Manage Users\" role, including subcomponents"
+  "Forms for Administrators in \"Manage Users\" role, including private subcomponents."
   (:require [clojure.string :as cstr]
             [webtools.constants :as const]
             [webtools.handlers.events :as events]))

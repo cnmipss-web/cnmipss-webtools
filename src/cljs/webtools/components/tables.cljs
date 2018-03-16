@@ -19,7 +19,6 @@
 
 (def fns-recent-results tfns/fns-recent-results)
 
-(def cert-table tcert/cert-table)
 (def error-table tcert/error-table)
 (def existing-certifications tcert/existing-certifications)
 

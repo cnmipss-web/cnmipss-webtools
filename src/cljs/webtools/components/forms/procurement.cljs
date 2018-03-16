@@ -1,4 +1,5 @@
 (ns webtools.components.forms.procurement
+  "Forms for users in \"Procurement\" role, including private subcomponents."
   (:require [re-frame.core :as rf]
             [webtools.components.buttons :as btn]
             [webtools.components.forms.generic :as gforms]
