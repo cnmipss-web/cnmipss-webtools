@@ -1,5 +1,6 @@
 (ns webtools.components.forms.generic
-  "Generic, reusable components used to build forms for other components")
+  "Generic, reusable components used to build forms for other components"
+  (:require [webtools.components.buttons :as btn]))
 
 (defn search-group
   "Creates a Bootstrap form group containing a search input and its associated label.
@@ -24,12 +25,13 @@
   "Creates a Bootstrap form group with col-xs-WIDTH containing a label and file 
   upload input.  Accepts a map with the following values:
 
-    :id -- The id and name of the file upload element
-    :accept -- The file type(s) accepted
+    :id       -- The id and name of the file upload element
+    :accept   -- The file type(s) accepted
     :multiple -- Whether multiple files are accepted
-    :label -- Text content of the label element
-    :class -- CSS classes to be applied to the group in addition to .form-group"
-  [{:keys [id accept multiple label class]}] 
+    :label    -- Text content of the label element
+    :class    -- CSS classes to be applied to the group in addition to .form-group"
+  [{:keys [id accept multiple label class]
+    :or {multiple false}}] 
   [:div.form-group
    {:class class}
    [:label.upload-form__label
@@ -51,7 +53,8 @@
     :value -- the hidden input field's value (e.g. a CSRF token)
     :type  -- the type of the hidden input.  Typically text.
   "
-  [{:keys [name value type]}]
+  [{:keys [name value type]
+    :or {type "text"}}]
   [:div {:style {:display "none"}}
    [:label {:for (str "input-" name) :aria-hidden "true"} "Hidden input"]
    [:input {:aria-hidden "true"
@@ -73,17 +76,15 @@
   [{:keys [path action accept label multiple]}]
   [:form.upload-form {:action action :method "post" :enc-type "multipart/form-data"}
    [:div.row
+    [:div.col-xs-1]
     [:div.col-xs-6
      [upload-group {:id "file"
                     :accept accept
                     :multiple multiple
                     :label label}]]
-    [:div.col-xs-6
+    [:div.col-xs-4
      [hidden-input {:name "path"
                     :value path
                     :type "text"}]
      [csrf-token]
-     [:button#upload-btn.btn.btn-primary.form-control {:type "submit"
-                                                       :aria-label "Upload"
-                                                       :style {:width "100%"
-                                                               :height "100%"}} "Upload"]]]])
+     [btn/submit-btn {:text "Upload"}]]]])

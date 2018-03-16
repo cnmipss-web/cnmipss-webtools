@@ -1,7 +1,9 @@
 (ns webtools.components.modals
   (:require [re-frame.core :as rf]
             [webtools.components.forms :as forms]
-            [webtools.components.tables :as tables]))
+            [webtools.components.tables :as tables]
+            [webtools.components.forms.procurement :as pforms]
+            [webtools.components.tables.procurement :as ptables]))
 
 (defn cert-modal [cert]
   [:div#cert-modal.modal.fade {:role "dialog"
@@ -59,9 +61,9 @@
 
 (defn procurement-modal [item]
   [:div#procurement-modal.modal.fade {:role "dialog"
-                              :tabIndex "-1"
-                              :aria-labelledby "procurement-modal-label"
-                              :aria-hidden "true"}
+                                      :tabIndex "-1"
+                                      :aria-labelledby "procurement-modal-label"
+                                      :aria-hidden "true"}
    [:div.modal-dialog {:role "document"}
     [:div.modal-content
      [:div.modal-header
@@ -72,9 +74,9 @@
      [:div.modal-body
       (if @(rf/subscribe [:add-addendum])
         [:div
-         [tables/existing-addenda item]
-         [forms/procurement-addendum item]]
-        [forms/edit-procurement item])]
+         [ptables/existing-addenda item]
+         [pforms/procurement-addendum item]]
+        [pforms/edit-procurement item])]
      [:div.modal-footer
       [:div.col-xs-3
        (if (and (not @(rf/subscribe [:add-addendum]))
@@ -114,7 +116,7 @@
        [:span {:aria-hidden "true"} "\u00d7"]]]
      [:div.modal-body
       [:p (str "There are " (count subscribers) " subscribers to this announcement.  Click below to email all subscribers or to download the list as a spreadsheet file.")]
-      [tables/pns-subscribers subscribers]]
+      [ptables/pns-subscribers subscribers]]
      [:div.modal-footer
       [:div.col-xs-2
        [:a {:href (str "mailto:"
@@ -130,7 +132,7 @@
          [:i.fa.fa-download] " Download"]]]]]]])
 
 (defn all-modals
-  []
+  [] 
   [:div
    [jva-modal @(rf/subscribe [:jva-modal])]
    [procurement-modal @(rf/subscribe [:procurement-modal])]

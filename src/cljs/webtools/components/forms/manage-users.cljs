@@ -33,7 +33,7 @@
     (for [role const/role-list]
       (let [role-id (apply str(re-seq #"\S" role))
             id (str role-id "-" id-stem)]
-        [-checkbox-group {:key (str "form-group-" role-id)
+        [-checkbox-group {:key (random-uuid)
                           :id id
                           :label role
                           :value role

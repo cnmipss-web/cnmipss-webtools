@@ -1,18 +1,19 @@
 (ns webtools.handlers.events
-  (:require [re-frame.core :as rf]
-            [ajax.core :as ajax]
-            [webtools.handlers.api :as ajax-handlers]
-            [webtools.util :as util]
-            [webtools.util.dates :as util-dates]
+  (:require [ajax.core :as ajax]
+            [clojure.string :as cstr]
+            [re-frame.core :as rf]
             [webtools.constants :as const]
+            [webtools.cookies :refer [set-cookie]]
+            [webtools.handlers.api :as ajax-handlers]
             [webtools.procurement.core :as p]
-            [webtools.cookies :refer [set-cookie]]))
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]))
 
-(def jq js/jQuery)
+(def ^:private jq js/jQuery)
 
 (defn set-active-role
   [role]
-  (fn [event]
+  (fn activate-role [event]
     (.preventDefault event)
     (rf/dispatch [:set-active-role role])
     (set-cookie :role role)))
@@ -27,7 +28,7 @@
                             (-> role-id jq (.is ":checked")))]
            role))
        (filter some?)
-       (clojure.string/join ",")))
+       (cstr/join ",")))
 
 (defn update-user
   "Returns an event-handler function specific to a single user's email.  Event handler will grab the new roles and admin status of this user from their form and send them to the server to update the user."
@@ -93,11 +94,11 @@
 
 
 (defn search-jvas []
-  (let [searches (-> "#search-jvas" jq .val (clojure.string/split #" "))]
+  (let [searches (-> "#search-jvas" jq .val (cstr/split #" "))]
     (rf/dispatch [:set-search-text searches])))
 
 (defn search-certs []
-  (let [searches (-> "#search-certs" jq .val (clojure.string/split #" "))]
+  (let [searches (-> "#search-certs" jq .val (cstr/split #" "))]
     (rf/dispatch [:set-search-text searches])))
 
 (defn edit-procurement [item]
@@ -115,9 +116,9 @@
 
 (defn delete-procurement [item]
   (let [type (-> item :type name)
-        type-caps (clojure.string/upper-case type)
+        type-caps (cstr/upper-case type)
         {:keys [id close_date open_date]} item]
-    (fn [e]
+    (fn delete-procurement-item [e]
       (.preventDefault e)
       (if (js/confirm (str "WARNING: Deleting this " type-caps
                            " will delete ALL related data including pdf documents, addendums,"

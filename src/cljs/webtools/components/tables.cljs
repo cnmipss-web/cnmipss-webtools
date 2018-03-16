@@ -2,289 +2,43 @@
   (:require
    [cljs-time.core :as time]
    [cljs-time.format :as f]
-   [cljs.reader :refer [read-string]]
-   [cljs.spec.alpha :as s]
    [clojure.string :as cstr]
    [re-frame.core :as rf]
    [webtools.components.forms :as forms]
    [webtools.components.tables.fns :as tfns]
+   [webtools.components.tables.certification :as tcert]
+   [webtools.components.tables.hro :as thro]
    [webtools.constants :as const]
    [webtools.handlers.events :as events]
    [webtools.procurement.core :as p]
    [webtools.spec.procurement]
    [webtools.spec.subscription]
    [webtools.timeout :refer [throttle]]
-   [webtools.util :as util]
+
    [webtools.util.dates :as util-dates]))
 
 (def fns-recent-results tfns/fns-recent-results)
 
-(defn- filter-by
-  [rows & ks]
-  (filter
-   (fn [row] (let [searches @(rf/subscribe [:search-text])]
-               (every? #(re-seq (re-pattern (str "(?i)" %))
-                                (cstr/join " " (map row ks))) searches)))
-   rows))
-
-(defn- filter-jvas
-  [jvas]
-  (filter-by jvas :position :location :announce_no :salary))
+(def cert-table tcert/cert-table)
+(def error-table tcert/error-table)
+(def existing-certifications tcert/existing-certifications)
 
 (defn user-row [user]
-  [:tr.row.user-list-row
-   [:td.custom-col-5.text-left {:style {:padding-left "10px"}} (user :email)]
-   [:td.custom-col-15.text-left (forms/edit-user-roles user)]])
+  [:tr.record-table__row
+   [:td.custom-col-5.text.text-left {:style {:padding-left "10px"}} (user :email)]
+   [:td.custom-col-15.text.text-left
+    [forms/edit-user-roles user]]])
 
 (defn user-table [users]
-  [:table.user-list
+  [:table.record-table
    [:caption.sr-only "Registered Users"]
    [:thead
-    [:tr.row.user-list-row
-     [:th.custom-col-5.text-center {:scope "col"} "Email"]
-     [:th.custom-col-15.text-center {:scope "col"} "Roles"]]]
+    [:tr.record-table__row
+     [:th.custom-col-5.text.text-center {:scope "col"} "Email"]
+     [:th.custom-col-15.text.text-center {:scope "col"} "Roles"]]]
    [:tbody
     (for [user (sort-by :email users)]
       ^{:key (str "user-" (user :email))} [user-row user])]])
 
-(defn force-close?
-  [{:keys [status close_date]}]
-  (try
-    (or (not status)
-        (and close_date
-             (time/after? (time/now) (util-dates/parse-date close_date))))
-    (catch js/Error e
-      (println "Exception in webtools.components.tables.force-close?" e)
-      false)))
 
-(defn jva-row [jva]
-  (let [{:keys [status close_date]} jva]
-    [:tr.row.jva-list-row {:class (if (force-close? jva) "closed")}
-     [:td.custom-col-1 (jva :announce_no)]
-     [:th.custom-col-4 {:scope "row"} (jva :position)]
-     [:td.custom-col-1
-      (if (force-close? jva)
-        [:em "Closed"]
-        [:strong "Open"])]
-     [:td.custom-col-2 (jva :open_date)]
-     [:td.custom-col-2
-      (if close_date
-        close_date
-        "Until Filled")]
-     [:td.custom-col-5 (jva :salary)]
-     [:td.custom-col-2 (jva :location)]
-     [:td.custom-col-3 
-      [:a.btn.btn-info.file-link {:title "Download"
-                                  :href (jva :file_link)
-                                  :role "button"} [:i.fa.fa-download]]
-      [:button.btn.btn-warning.file-link {:title "Edit"
-                                          :data-toggle "modal"
-                                          :data-target "#jva-modal"
-                                          :aria-controls "jva-modal"
-                                          :on-click (fn [] (rf/dispatch [:set-jva-modal jva]))}
-       [:i.fa.fa-pencil]]
-      [:button.btn.btn-danger.file-link {:title "Delete"
-                                         :on-click (events/delete-jva jva)} [:i.fa.fa-trash]]]]))
 
-(defn sort-jvas [jvas]
-  (concat (->> jvas (filter (comp not force-close?)) (sort-by :announce_no) reverse)
-          (->> jvas (filter force-close?) (sort-by :announce_no) reverse)))
-
-(defn jva-list [jvas]
-  [:table.jva-list.col-xs-12
-   [:caption.sr-only "List of current and past JVAs"]
-   [:thead
-    [:tr.row.jva-list-row
-     [:th.custom-col-1.text-center {:scope "col"} "Number"]
-     [:th.custom-col-4.text-center {:scope "col"} "Position/Title"]
-     [:th.custom-col-1.text-center {:scope "col"} "Status"]
-     [:th.custom-col-2.text-center {:scope "col"} "Opening Date"]
-     [:th.custom-col-2.text-center {:scope "col"} "Closing Date"]
-     [:th.custom-col-5.text-center {:scope "col"} "Salary"]
-     [:th.custom-col-2.text-center {:scope "col"} "Location"]
-     [:th.custom-col-3.text-center {:scope "col"} "Links"]]]
-   [:tbody
-    (for [jva (-> jvas filter-jvas sort-jvas)]
-      ^{:key (str "jva-" (jva :announce_no))} [jva-row jva])]])
-
-(def key->name {:rfps "Requests for Proposal" :ifbs "Invitations for Bid"})
-
-(s/fdef procurement-row
-        :args :webtools.spec.procurement/record
-        :ret vector?)
-
-(defn procurement-row [item]
-  [:tr.row.jva-list-row {:class (if (force-close? item) "closed")}
-   [:td.custom-col-1.text-center (:number item)]
-   [:td.custom-col-2.text-center.p-1 (util-dates/print-date (:open_date item))]
-   [:td.custom-col-2.text-center.p-1 (util-dates/print-date-at-time (:close_date item))]
-   [:td.custom-col-4.text-center.p-1 (:title item)]
-   [:td.custom-col-8.text-left.p-1 (-> item :description (subs 0 140) (str "..."))]
-   [:td.custom-col-3.text-center.pl-1.pr-1
-    [:a {:on-click #(rf/dispatch [:set-subscriber-modal item])}
-     [:button.btn.btn-success.file-link {:title "Subscribers"
-                                         :data-toggle "modal"
-                                         :data-target "#pns-subscriber-modal"
-                                         :aria-controls "pns-subscriber-modal"} [:i.fa.fa-envelope]]]
-    [:a {:href (:file_link item)}
-     [:button.btn.btn-info.file-link {:title "Download"} [:i.fa.fa-download]]]
-    [:a {:href (:spec_link item)}
-     [:button.btn.btn-info.file-link {:title "Specifications"} [:i.fa.fa-info-circle]]]
-    [:a {:on-click (fn [] (rf/dispatch [:set-procurement-modal item]))}
-     [:button.btn.btn-warning.file-link {:title "Edit"
-                                         :data-toggle "modal"
-                                         :data-target "#procurement-modal"
-                                         :aria-controls "procurement-modal"} [:i.fa.fa-pencil]]]
-    [:a {:on-click (events/delete-procurement item)}
-     [:button.btn.btn-danger.file-link {:title "Delete"} [:i.fa.fa-trash]]]]])
-
-(defn procurement-table [k m]
-  [:div.procurement-table-box.col-xs-12
-   [:h2.procurement-title.text-center (key->name k)]
-   [:table.procurement-list
-    [:caption.sr-only "List of current requests for proposals and invitations for bids"]
-    [:thead
-     [:tr.row.jva-list-row
-      [:th.custom-col-1.text-center {:scope "col"} "Number"]
-      [:th.custom-col-2.text-center {:scope "col"} "Opening Date"]
-      [:th.custom-col-2.text-center {:scope "col"} "Closing Date"]
-      [:th.custom-col-4.text-center {:scope "col"} "Title"]
-      [:th.custom-col-8.text-center {:scope "col"} "Description"]
-      [:th.custom-col-3.text-center {:scope "col"} "Links"]]]
-    [:tbody
-     (for [item (-> m k)]
-       ^{:key (str (name k) (:title item))} [procurement-row (assoc item :status true)])]]])
-
-(defn rfp-ifb-list [procurement-list]
-  [:div
-   [procurement-table :rfps procurement-list]
-   [procurement-table :ifbs procurement-list]])
-
-(defn existing-addenda [pns-item]
-  (let [{:keys [id]} pns-item
-        addenda (->> @(rf/subscribe [:procurement-list])
-                    :addenda
-                    (filter #(= id (-> % :proc_id p/make-uuid))))]
-    [:table#existing-addenda.text-center
-     [:caption "Existing Addendums"]
-     [:thead
-      [:tr
-       [:th.text-center "Number"]
-       [:th.text-center "Link"]]]
-     [:tbody
-      (for [{:keys [addendum_number file_link]} addenda]
-        (let [filename (last (re-find #"/([\w\.\-]+)$" file_link))]
-          ^{:key (str (* addendum_number (.random js/Math)))}
-          [:tr
-           [:td (inc addendum_number)]
-           [:td
-            [:a {:href file_link :target "_blank"} filename]]]))]]))
-
-(defn cert-row [row]
-  (let [{:keys [last_name first_name cert_type cert_no start_date expiry_date mi]} row
-        delete-cert (events/delete-cert row)]
-    [:tr.row.lookup-row
-     [:th.custom-col-3 {:scope "row"}
-      [:p.text-center (second (re-find #"(.*?)(\-renewal\-\d+)?$" cert_no))]]
-     [:td.custom-col-3
-      [:p.text-center last_name]]
-     [:td.custom-col-3
-      [:p.text-center (str first_name " " mi)]]
-     [:td.custom-col-2
-      [:p.text-center cert_type]]
-     [:td.custom-col-3
-      [:p.text-center start_date]]
-     [:td.custom-col-3
-      [:p.text-center expiry_date]]
-     [:td.custom-col-3 {:style {:text-align "center"}}
-      [:button.btn.btn-warning.file-link {:title "Edit"
-                                          :aria-label "Edit"
-                                          :data-toggle "modal"
-                                          :data-target "#cert-modal"
-                                          :aria-controls "cert-modal"
-                                          :on-click (fn [] (rf/dispatch [:set-cert-modal row]))} [:i.fa.fa-pencil]]
-      [:button.btn.btn-danger.file-link {:title "Delete"
-                                         :aria-label "Delete"
-                                         :on-click delete-cert} [:i.fa.fa-trash]]]]))
-
-(defn- flatten-errors [list next-error]
-  (let [certs (->> (cstr/split next-error #"\n")
-                   (mapv read-string))]
-    (concat list certs)))
-
-(defn error-table [error-list]
-  (let [th-props {:scope "col"}]
-    [:table#cert-error-list
-     [:caption "Duplicate Certs: These records caused an error and were not saved to the database."]
-     [:thead
-      [:tr.row.lookup-row
-       [:th.custom-col-3.text-center th-props "Cert Number"]
-       [:th.custom-col-3.text-center th-props "Last Name"]
-       [:th.custom-col-3.text-center th-props "First Name"]
-       [:th.custom-col-2.text-center th-props "Cert Type"]
-       [:th.custom-col-3.text-center th-props "Effective Date"]
-       [:th.custom-col-3.text-center th-props "Expiration Date"]]]
-     [:tbody
-      (for [cert (reduce flatten-errors [] error-list)]
-        ^{:key (str (* 100000000 (.random js/Math)))} (vec (drop-last (cert-row cert))))]]))
-
-(defn- sort-certs
-  [certs]
-  (sort-by :cert_no certs))
-
-(defn cert-table [table]
-  (let [th-props {:scope "col"}
-        n-results (count table)
-        results-str (str n-results (if (> n-results 1) " results." " result."))]
-    [:div
-     [:p.sr-only {:aria-live "polite"} results-str]
-     [:table.lookup-list.col-xs-12
-      [:caption.sr-only (str "Certified Personnel Table ")]
-      [:thead
-       [:tr.row.lookup-row
-        [:th.custom-col-3.text-center th-props "Cert Number"]
-        [:th.custom-col-3.text-center th-props "Last Name"]
-        [:th.custom-col-3.text-center th-props "First Name"]
-        [:th.custom-col-2.text-center th-props "Cert Type"]
-        [:th.custom-col-3.text-center th-props "Effective Date"]
-        [:th.custom-col-3.text-center th-props "Expiration Date"]
-        [:th.custom-col-3.text-center th-props "Tools"]]]
-      [:tbody
-       (if (< 0 (count @(rf/subscribe [:search-text])))
-         (for [cert  table]
-           ^{:key (cstr/join " " (map cert [:cert_no :first_name :last_name]))} [cert-row cert]))]]]))
-
-(defn existing-certifications
-  [state]
-  (let [table @(rf/subscribe [:cert-list])]
-    [:div.col-xs-12.col-sm-10.offset-sm-1
-     [forms/cert-search "Search Certification Records"]
-     [cert-table (-> table js->clj clojure.walk/keywordize-keys
-                     (filter-by :cert_no :first_name :last_name)
-                     sort-certs)]]))
-
- 
-(defn subscriber-row [subscriber]
-  [:tr
-   [:td (:company_name subscriber)]
-   [:td (:contact_person subscriber)]
-   [:td (-> subscriber :telephone util/format-tel-num)]
-   [:td (:email subscriber)]])
-
-(s/fdef subscriber-row
-        :args :webtools.spec.subscription/record
-        :ret vector?)
-
-(defn pns-subscribers [subscribers]
-  [:table#pns-subscriber-table
-   [:caption "List of Subscribers"]
-   [:thead
-    [:tr
-     [:th "Company Name"]
-     [:th "Contact Person"]
-     [:th "Phone Number"]
-     [:th "Email"]]]
-   [:tbody
-    (for [subscriber subscribers]
-      ^{:key (:id subscriber)}
-      [subscriber-row subscriber])]])
