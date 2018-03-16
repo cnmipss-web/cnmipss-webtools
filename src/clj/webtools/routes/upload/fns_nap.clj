@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
             [clojure.string :as cstr]
+            [clojure.tools.logging :as log]
             [webtools.db.core :as db]
             [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration] :as mr]
             [webtools.util.dates :refer [parse-nap-date]]
@@ -265,7 +266,7 @@
           (if nap_file_link (io/delete-file nap_file_link))
           (if matched_file_link (io/delete-file matched_file_link))
           (catch java.io.IOException ex
-            (println (.getMessage ex)))
+            (log/error ex))
           (finally
             (db/drop-oldest-fns-nap!)))))
     (with-open [fns-out (io/output-stream (str "fns-nap/fns-" uuid ".xlsx"))

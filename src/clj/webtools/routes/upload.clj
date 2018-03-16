@@ -217,12 +217,12 @@
             (response/set-cookie "wt-role" role cookie-opts)
             (response/set-cookie "wt-code" code cookie-opts)
             (response/header "Content-Type" "application/json")))
-      (catch Exception e
-        (log/error e)
+      (catch Exception ex
+        (log/error ex)
         (-> (response/found (str (env :server-uri) "#/app"))
             (response/set-cookie "wt-success" "false" cookie-opts)
-            (response/set-cookie "wt-error" (handle-error/msg e) cookie-opts)
-            (response/set-cookie "wt-code" (handle-error/code e) cookie-opts)
+            (response/set-cookie "wt-error" (handle-error/msg ex) cookie-opts)
+            (response/set-cookie "wt-code" (handle-error/code ex) cookie-opts)
             (response/set-cookie "wt-role" role cookie-opts)
             (response/header "Content-Type" "application/json"))))))
 
