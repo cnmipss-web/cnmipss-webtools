@@ -18,8 +18,7 @@
 
 (defn subscriber-list-csv [id]
   (let [uuid (p/make-uuid id)
-        subscriptions (->> (db/get-subscriptions {:proc_id uuid})
-                           (mapv #(assoc % :telephone (util/format-tel-num (:telephone %)))))
+        subscriptions (p/get-subs-from-db uuid)
         columns (->> subscriptions
                      first
                      keys

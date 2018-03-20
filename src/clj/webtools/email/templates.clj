@@ -82,13 +82,13 @@
          (conj (changes-email orig new sub)
                (unsubscribe-option email :procurement))]))
 
-(defn notify-deletion [title name email]
+(defn notify-deletion [pns {:keys [email contact_person] :as sub}]
   (html
    [:html
     [:body
-     [:p (str "Greetings " name ",")]
+     [:p (str "Greetings " contact_person ",")]
      [:p (str "We would like to notify you that "
-              title
+              (title-string pns)
               " has been withdrawn from the CNMI PSS website along with any addenda or other documentation.  You will not receive any further emails regarding this matter.")]
      [:br]
      [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
@@ -99,24 +99,25 @@
      [:p "CNMI PSS"]
      (unsubscribe-option email :procurement)]]))
 
-(defn notify-addenda [addendum title name email]
-  (html
-   [:html
-    [:body
-     [:p (str "Greetings " name ",")]
-     [:p (str "We would like to notify you that an addendum has been added to "
-              title
-              ".  You may access the full content of this addendum through ")
-      [:a {:href (:file_link addendum)}
-       "this link."]]
-     [:br]
-     [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-     [:br]
-     [:p "Thank you,"]
-     [:p "Kimo Rosario"]
-     [:p "Procurement & Supply Officer"]
-     [:p "CNMI PSS"]
-     (unsubscribe-option email :procurement)]]))
+(defn notify-addenda [addendum pns {:keys [email contact_person]}]
+  (let [title (title-string pns)]
+    (html
+     [:html
+      [:body
+       [:p (str "Greetings " contact_person ",")]
+       [:p (str "We would like to notify you that an addendum has been added to "
+                title
+                ".  You may access the full content of this addendum through ")
+        [:a {:href (:file_link addendum)}
+         "this link."]]
+       [:br]
+       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+       [:br]
+       [:p "Thank you,"]
+       [:p "Kimo Rosario"]
+       [:p "Procurement & Supply Officer"]
+       [:p "CNMI PSS"]
+       (unsubscribe-option email :procurement)]])))
 
 (defn warning-24hr [pns contact email]
   (html

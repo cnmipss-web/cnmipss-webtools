@@ -12,8 +12,9 @@
 
 (defprotocol procurement-from-db
   "Methods to retrive procurement records from DB"
-  (make-uuid       [id] "Convert a string id to uuid class")
-  (get-pns-from-db [id] "Retrieve an rfp or ifb based on its id"))
+  (make-uuid        [id] "Convert a string id to uuid class")
+  (get-pns-from-db  [id] "Retrieve an rfp or ifb based on its id")
+  (get-subs-from-db [proc_id] "Retrieve all subscriptions to with supplide proc_id"))
 
 (defprotocol create-procurement
   "Method to convert simple maps to procurement records, with validation and type conversion"

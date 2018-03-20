@@ -11,7 +11,7 @@
             [webtools.layout :refer [error-page]]
             [webtools.constants :refer [max-cookie-age]  :as const]
             [webtools.wordpress-api :as wp]
-            [webtools.models.procurement.core :refer :all]
+            [webtools.models.procurement.core :refer :all :as p]
             [webtools.models.procurement.server :refer :all]
             [clojure.tools.logging :as log]))
 
@@ -61,7 +61,7 @@
       (catch Exception e
         (log/error e)))
     (let [addenda (db/get-addenda query-map)
-          subscriptions (db/get-subscriptions query-map)]
+          subscriptions (p/get-subs-from-db uuid)]
       (mapv db/delete-subscription! subscriptions)
       (mapv db/delete-addendum! addenda)
       (mapv (comp wp/delete-media :id) addenda)
@@ -80,9 +80,10 @@
 
   (POST "/api/subscribe-procurement" {:keys [body] :as request}
         (let [{:keys [company person email tel proc_id]} (-> body json->edn)
-              existing-subs (db/get-subscriptions {:proc_id (make-uuid proc_id)})
+              pid (p/make-uuid proc_id)
+              existing-subs (p/get-subs-from-db pid)
               subscription {:id (java.util.UUID/randomUUID)
-                            :proc_id (make-uuid proc_id)
+                            :proc_id pid
                             :company_name company
                             :contact_person person
                             :email email
@@ -90,7 +91,7 @@
                             :subscription_number (count existing-subs)}]
           (try
             (let [created (db/create-subscription! subscription)
-                  pns (get-pns-from-db (make-uuid proc_id))]
+                  pns (get-pns-from-db pid)]
               (future (email/confirm-subscription subscription pns))
               (future (email/notify-procurement subscription pns))
               (json-response resp/ok created))

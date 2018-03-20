@@ -198,7 +198,7 @@
             addenda     {:id        "84ee3bd5-9077-449f-a576-08eec5b26028"
                          :proc_id   pid
                          :file_link ""}
-            subscribers (db/get-subscriptions {:proc_id pid})]
+            subscribers (p/get-subs-from-db pid)]
         (email/notify-addenda addenda rfp subscribers)
         (validate-emails (calls send-message) subscribers "procurement@cnmipss.org")
 
@@ -224,9 +224,9 @@
   (testing "should send notification message if open PSAnnouncement is deleted"
     (with-stub! [[send-message (constantly nil)]
                  [etemp/unsubscribe-option (constantly "UNSUBSCRIBE STRING")]]
-      (let [pid (p/make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
-            rfp (p/get-pns-from-db pid)
-            subscribers (db/get-subscriptions {:proc_id pid})]
+      (let [pid         (p/make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
+            rfp         (p/get-pns-from-db pid)
+            subscribers (p/get-subs-from-db pid)]
         (email/notify-deletion rfp subscribers)
         (validate-emails (calls send-message) subscribers "procurement@cnmipss.org")
 
@@ -254,7 +254,7 @@
             closed-rfp  (assoc (p/get-pns-from-db pid)
                                :close_date
                                (t/minus (t/now) (t/days 1))) 
-            subscribers (db/get-subscriptions {:proc_id pid})]
+            subscribers (p/get-subs-from-db pid)]
         (email/notify-deletion closed-rfp subscribers)
         (validate-emails (calls send-message))
         (is (= 0 (count-calls send-message)))))))

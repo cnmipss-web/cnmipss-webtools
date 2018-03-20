@@ -1,7 +1,7 @@
 (ns webtools.models.procurement.server
   (:require [webtools.spec.core]
             [webtools.spec.dates]
-            [webtools.models.procurement.core :refer :all]
+            [webtools.models.procurement.core :refer :all :as p]
             [webtools.db.core :as db]
             [webtools.wordpress-api :as wp]
             [webtools.constants :as const]
@@ -9,7 +9,8 @@
             [webtools.util.dates :as util-dates]
             [clj-time.format :as f]
             [clojure.tools.logging :as log]
-            [clojure.string :as cstr])
+            [clojure.string :as cstr]
+            [cemerick.url :as curl])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper])) 
 
@@ -124,7 +125,7 @@
                               :description (-> (:description rec)
                                                (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
                                                (last)
-                                               (cemerick.url/url-encode))
+                                               (curl/url-encode))
                               :slug (:id rec)))
       (assoc rec :spec_link
              (wp/create-media (:filename spec-file) (:tempfile spec-file)
@@ -135,7 +136,7 @@
                               :description (-> (:description rec)
                                                (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
                                                (last)
-                                               (cemerick.url/url-encode))
+                                               (curl/url-encode))
                               :slug (str (:id rec) "-spec")))
       (map->PSAnnouncement rec))))
 
@@ -145,17 +146,26 @@
     (-> {:id (make-uuid id)}         
         (db/get-single-pnsa)
         (map->PSAnnouncement)))
+
+  (get-subs-from-db [proc_id]
+    (map p/convert-sub-from-map (db/get-subscriptions {:proc_id (p/make-uuid proc_id)})))
+
   (make-uuid [id] (java.util.UUID/fromString id))
 
   java.util.UUID
   (get-pns-from-db [uuid]
     (-> {:id uuid}
-         (db/get-single-pnsa)
-         (map->PSAnnouncement)))
+        (db/get-single-pnsa)
+        (map->PSAnnouncement)))
+
+  (get-subs-from-db [proc_id]
+    (map p/convert-sub-from-map (db/get-subscriptions {:proc_id proc_id})))
+  
   (make-uuid [id] id)
   
   nil
   (get-pns-from-db [id] nil)
+  (get-subs-from-db [proc_id] nil)
   (make-uuid [id] nil))
 
 
