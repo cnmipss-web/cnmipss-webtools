@@ -1,6 +1,7 @@
 (ns webtools.spec.subscription
   (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]))
+            [clojure.spec.gen.alpha :as gen]
+            [webtools.util :as util]))
 
 (s/def ::id :webtools.spec.core/uuid)
 (s/def ::proc_id :webtools.spec.core/uuid)
@@ -18,7 +19,7 @@
 
 (s/def ::telephone (s/with-gen
                      #(some? (re-find #"^(\+\d{1,2}\s)?(\(?\d{3}\)?)?[\s.-]?\d{3}[\s.-]?\d{4}$" %))
-                     #(gen/fmap webtools.util/format-tel-num (gen/choose 1000000 9999999))))
+                     #(gen/fmap util/format-tel-num (gen/choose 1000000 9999999))))
 
 (s/def ::subscription_number nat-int?)
 

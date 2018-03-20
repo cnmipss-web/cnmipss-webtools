@@ -1,6 +1,7 @@
 (ns webtools.util
   (:require [webtools.constants :as const]
             [clojure.spec.alpha :as s]
+            [clojure.string :as cstr]
             #?(:clj  [clj-time.core :as time]
                :cljs [cljs-time.core :as time])
             #?(:clj  [clj-time.coerce :as coerce]
@@ -54,7 +55,7 @@
 (defn line-parser
   [re line]
   (if-let [match (peek (re-find re line))]
-    (clojure.string/trim match)
+    (cstr/trim match)
     nil))
 
 #?(:clj
@@ -104,9 +105,9 @@
 (defn capitalize-words 
   "Capitalize every word in a string"
   [s]
-  (->> (clojure.string/split (str s) #"\b") 
-       (map clojure.string/capitalize)
-       clojure.string/join))
+  (->> (cstr/split (str s) #"\b") 
+       (map cstr/capitalize)
+       cstr/join))
 
 (defn cookie->map
   [cookie-string]
@@ -115,3 +116,10 @@
           (for [cookie (.split cookie-string ";")]
             (let [keyval (map #(.trim %) (.split cookie "=" 2))]
               [(first keyval) (second keyval)])))))
+
+(defn email->name [email]
+  (as-> (cstr/split email #"@") names
+    (first names)
+    (cstr/split names #"\.")
+    (map cstr/capitalize names)
+    (cstr/join " " names)))
