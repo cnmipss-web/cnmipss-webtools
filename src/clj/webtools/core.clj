@@ -5,7 +5,7 @@
             [webtools.db.core :as db]
             [webtools.handler :as handler]
             [webtools.cron.config :as cron]
-            [webtools.procurement.server]
+            [webtools.models.procurement.server]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.tools.logging :as log]

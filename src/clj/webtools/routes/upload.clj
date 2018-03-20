@@ -14,8 +14,8 @@
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.wordpress-api :as wp]
-            [webtools.procurement.core :refer :all]
-            [webtools.procurement.server :refer [create-pns-from-file]]
+            [webtools.models.procurement.core :refer :all]
+            [webtools.models.procurement.server :refer [create-pns-from-file]]
             [webtools.email :as email]
             [webtools.error-handler.core :as handle-error]
             [webtools.routes.upload.fns-nap :as fns-nap]
@@ -24,7 +24,7 @@
             [clj-time.format :as f])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper]
-           [webtools.procurement.core PSAnnouncement]))
+           [webtools.models.procurement.core PSAnnouncement]))
 
 (defn create-new-cert
   "Convert a list represented a row in the uploaded CSV file to a hash-map representing the certification record."

@@ -7,7 +7,7 @@
             [clojure.spec.alpha :as s]
             [webtools.db.core :as db]
             [webtools.util :as util]
-            [webtools.procurement.core :as p]))
+            [webtools.models.procurement.core :as p]))
 
 (s/fdef subscriber-list-csv
         :args (s/cat :id :webtools.spec/uuid)

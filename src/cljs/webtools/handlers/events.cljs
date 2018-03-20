@@ -5,7 +5,7 @@
             [webtools.constants :as const]
             [webtools.cookies :refer [set-cookie]]
             [webtools.handlers.api :as ajax-handlers]
-            [webtools.procurement.core :as p]
+            [webtools.models.procurement.core :as p]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]))
 

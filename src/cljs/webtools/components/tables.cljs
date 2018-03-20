@@ -10,7 +10,7 @@
    [webtools.components.tables.hro :as thro]
    [webtools.constants :as const]
    [webtools.handlers.events :as events]
-   [webtools.procurement.core :as p]
+   [webtools.models.procurement.core :as p]
    [webtools.spec.procurement]
    [webtools.spec.subscription]
    [webtools.timeout :refer [throttle]]

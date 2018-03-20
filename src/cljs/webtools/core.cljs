@@ -12,7 +12,7 @@
    [webtools.util :as util]
    [webtools.timeout :as timeout]
    [webtools.cookies :refer [get-cookie]]
-   [webtools.procurement.front-end]
+   [webtools.models.procurement]
    [webtools.history :refer [hook-browser-navigation!]]
    [ajax.core :as ajax]
    [cemerick.url :refer [url-decode]]

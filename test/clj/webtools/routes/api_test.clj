@@ -16,7 +16,7 @@
    [webtools.email :as email]
    [webtools.handler :refer [app]]
    [webtools.json :refer :all]
-   [webtools.procurement.core :refer :all]
+   [webtools.models.procurement.core :refer :all]
    [webtools.spec.fns-nap]
    [webtools.spec.user]
    [webtools.test.constants :as c-t]

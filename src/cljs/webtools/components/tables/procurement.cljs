@@ -3,7 +3,7 @@
             [re-frame.core :as rf]
             [webtools.components.buttons :as btn]
             [webtools.handlers.events :as events]
-            [webtools.procurement.core :as pcore]
+            [webtools.models.procurement.core :as pcore]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]))
 

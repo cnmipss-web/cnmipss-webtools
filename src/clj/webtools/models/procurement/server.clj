@@ -1,74 +1,81 @@
-(ns webtools.procurement.server
+(ns webtools.models.procurement.server
   (:require [webtools.spec.core]
             [webtools.spec.dates]
-            [webtools.procurement.core :refer :all]
+            [webtools.models.procurement.core :refer :all]
             [webtools.db.core :as db]
             [webtools.wordpress-api :as wp]
             [webtools.constants :as const]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [clj-time.format :as f]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [clojure.string :as cstr])
   (:import [org.apache.pdfbox.pdmodel PDDocument]
            [org.apache.pdfbox.text PDFTextStripper])) 
 
-(extend-type webtools.procurement.core.PSAnnouncement
-    procurement-to-db
-    (proc-type [pnsa]
-      (-> pnsa :type keyword))
-    
-    (save-to-db [pnsa]
-      (-> pnsa
-          (db/make-sql-date :open_date)
-          (db/make-sql-datetime :close_date)
-          (db/create-pnsa!)))
-
-    (change-in-db [pnsa]
-      (db/update-pnsa! pnsa))
+(extend-type webtools.models.procurement.core.PSAnnouncement
+  procurement-to-db
+  (proc-type [pnsa]
+    (-> pnsa :type keyword))
   
-    (delete-from-db [pnsa]
-      (db/delete-pnsa! pnsa))
+  (save-to-db [pnsa]
+    (-> pnsa
+        (db/make-sql-date :open_date)
+        (db/make-sql-datetime :close_date)
+        (db/create-pnsa!)))
 
-    communicate-procurement
-    (changes-email [orig new sub]
-      (let [title-string (str (-> new :type name clojure.string/upper-case)
-                              "# " (:number orig) " " (:title orig))
-            referent-term (if (= :rfp (:type new)) "request" "invitation")]
-        [:body
-         [:p (str "Greetings " (:contact_person sub) ",")]
-         [:p (str "We would like to notify you that details of " title-string " have been changed.")]
+  (change-in-db [pnsa]
+    (db/update-pnsa! pnsa))
+  
+  (delete-from-db [pnsa]
+    (db/delete-pnsa! pnsa))
 
-         (if (not= (:open_date orig) (:open_date new))
-           [:p (str "The window for submissions will now begin on "
-                    (util-dates/print-date (:open_date new)) ".  ")])
+  communicate-procurement
+  (uppercase-type [pns]
+    (-> pns :type name cstr/upper-case))
 
-         (if (not= (:close_date orig) (:close_date new))
-           [:p (str "The window for submissions will now close at "
-                    (util-dates/print-date-at-time (:close_date new)) ".  ")])
+  (title-string [{:keys [number title] :as pns}]
+    (str (uppercase-type pns) "# " number " " title))
+  
+  (changes-email [orig new sub]
+    (let [title-string (str (-> new :type name cstr/upper-case)
+                            "# " (:number orig) " " (:title orig))
+          referent-term (if (= :rfp (:type new)) "request" "invitation")]
+      [:body
+       [:p (str "Greetings " (:contact_person sub) ",")]
+       [:p (str "We would like to notify you that details of " title-string " have been changed.")]
 
-         (if (not= (:number orig) (:number new))
-           [:p (str "The " (-> new :type name clojure.string/upper-case)
-                    "# of this request has been changed to "
-                    (:number new) ".  ")])
+       (if (not= (:open_date orig) (:open_date new))
+         [:p (str "The window for submissions will now begin on "
+                  (util-dates/print-date (:open_date new)) ".  ")])
 
-         (if (not= (:title orig) (:title new))
-           [:p (str "The title of this " referent-term " has been changed to: ")
-            [:em (:title new)] ".  "])
+       (if (not= (:close_date orig) (:close_date new))
+         [:p (str "The window for submissions will now close at "
+                  (util-dates/print-date-at-time (:close_date new)) ".  ")])
 
-         (if (not= (:description orig) (:description new))
-           [:p
-            (str "The description of this " referent-term " has been change to the following: ")
-            [:br]
-            [:br]
-            (:description new)])
+       (if (not= (:number orig) (:number new))
+         [:p (str "The " (-> new :type name cstr/upper-case)
+                  "# of this request has been changed to "
+                  (:number new) ".  ")])
 
-         [:br]
-         [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-         [:br]
-         [:p "Thank you,"]
-         [:p "Kimo Rosario"]
-         [:p "Procurement & Supply Officer"]
-         [:p "CNMI PSS"]])))
+       (if (not= (:title orig) (:title new))
+         [:p (str "The title of this " referent-term " has been changed to: ")
+          [:em (:title new)] ".  "])
+
+       (if (not= (:description orig) (:description new))
+         [:p
+          (str "The description of this " referent-term " has been change to the following: ")
+          [:br]
+          [:br]
+          (:description new)])
+
+       [:br]
+       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+       [:br]
+       [:p "Thank you,"]
+       [:p "Kimo Rosario"]
+       [:p "Procurement & Supply Officer"]
+       [:p "CNMI PSS"]])))
 
 (def procurement-regexes
   {:type #"(RFP|IFB)"
@@ -85,18 +92,24 @@
   "Takes an announcement file and a specification file and uploads both to the WP site.  
   Parses information from the files to create a PSAnnouncement type record."
   [ann-file spec-file]
-  (let [{:keys [tempfile size filename]} ann-file
-            announcement (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-            desc (-> (re-find #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/" announcement)
-                     (last)
-                     (clojure.string/trim))
-            lines (clojure.string/split announcement #"\n")]
+  (let [{:keys [tempfile
+                size
+                filename]} ann-file
+        announcement       (->> tempfile
+                                PDDocument/load
+                                (.getText (PDFTextStripper.)))
+        desc               (-> (re-find
+                                #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/"
+                                announcement)
+                               (last)
+                               (cstr/trim))
+        lines              (cstr/split announcement #"\n")]
     (as->
         (reduce procurement-reducer {} lines) rec
       (filter (comp some? val) rec)
-      (map (fn [[k v]] [k (clojure.string/replace v #"\s+" " ")]) rec)
+      (map (fn [[k v]] [k (cstr/replace v #"\s+" " ")]) rec)
       (into {} rec)
-      (assoc rec :type (-> rec :type clojure.string/lower-case keyword))
+      (assoc rec :type (-> rec :type cstr/lower-case keyword))
       (assoc rec :description desc)
       (assoc rec :open_date (-> rec :open_date util-dates/parse-date))
       (assoc rec :close_date (-> rec :close_date util-dates/parse-date-at-time))
@@ -106,7 +119,7 @@
              (wp/create-media filename tempfile
                               :title (:title rec)
                               :alt_text (str "Announcement for "
-                                             (-> rec :type name clojure.string/upper-case)
+                                             (-> rec :type name cstr/upper-case)
                                              "# " (:number rec) " " (:title rec))
                               :description (-> (:description rec)
                                                (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))
@@ -117,7 +130,7 @@
              (wp/create-media (:filename spec-file) (:tempfile spec-file)
                               :title (:title rec)
                               :alt_text (str "Specifications for "
-                                             (-> rec :type name clojure.string/upper-case)
+                                             (-> rec :type name cstr/upper-case)
                                              "# " (:number rec) " " (:title rec))
                               :description (-> (:description rec)
                                                (#(re-find #"([\p{L}\p{Z}\p{P}\p{M}\n]*?)\n\p{Z}\n" %))

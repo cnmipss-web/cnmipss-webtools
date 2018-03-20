@@ -1,5 +1,5 @@
-(ns webtools.procurement.front-end
-  (:require [webtools.procurement.core :as p]
+(ns webtools.models.procurement
+  (:require [webtools.models.procurement.core :as p]
             [webtools.constants :as const]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
