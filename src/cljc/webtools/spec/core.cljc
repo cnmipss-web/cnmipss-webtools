@@ -27,6 +27,8 @@
                                           (- (count url) (count ext))
                                           (cstr/index-of url ext))))))
 
+(spec/def ::throwable? (partial instance? java.lang.Exception))
+
 
 
 
