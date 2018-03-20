@@ -4,7 +4,6 @@
   :url "http://www.cnmipss.org/webtools/"
 
   :dependencies [[cheshire "5.8.0"]
-                 [cider/cider-nrepl "0.16.0"]
                  [clj-fuzzy "0.4.1"]
                  [clj-http "3.7.0"]
                  [clj-time "0.14.2"]
@@ -140,8 +139,7 @@
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.8"]
                                  [lein-figwheel "0.5.15"]
-                                 [org.clojure/clojurescript "1.10.145"]
-                                 [lein-cloverage "1.0.9"]]
+                                 [org.clojure/clojurescript "1.10.145"]]
                   
                   :cljsbuild
                   {:builds
