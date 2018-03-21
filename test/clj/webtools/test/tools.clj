@@ -20,8 +20,16 @@
   ([method url] `(auth-req ~method ~url (identity)))
   ([method url & body]
    `((app) (-> (mock/request ~method ~url)
-            ~@body
-            authorize))))
+               ~@body
+               authorize))))
+
+(defmacro unauth-req
+  ""
+  {:style/indent 2}
+  ([method url] `(unauth-req ~method ~url (identity)))
+  ([method url & body]
+   `((app) (-> (mock/request ~method ~url)
+               ~@body))))
 
 (defn equal-props?
   "Return true if EVERY key in ks is associated with the same value in m and n"
