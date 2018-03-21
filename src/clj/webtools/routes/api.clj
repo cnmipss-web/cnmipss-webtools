@@ -76,7 +76,7 @@
   (GET "/api/all-procurement" [] (query-route get-all-procurement))
 
   (POST "/api/subscribe-procurement" {:keys [body] :as request}
-        (let [{:keys [company person email tel proc_id]} (-> body json->edn)
+        (let [{:keys [company person email tel proc_id]} body
               pid (p/make-uuid proc_id)
               existing-subs (p/get-subs-from-db pid)
               subscription {:id (java.util.UUID/randomUUID)
