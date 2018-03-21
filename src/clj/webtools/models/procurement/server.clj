@@ -92,15 +92,15 @@
   (let [{:keys [tempfile
                 size
                 filename]} ann-file
-        announcement       (->> tempfile
-                                PDDocument/load
-                                (.getText (PDFTextStripper.)))
+        pdf-doc            (PDDocument/load tempfile)
+        announcement       (.getText (PDFTextStripper.) pdf-doc)
         desc               (-> (re-find
                                 #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/"
                                 announcement)
                                (last)
                                (cstr/trim))
         lines              (cstr/split announcement #"\n")]
+    (.close pdf-doc)
     (as->
         (reduce procurement-reducer {} lines) rec
       (filter (comp some? val) rec)

@@ -158,7 +158,8 @@
   (let [{:keys [file]} params]
     (if (= (type file) clojure.lang.PersistentArrayMap)
       (let [{:keys [tempfile size filename]} file
-            jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
+            pdf-document (PDDocument/load tempfile)
+            jva (.getText (PDFTextStripper.) pdf-document)
             text-list (split jva #"\n")
             jva-record (as-> (reduce jva-reducer {} text-list) jva
                          (db/make-sql-date jva :open_date)
@@ -172,6 +173,7 @@
                                                                 (:position jva))
                                                  :description (jva-desc jva)
                                                  :slug (:id jva))))]
+        (.close pdf-document)
         (db/create-jva! jva-record))
       (mapv (comp process-jva-pdf #(into {} [[:file %]])) file))))
 
@@ -179,13 +181,14 @@
   [params]
   (let [{:keys [file]} params
         {:keys [tempfile size filename]} file
-          jva (->> tempfile PDDocument/load (.getText (PDFTextStripper.)))
-          text-list (split jva #"\n")
-          jva-record (as-> (reduce jva-reducer {} text-list) jva
-                       (db/make-sql-date jva :open_date)
-                       (db/make-sql-date jva :close_date)                       
-                       (util/make-status jva)
-                       (assoc jva :id (java.util.UUID/randomUUID)))
+        pdf-document (PDDocument/load tempfile)
+        jva (.getText (PDFTextStripper.) pdf-document)
+        text-list (split jva #"\n")
+        jva-record (as-> (reduce jva-reducer {} text-list) jva
+                     (db/make-sql-date jva :open_date)
+                     (db/make-sql-date jva :close_date)                       
+                     (util/make-status jva)
+                     (assoc jva :id (java.util.UUID/randomUUID)))
         existing-jva (db/get-jva jva-record)]
     (db/delete-jva! existing-jva)
     (wp/delete-media (str (:id existing-jva)))
@@ -197,6 +200,7 @@
                                             (:position jva-record))
                              :description (jva-desc jva-record)
                              :slug (:id jva-record)))
+     (.close pdf-document)
      (db/create-jva!))))
 
 (defn post-file-route
