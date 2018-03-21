@@ -1,9 +1,8 @@
 (ns webtools.routes.home
-  (:require [webtools.layout :as layout]
-            [webtools.config :refer [env]]
-            [compojure.core :refer [defroutes GET]]
+  (:require [compojure.core :refer [GET defroutes]]
             [ring.util.http-response :as response]
-            [clojure.java.io :as io]))
+            [webtools.config :refer [env]]
+            [webtools.layout :as layout]))
 
 (defn home-page []
   (layout/render "home.html"))

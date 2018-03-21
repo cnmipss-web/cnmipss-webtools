@@ -1,8 +1,7 @@
 (ns webtools.cron.core
   (:require [chime :refer [chime-at]]
             [clj-time.core :as t]
-            [clj-time.periodic :as p])
-  (:import [org.joda.time DateTimeZone]))
+            [clj-time.periodic :as p]))
 
 (def ^:private jobs (atom {}))
 

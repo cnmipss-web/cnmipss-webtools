@@ -1,13 +1,11 @@
 (ns webtools.routes.download
-  (:require [compojure.core :refer [defroutes GET]]
-            [ring.util.http-response :as response]
-            [clojure.data.csv :as csv]
+  (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
             [clojure.spec.alpha :as s]
-            [webtools.db.core :as db]
-            [webtools.util :as util]
-            [webtools.models.procurement.core :as p]))
+            [compojure.core :refer [GET defroutes]]
+            [ring.util.http-response :as response]
+            [webtools.models.procurement.core :as p]
+            [webtools.util :as util]))
 
 (s/fdef subscriber-list-csv
         :args (s/cat :id :webtools.spec/uuid)

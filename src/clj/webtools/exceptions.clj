@@ -1,6 +1,5 @@
 (ns webtools.exceptions
-  (:require [clojure.pprint :refer [pprint]])
-  (:import [java.io StringWriter PrintWriter]))
+  (:require [clojure.pprint :refer [pprint]]))
 
 (defn exception->string [exception]
   "Pretty print exception data to a string and return that string."

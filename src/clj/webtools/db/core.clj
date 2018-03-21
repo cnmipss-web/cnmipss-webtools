@@ -1,28 +1,19 @@
 (ns webtools.db.core
-  (:require
-   [clojure.data.json :as json]
-   [cheshire.core :refer [generate-string parse-string]]
-   [cheshire.generate :refer [add-encoder encode-str encode-date]]
-   [clj-time.jdbc]
-   [clj-time.format :as f]
-   [clj-time.coerce :as c]
-   [clj-time.core :as t]
-   [clj-time.local :as l]
-   [clojure.java.jdbc :as jdbc]
-   [clojure.tools.logging :as log]
-   [conman.core :as conman]
-   [webtools.config :refer [env]]
-   [webtools.constants :as const]
-   [webtools.util :as util]
-   [webtools.util.dates :as util-dates]
-   [mount.core :refer [defstate]])
-  (:import org.postgresql.util.PGobject
-           java.sql.Array
-           clojure.lang.IPersistentMap
-           clojure.lang.IPersistentVector
-           [java.sql
-            BatchUpdateException
-            PreparedStatement]))
+  (:require [cheshire.core :refer [generate-string parse-string]]
+            [cheshire.generate :refer [add-encoder]]
+            [clj-time.coerce :as c]
+            [clj-time.core :as t]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as cstr]
+            [clojure.tools.logging :as log]
+            [conman.core :as conman]
+            [mount.core :refer [defstate]]
+            [webtools.config :refer [env]]
+            [webtools.constants :as const]
+            [webtools.util.dates :as util-dates])
+  (:import (clojure.lang IPersistentMap IPersistentVector)
+           (java.sql Array)
+           (org.postgresql.util PGobject)))
 
 (defstate ^:dynamic *db*
   :start (conman/connect! {:jdbc-url (str (env :database-url)
@@ -70,15 +61,15 @@
     (let [conn      (.getConnection stmt)
           meta      (.getParameterMetaData stmt)
           type-name (.getParameterTypeName meta idx)]
-      (if-let [elem-type (when (= (first type-name) \_) (apply str (rest type-name)))]
+      (if-let [elem-type (when (= (first type-name) \_) (cstr/join (rest type-name)))]
         (.setObject stmt idx (.createArrayOf conn elem-type (to-array v)))
         (.setObject stmt idx (to-pg-json v))))))
 
 (add-encoder org.joda.time.DateTime
              (fn [date jg]
-               (if (and (= (t/hour date) 0)
-                        (= (t/minute date) 0)
-                        (= (t/second date) 0))
+               (if (and (zero? (t/hour date))
+                        (zero? (t/minute date))
+                        (zero? (t/second date)))
                  (.writeString jg (util-dates/print-date date))
                  (.writeString jg (util-dates/print-date-at-time date)))))
 
@@ -88,7 +79,9 @@
   IPersistentMap
   (sql-value [value] (to-pg-json value))
   IPersistentVector
-  (sql-value [value] (to-pg-json value)))
+  (sql-value [value] (to-pg-json value))
+  org.joda.time.DateTime
+  (sql-value [value] (c/to-sql-time value)))
 
 (defn make-sql-date
   [m k]

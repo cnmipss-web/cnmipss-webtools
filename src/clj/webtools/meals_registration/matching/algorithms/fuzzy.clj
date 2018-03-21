@@ -2,14 +2,13 @@
   "Implementation of fuzzy string matching algorithm for matching FNS 
   Registrations with NAP Registrations.  Uses clojure.core.reducers to
   multithread the matching process."
-  (:require [clojure.spec.alpha :as spec]
-            [clojure.spec.gen.alpha :as sgen]
-            [clojure.core.reducers :as r]
-            [clojure.string :as cstr]
-            [clj-fuzzy.metrics :as smetric]
+  (:require [clj-fuzzy.metrics :as smetric]
             [clj-fuzzy.phonetics :as sphon]
             [clj-time.core :as time]
             [clj-time.format :as tform]
+            [clojure.core.reducers :as r]
+            [clojure.spec.alpha :as spec]
+            [clojure.string :as cstr]
             [webtools.constants :as const]))
 
 

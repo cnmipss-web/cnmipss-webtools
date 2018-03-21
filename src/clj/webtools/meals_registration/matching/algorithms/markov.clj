@@ -1,6 +1,6 @@
 (ns webtools.meals-registration.matching.algorithms.markov
-  (:require [clojure.string :as s]
-            [clj-fuzzy.metrics :as smetric]))
+  (:require [clj-fuzzy.metrics :as smetric]
+            [clojure.string :as s]))
 
 (defn- -prefix-val-list [size coll]
   (let [prefixes (butlast (map vec (partition size 1 coll)))

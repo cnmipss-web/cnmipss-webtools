@@ -1,15 +1,16 @@
 (ns webtools.handler
   (:require [compojure.core :refer [routes wrap-routes]]
+            [compojure.route :as route]
+            [mount.core :as mount]
+            [webtools.env :refer [defaults]]
             [webtools.layout :refer [error-page]]
+            [webtools.middleware :as middleware]
+            [webtools.routes.api :refer [api-routes
+                                         api-routes-with-auth]]
+            [webtools.routes.download :refer [download-routes]]
             [webtools.routes.home :refer [home-routes]]
             [webtools.routes.oauth :refer [oauth-routes]]
-            [webtools.routes.api :refer [api-routes api-routes-with-auth]]
-            [webtools.routes.upload :refer [upload-routes]]
-            [webtools.routes.download :refer [download-routes]]
-            [compojure.route :as route]
-            [webtools.env :refer [defaults]]
-            [mount.core :as mount]
-            [webtools.middleware :as middleware]))
+            [webtools.routes.upload :refer [upload-routes]]))
 
 (mount/defstate init-app
                 :start ((or (:init defaults) identity))

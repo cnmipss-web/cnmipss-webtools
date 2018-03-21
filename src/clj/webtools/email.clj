@@ -1,18 +1,13 @@
 (ns webtools.email
-  (:require [clj-time.coerce :as c]
-            [clj-time.format :as f]
-            [clojure.data :refer [diff]]
+  (:require [clojure.data :refer [diff]]
             [clojure.spec.alpha :as spec]
-            [clojure.string :as cstr]
             [clojure.tools.logging :as log]
             [postal.core :refer [send-message]]
             [webtools.db.core :as db]
             [webtools.email.templates :as templates]
             [webtools.exceptions :as w-ex]
             [webtools.models.procurement.core :as p]
-            [webtools.spec]
-            [webtools.util :as util]
-            [webtools.util.dates :as util-dates]))
+            [webtools.util :as util]))
 
 (def ^:private webmaster-email "webmaster@cnmipss.org")
 (def ^:private procurement-email "procurement@cnmipss.org")

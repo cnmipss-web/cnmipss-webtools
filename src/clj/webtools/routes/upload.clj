@@ -1,30 +1,23 @@
 (ns webtools.routes.upload
-  (:require [compojure.core :refer [defroutes GET POST]]
-            [cemerick.url :as curl]
-            [ring.util.http-response :as response]
+  (:require [clj-time.core :as t]
             [clojure.data :refer [diff]]
-            [clojure.data.json :as json]
             [clojure.data.csv :as csv]
             [clojure.string :refer [split]]
             [clojure.tools.logging :as log]
-            [clj-fuzzy.metrics :as measure]
-            [webtools.db.core :as db]
-            [webtools.util :as util]
-            [webtools.util.dates :as util-dates]
-            [webtools.json :refer :all]
+            [compojure.core :refer [POST defroutes]]
+            [ring.util.http-response :as response]
             [webtools.config :refer [env]]
-            [webtools.wordpress-api :as wp]
-            [webtools.models.procurement.core :refer :all]
-            [webtools.models.procurement.server :refer [create-pns-from-file]]
+            [webtools.db.core :as db]
             [webtools.email :as email]
             [webtools.error-handler.core :as handle-error]
+            [webtools.models.procurement.core :refer :all]
+            [webtools.models.procurement.server :refer [create-pns-from-file]]
             [webtools.routes.upload.fns-nap :as fns-nap]
-            [clj-time.core :as t]
-            [clj-time.coerce :as coerce]
-            [clj-time.format :as f])
-  (:import [org.apache.pdfbox.pdmodel PDDocument]
-           [org.apache.pdfbox.text PDFTextStripper]
-           [webtools.models.procurement.core PSAnnouncement]))
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
+            [webtools.wordpress-api :as wp])
+  (:import (org.apache.pdfbox.pdmodel PDDocument)
+           (org.apache.pdfbox.text PDFTextStripper)))
 
 (defn create-new-cert
   "Convert a list represented a row in the uploaded CSV file to a hash-map representing the certification record."

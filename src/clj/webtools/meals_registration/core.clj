@@ -1,6 +1,5 @@
 (ns webtools.meals-registration.core
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as sgen]))
+  (:require [clojure.spec.alpha :as s]))
 
 (defrecord FNSRegistration
     [fns-type

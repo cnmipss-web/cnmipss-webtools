@@ -1,18 +1,14 @@
 (ns webtools.models.procurement.server
-  (:require [webtools.spec.core]
-            [webtools.spec.dates]
-            [webtools.models.procurement.core :refer :all :as p]
+  (:require [cemerick.url :as curl]
+            [clojure.string :as cstr]
+            [clojure.tools.logging :as log]
             [webtools.db.core :as db]
-            [webtools.wordpress-api :as wp]
-            [webtools.constants :as const]
+            [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
-            [clj-time.format :as f]
-            [clojure.tools.logging :as log]
-            [clojure.string :as cstr]
-            [cemerick.url :as curl])
-  (:import [org.apache.pdfbox.pdmodel PDDocument]
-           [org.apache.pdfbox.text PDFTextStripper])) 
+            [webtools.wordpress-api :as wp])
+  (:import (org.apache.pdfbox.pdmodel PDDocument)
+           (org.apache.pdfbox.text PDFTextStripper))) 
 
 (extend-type webtools.models.procurement.core.PSAnnouncement
   procurement-to-db

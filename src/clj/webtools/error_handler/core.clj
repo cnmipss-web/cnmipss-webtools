@@ -1,6 +1,6 @@
 (ns webtools.error-handler.core
-  (:require [webtools.error-handler.sql :as sql-error]
-            [webtools.error-handler.ex-info :as info-error]))
+  (:require [webtools.error-handler.ex-info :as info-error]
+            [webtools.error-handler.sql :as sql-error]))
 
 (defprotocol HandleErrors
   (code [x] "Return an error-code based on the type of error in terms of our data model.")

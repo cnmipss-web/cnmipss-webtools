@@ -1,14 +1,16 @@
 (ns webtools.routes.upload.fns-nap
-  (:require [dk.ative.docjure.spreadsheet :as ss]
-            [clj-time.core :as time]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
             [clojure.string :as cstr]
             [clojure.tools.logging :as log]
+            [dk.ative.docjure.spreadsheet :as ss]
             [webtools.db.core :as db]
-            [webtools.meals-registration.core :refer [->FNSRegistration ->NAPRegistration] :as mr]
-            [webtools.util.dates :refer [parse-nap-date]]
-            [webtools.meals-registration.matching.algorithms :as malgo]))
+            [webtools.meals-registration.core
+             :refer [->FNSRegistration
+                     ->NAPRegistration]
+             :as mr]
+            [webtools.meals-registration.matching.algorithms :as malgo]
+            [webtools.util.dates :refer [parse-nap-date]]))
 
 (defn- -nils-to-string [row]
   (map (fn [cell]

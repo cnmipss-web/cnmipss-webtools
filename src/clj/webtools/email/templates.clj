@@ -1,13 +1,12 @@
 (ns webtools.email.templates
-  (:require [clojure.string :as cstr]
-            [clj-time.core :as time]
+  (:require [clj-time.core :as time]
+            [clojure.string :as cstr]
             [hiccup.core :refer [html]]
             [webtools.config :refer [env]]
             [webtools.exceptions :as w-ex]
             [webtools.models.procurement.core :refer :all]
-            [webtools.models.procurement.server :refer :all]
-            [webtools.util.dates :as util-dates]
-            [webtools.util :as util])) 
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates])) 
 
 (defn unsubscribe-option [email k]
   (let [routes {:procurement "https://cnmipss.org/webtoolspec/api/procurement-unsubscribe"}]

@@ -1,14 +1,6 @@
 (ns webtools.meals-registration.matching.algorithms
-  (:require [clojure.core.reducers :as r]
-            [clojure.string :as cstr]
-            [clj-fuzzy.metrics :as smetric]
-            [clj-fuzzy.phonetics :as sphon]
-            [clj-time.core :as time]
-            [clj-time.format :as tform]
-            [webtools.constants :as const]
-            [webtools.meals-registration.matching.random :refer [random-match]]
-            [webtools.meals-registration.matching.algorithms.fuzzy
-             :refer [apply-fuzzy-match-algorithm]]))
+  (:require [clj-time.core :as time]
+            [webtools.meals-registration.matching.algorithms.fuzzy :refer [apply-fuzzy-match-algorithm]]))
 
 (defn dob-match [fns-records nap-records]
   "Match solely by date of birth, ignoring all other fields"

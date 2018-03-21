@@ -1,8 +1,8 @@
 (ns webtools.cron.jobs
-  (:require [webtools.db.core :as db]
-            [webtools.models.procurement.core :as p]
+  (:require [clj-time.core :as t]
+            [webtools.db.core :as db]
             [webtools.email :as email]
-            [clj-time.core :as t]))
+            [webtools.models.procurement.core :as p]))
 
 (defn- -deadline-notifier
   [interval mailer]

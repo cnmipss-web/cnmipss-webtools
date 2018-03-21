@@ -22,6 +22,7 @@
    [webtools.test.constants :as c-t]
    [webtools.test.fixtures :as fixtures]
    [webtools.test.tools :refer [auth-req]]
+   [webtools.test.util :refer [count-calls args-from-call]]
    [webtools.util :refer :all]
    [webtools.wordpress-api :as wp]
    ))
@@ -354,10 +355,9 @@
             (is (= new-desc  description))))
 
         (testing "should notify subscribers of the updated rfp"
-          (is (= 1 (-> email/notify-subscribers calls count)))
-          (is (= :update (-> email/notify-subscribers calls first :args first)))
-          (is (= orig (-> email/notify-subscribers calls first :args second)))
-          (is (= (convert-pns-from-map rfp) (-> email/notify-subscribers calls first :args last))))))
+          (is (= 1 (count-calls email/notify-subscribers)))
+          (is (= [:update orig (convert-pns-from-map rfp)]
+                 (args-from-call email/notify-subscribers))))))
 
     (with-stub! [[email/notify-subscribers (constantly nil)]]
       (let [new-title "New Title for Invitation #2"

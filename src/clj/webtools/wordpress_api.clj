@@ -1,9 +1,8 @@
 (ns webtools.wordpress-api
-  (:require [webtools.constants :as const :refer [wp-media-route wp-token-route]]
-            [webtools.util :as util]
+  (:require [clj-http.client :as http]
             [clojure.tools.logging :as log]
-            [clj-http.client :as http]
             [webtools.config :refer [env]]
+            [webtools.constants :refer [wp-media-route wp-token-route]]
             [webtools.json :refer [json->edn]]))
 
 

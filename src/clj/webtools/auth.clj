@@ -1,7 +1,7 @@
 (ns webtools.auth
   (:require [clj-http.client :refer [post]]
             [clojure.string :refer [join]])
-  (:import [java.net URLEncoder]))
+  (:import (java.net URLEncoder)))
 
 (defn url-encode [s]
   (URLEncoder/encode s))

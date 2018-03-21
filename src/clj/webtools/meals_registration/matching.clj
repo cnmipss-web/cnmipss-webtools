@@ -1,7 +1,9 @@
 (ns webtools.meals-registration.matching
   (:require [clojure.spec.alpha :as s]
+            [webtools.meals-registration.core]
             [webtools.meals-registration.matching.random :refer [random-match]])
-  (:import [webtools.meals_registration.core FNSRegistration NAPRegistration]))
+  (:import (webtools.meals_registration.core FNSRegistration
+                                             NAPRegistration)))
 
 (defprotocol matching-registration
   (match-probability [source target] "Estimate the likelihood of a match between two registration records based on string distances and other parameters"))
