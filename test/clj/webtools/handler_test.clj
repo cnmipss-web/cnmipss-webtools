@@ -1,20 +1,8 @@
 (ns webtools.handler-test
   (:require [clojure.test :refer :all]
-            [clojure.data.json :as json]
-            [clojure.walk :as walk]
-            [clojure.java.io :refer [file]]
-            [clj-fuzzy.metrics :as measure]
             [ring.mock.request :as mock]
             [webtools.handler :refer :all]
-            [webtools.util :refer :all]
-            [webtools.json :refer :all]
-            [webtools.config :refer [env]]
-            [webtools.db.core :as db]
-            [webtools.test.constants :as c-t]
-            [webtools.test.fixtures :as fixtures]
-            [webtools.test.tools :refer [auth-req equal-props? not-equal-props?]]
-            [conman.core :refer [bind-connection] :as conman]
-            [mount.core :as mount]))
+            [webtools.test.fixtures :as fixtures]))
 
 
 (use-fixtures :once fixtures/prep-db)

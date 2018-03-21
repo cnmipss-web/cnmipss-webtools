@@ -1,21 +1,17 @@
 (ns webtools.email-test
-  (:require [clojure.test :refer :all]
-            [clojure.spec.alpha :as spec]
-            [webtools.email :as email :refer [notify-changes notify-deletion notify-addenda]]
+  (:require [bond.james :refer [calls with-stub!]]
+            [clj-time.core :as t]
+            [clojure.test :refer :all]
+            [postal.core :refer [send-message]]
+            [webtools.db.core :as db]
+            [webtools.email :as email :refer [notify-addenda
+                                              notify-deletion]]
             [webtools.email.templates :as etemp]
             [webtools.models.procurement.core :as p]
-            [webtools.db.core :as db]
-            [webtools.util :as util]
-            [webtools.util.dates :as util-dates]
-            [webtools.test.util :refer [count-calls args-from-call]]
             [webtools.test.fixtures :as fixtures]
-            [webtools.spec.internet]
-            [webtools.spec.subscription]
-            [bond.james :refer [calls with-spy with-stub!]]
-            [postal.core :refer [send-message]]
-            [clj-time.core :as t]
-            [clj-time.format :as f])
-  (:import [webtools.models.procurement.core PSAnnouncement]))
+            [webtools.test.util :refer [args-from-call count-calls]]
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]))
 
 (use-fixtures :once fixtures/prep-db fixtures/instrument)
 

@@ -1,12 +1,14 @@
 (ns webtools.meals-registration.matching.algorithms-test
-  (:require [clojure.test :refer :all]
-            [clojure.java.io :refer [file]]
-            [clj-time.core :as time]
+  (:require [clj-time.core :as time]
+            [clojure.test :refer :all]
+            [webtools.meals-registration.core]
             [webtools.meals-registration.matching.algorithms :as malgo]
-            [webtools.routes.upload.fns-nap :refer [fns-parse nap-parse]]
-            [webtools.test.fixtures :as fixtures]
-            [webtools.test.constants :as test-const])
-  (:import [webtools.meals_registration.core FNSRegistration NAPRegistration]))
+            [webtools.routes.upload.fns-nap :refer [fns-parse
+                                                    nap-parse]]
+            [webtools.test.constants :as test-const]
+            [webtools.test.fixtures :as fixtures])
+  (:import (webtools.meals_registration.core FNSRegistration
+                                             NAPRegistration)))
 
 (use-fixtures :once fixtures/instrument)
 

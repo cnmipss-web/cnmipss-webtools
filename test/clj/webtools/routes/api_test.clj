@@ -1,31 +1,19 @@
 (ns webtools.routes.api-test
-  (:require
-   [bond.james :refer [calls with-spy with-stub!]]
-   [clj-fuzzy.metrics :as measure]
-   [clojure.data.json :as json]
-   [clojure.java.io :refer [file]]
-   [clojure.spec.alpha :as spec]
-   [clojure.string :as cstr]
-   [clojure.test :refer :all]
-   [clojure.walk :as walk]
-   [conman.core :refer [bind-connection] :as conman]
-   [mount.core :as mount]
-   [ring.mock.request :as mock]
-   [webtools.config :refer [env]]
-   [webtools.db.core :as db]
-   [webtools.email :as email]
-   [webtools.handler :refer [app]]
-   [webtools.json :refer :all]
-   [webtools.models.procurement.core :refer :all]
-   [webtools.spec.fns-nap]
-   [webtools.spec.user]
-   [webtools.test.constants :as c-t]
-   [webtools.test.fixtures :as fixtures]
-   [webtools.test.tools :refer [auth-req]]
-   [webtools.test.util :refer [count-calls args-from-call]]
-   [webtools.util :refer :all]
-   [webtools.wordpress-api :as wp]
-   ))
+  (:require [bond.james :refer [calls with-stub!]]
+            [clojure.spec.alpha :as spec]
+            [clojure.string :as cstr]
+            [clojure.test :refer :all]
+            [ring.mock.request :as mock]
+            [webtools.db.core :as db]
+            [webtools.email :as email]
+            [webtools.handler :refer [app]]
+            [webtools.models.procurement.core :refer :all]
+            [webtools.test.fixtures :as fixtures]
+            [webtools.test.tools :refer [auth-req unauth-req]]
+            [webtools.test.util :refer [args-from-call count-calls]]
+            [webtools.util :as util]
+            [webtools.json :as json]
+            [webtools.wordpress-api :as wp]))
 
 (use-fixtures :once fixtures/prep-db fixtures/instrument)
 
@@ -51,13 +39,14 @@
      (let [auth?#         (:auth ~opts)
            auth-req-fn#   (fn [] (auth-req (:method ~opts) (:route ~opts)
                                    (assoc :body (:body ~opts))))
-           unauth-req-fn# (fn [] ((app) (mock/request (:method ~opts) (:route ~opts))))
+           unauth-req-fn# (fn [] (unauth-req (:method ~opts) (:route ~opts)
+                                   (assoc :body (:body ~opts))))
            response#      (if auth?#
                             (auth-req-fn#)
                             (unauth-req-fn#))]
        (binding [status  (:status response#)
                  headers (:headers response#)
-                 body    (json->edn (:body response#))]
+                 body    (json/json->edn (:body response#))]
          ~@assertions
          (if auth?#
            (testing "should reject unauthorized requests"
@@ -72,59 +61,50 @@
       (is (= 200 status))
       (is (= "application/json" (get headers "Content-Type")))
       (is (= 4 (count body)))
-      (is (every? #(and (string? (:cert_no %))
-                        (string? (:first_name %))
-                        (string? (:last_name %))
-                        (string? (:start_date %))
-                        (string? (:expiry_date %))) body)))))
+      (is (every? (partial spec/valid? :webtools.spec.certification/record) body)))))
 
 (deftest test-api-hro
-  (testing "GET /api/all-jvas"
-    (let [{:keys [status headers body] :as response} ((app) (mock/request :get "/api/all-jvas"))
-          edn-body (json->edn body)]
-      (testing "should return a list of all jvas stored in DB"
-        (is (= 200 status))
-        (is (= "application/json" (get headers "Content-Type")))
-        (is (= 3 (count edn-body)))
-        (is (every? #(and (string? (:file_link %))
-                          (string? (:announce_no %))
-                          (string? (:position %))
-                          (string? (:open_date %))
-                          (string? (:location %))) edn-body))))))
+  (testing-route {:route "/api/all-jvas"
+                  :method :get}
+    (testing "should return a list of all jvas stored in DB"
+      (is (= 200 status))
+      (is (= "application/json" (get headers "Content-Type")))
+      (is (= 3 (count body)))
+      (is (every? (partial spec/valid? :webtools.spec.jva/record) body)))))
 
 (deftest test-api-p&s
 
-  (testing "GET /api/all-procurement"
-    (let [{:keys [status headers body] :as response} ((app) (mock/request :get "/api/all-procurement"))
-          {:keys [pnsa subscriptions addenda] :as edn-body} (json->edn body)]
+  (testing-route {:route "/api/all-procurement"
+                  :method :get}
+    (let [{:keys [pnsa subscriptions addenda]} body]
       (testing "should return a map of all lists of rfps, ifbs, addenda, and subscriptions from DB"
         (is (= 200 status))
         (is (= "application/json" (get headers "Content-Type")))
-        (is (= clojure.lang.PersistentArrayMap (type edn-body)))
+        (is (= clojure.lang.PersistentArrayMap (type body)))
 
         (is (= 6 (count pnsa)))
-        (is (every? #(spec/valid? :webtools.spec.procurement/record %) (map convert-pns-from-map pnsa)))
+        (is (every? (partial spec/valid? :webtools.spec.procurement/record)
+                    (map convert-pns-from-map pnsa)))
 
         (is (= 3 (count addenda)))
-        (is (every? #(and (-> % :file_link string?)
-                          (-> % :addendum_number int?)
-                          (-> % :proc_id some?)) addenda))
+        (is (every? (partial spec/valid? :webtools.spec.procurement-addendum/record) addenda))
 
         (is (= 4 (count subscriptions)))
-        (is (every? #(spec/valid? :webtools.spec.subscription/record %) (map convert-sub-from-map subscriptions))))))
+        (is (every? (partial spec/valid? :webtools.spec.subscription/record)
+                    (map convert-sub-from-map subscriptions))))))
 
-  (testing "POST /api/subscribe-procurement"
-    (with-stub! [[email/confirm-subscription (constantly nil)]
-                 [email/notify-procurement (constantly nil)]]
-      (testing "should handle subscriptions to rfps"
-        (let [subscriber {:company "Test Centers of America"
-                          :person "TV's Adam West"
-                          :email "iambatman@gotham.tv"
-                          :tel "+1 (670) 555-6666"
-                          :proc_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
-              {:keys [status headers body] :as response}
-              ((app) (-> (mock/request :post "/api/subscribe-procurement")
-                         (assoc :body (edn->json subscriber))))]
+  (with-stub! [[email/confirm-subscription (constantly nil)]
+               [email/notify-procurement (constantly nil)]]
+    (let [rfp-id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
+          ifb-id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")
+          subscriber{:company "Test Centers of America"
+                     :person "TV's Adam West"
+                     :email "iambatman@gotham.tv"
+                     :tel "+1 (670) 555-6666"}]
+      (testing-route {:route "/api/subscribe-procurement"
+                      :method :post
+                      :body (assoc subscriber :proc_id rfp-id)}
+        (testing "should handle subscriptions to rfps"
           (testing "should return status 200"
             (is (= 200 status)))
           
@@ -132,55 +112,44 @@
             (is (= "application/json" (get headers "Content-Type"))))
           
           (testing "should add subscription to the DB"
-            (let [subscriptions
-                  (db/get-subscriptions {:proc_id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")})]
+            (let [subscriptions (get-subs-from-db rfp-id)]
               (is (= 4 (count subscriptions)))
               (is (= "Test Centers of America" (-> subscriptions last :company_name)))
               (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
-              (is (= 16705556666 (-> subscriptions last :telephone)))))
+              (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
 
           (testing "should send confirmation email to subscriber"
-            (is (= 1 (-> email/confirm-subscription calls count)))
-            (is (= 2 (-> email/confirm-subscription calls first :args count)))
-            (let [contact (-> email/confirm-subscription calls first :args first)]
+            (is (= 1 (count-calls email/confirm-subscription)))
+            (is (= 2 (count (args-from-call email/confirm-subscription))))
+            (let [contact (first (args-from-call email/confirm-subscription))]
               (is (= (:company subscriber) (:company_name contact)))
               (is (= (:person subscriber) (:contact_person contact)))
-              (is (= (:email subscriber) (:email contact)))))))
-      
-      (testing "should handle subscriptions to ifbs"
-        (let [subscriber {:company "Test Centers of America"
-                          :person "TV's Adam West"
-                          :email "iambatman@gotham.tv"
-                          :tel "+1 (670) 555-6666"
-                          :rfp_id "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3"}
-              {:keys [status headers body] :as response}
-              ((app) (-> (mock/request :post "/api/subscribe-procurement")
-                         (assoc :body (edn->json {:company "Test Centers of America"
-                                                  :person "TV's Adam West"
-                                                  :email "iambatman@gotham.tv"
-                                                  :tel "+1 (670) 555-6666"
-                                                  :proc_id "cf82deed-c84f-446c-a3f0-0d826428ddbd"}))))]
-          (testing "should return status 200"
-            (is (= 200 status)))
-          
-          (testing "should return JSON"
-            (is (= "application/json" (get headers "Content-Type"))))
-          
-          (testing "should add subscription to the DB"
-            (let [subscriptions
-                  (db/get-subscriptions {:proc_id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
-              (is (= 2 (count subscriptions)))
-              (is (= "Test Centers of America" (-> subscriptions last :company_name)))
-              (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
-              (is (= 16705556666 (-> subscriptions last :telephone)))))
+              (is (= (:email subscriber) (:email contact))))))
 
-          (testing "should send confirmation email to subscriber"
-            (is (= 2 (-> email/confirm-subscription calls count)))
-            (is (= 2 (-> email/confirm-subscription calls first :args count)))
-            (let [contact (-> email/confirm-subscription calls first :args first)]
-              (is (= (:company subscriber) (:company_name contact)))
-              (is (= (:person subscriber) (:contact_person contact)))
-              (is (= (:email subscriber) (:email contact))))))))))
+        (testing-route {:route "/api/subscribe-procurement"
+                        :method :post
+                        :body (assoc subscriber :proc_id ifb-id)}
+          (testing "should handle subscriptions to ifbs"
+            (testing "should return status 200"
+              (is (= 200 status)))
+            
+            (testing "should return JSON"
+              (is (= "application/json" (get headers "Content-Type"))))
+            
+            (testing "should add subscription to the DB"
+              (let [subscriptions (get-subs-from-db ifb-id)]
+                (is (= 2 (count subscriptions)))
+                (is (= "Test Centers of America" (-> subscriptions last :company_name)))
+                (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
+                (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
+
+            (testing "should send confirmation email to subscriber"
+              (is (= 2 (count-calls email/confirm-subscription)))
+              (is (= 2 (count (args-from-call email/confirm-subscription))))
+              (let [contact (first (args-from-call email/confirm-subscription))]
+                (is (= (:company subscriber) (:company_name contact)))
+                (is (= (:person subscriber) (:contact_person contact)))
+                (is (= (:email subscriber) (:email contact)))))))))))
 
 (deftest test-api-authentication
   (testing "POST /api/verify-token"
@@ -219,7 +188,7 @@
                   :method :get
                   :auth   true}
     (testing "should set client cookies with new max-age"
-      (let [cookies (map cookie->map (get headers "Set-Cookie"))]
+      (let [cookies (map util/cookie->map (get headers "Set-Cookie"))]
         (is (every? #(= "900" (get % "Max-Age")) cookies)))))
   
   (testing-route {:route  "/api/user"

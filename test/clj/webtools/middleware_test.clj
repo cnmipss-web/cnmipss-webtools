@@ -1,11 +1,11 @@
 (ns webtools.middleware-test
-  (:require [webtools.middleware :as middleware]
-            [webtools.test.fixtures :as fixtures]
-            [webtools.test.constants :as c-t]
-            [webtools.layout :refer [error-page]]
+  (:require [bond.james :refer [calls with-spy]]
             [clojure.test :refer :all]
-            [bond.james :refer [with-spy calls]]
-            [ring.mock.request :as mock]))
+            [ring.mock.request :as mock]
+            [webtools.layout :refer [error-page]]
+            [webtools.middleware :as middleware]
+            [webtools.test.constants :as c-t]
+            [webtools.test.fixtures :as fixtures]))
 
 
 (def handler identity)

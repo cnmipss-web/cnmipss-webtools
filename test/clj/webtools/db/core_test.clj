@@ -1,13 +1,9 @@
 (ns webtools.db.core-test
-  (:require [webtools.config :refer [env]]
+  (:require [clojure.test :refer :all]
             [webtools.db.core :as db]
             [webtools.models.procurement.core :refer [make-uuid]]
             [webtools.test.constants :as const]
-            [webtools.test.fixtures :as fixtures]
-            [clojure.test :refer :all]
-            [conman.core :refer [bind-connection] :as conman]
-            [clojure.java.jdbc :as sql]
-            [mount.core :as mount]))
+            [webtools.test.fixtures :as fixtures]))
 
 (deftest test-initial-seed
   (testing "database seeded correctly"

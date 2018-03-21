@@ -1,7 +1,6 @@
 (ns webtools.routes.upload.fns-nap-test
-  (:require [clojure.test :refer :all]
-            [clojure.java.io :refer [file]]
-            [clojure.spec.alpha :as spec]
+  (:require [clojure.spec.alpha :as spec]
+            [clojure.test :refer :all]
             [webtools.routes.upload.fns-nap :as fns-nap]
             [webtools.test.constants :as test-const]
             [webtools.test.fixtures :as fixtures]))

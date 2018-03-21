@@ -1,13 +1,12 @@
 (ns webtools.wordpress-api-test
-  (:require [webtools.wordpress-api :refer [wp-auth-token] :as wp]
-            [webtools.config :refer [env]]
-            [webtools.test.fixtures :as fixtures]
-            [webtools.constants :refer [wp-token-route wp-media-route]]
-            [webtools.test.constants :as c-t]
-            [webtools.json :refer :all]
-            [clojure.test :refer :all]
+  (:require [bond.james :refer [calls with-stub! with-stub-ns]]
             [clj-http.client :as http]
-            [bond.james :refer [calls with-spy with-stub! with-stub-ns]]))
+            [clojure.test :refer :all]
+            [webtools.config :refer [env]]
+            [webtools.constants :refer [wp-media-route wp-token-route]]
+            [webtools.json :refer :all]
+            [webtools.test.fixtures :as fixtures]
+            [webtools.wordpress-api :as wp]))
 
 (use-fixtures :once fixtures/prep-db)
 

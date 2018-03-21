@@ -1,13 +1,13 @@
 (ns webtools.cron.jobs-test
-  (:require [clojure.test :refer :all]
+  (:require [bond.james :refer [calls with-spy with-stub]]
             [clj-time.core :as t]
+            [clojure.test :refer :all]
             [webtools.cron.jobs :as jobs]
-            [webtools.email :as email]
             [webtools.db.core :as db]
-            [webtools.test.fixtures :as fixtures]
-            [webtools.test.util :refer [count-calls args-from-call]]
+            [webtools.email :as email]
             [webtools.models.procurement.core :as p]
-            [bond.james :refer [calls with-spy with-stub with-stub!]]))
+            [webtools.test.fixtures :as fixtures]
+            [webtools.test.util :refer [args-from-call count-calls]]))
 
 (use-fixtures :once fixtures/prep-db)
 (use-fixtures :each fixtures/with-rollback)
