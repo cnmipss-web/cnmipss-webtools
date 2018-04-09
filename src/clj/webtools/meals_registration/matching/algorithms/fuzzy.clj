@@ -1,7 +1,7 @@
 (ns webtools.meals-registration.matching.algorithms.fuzzy
   "Implementation of fuzzy string matching algorithm for matching FNS 
   Registrations with NAP Registrations.  Uses clojure.core.reducers to
-  multithread the matching process."
+  multi-thread the matching process."
   (:require [clj-fuzzy.metrics :as smetric]
             [clj-fuzzy.phonetics :as sphon]
             [clj-time.core :as time]
@@ -14,7 +14,7 @@
 
 ;; Define match thresholds for Jaro-Winkler matching
 (def ^:private jw-threshold-high 0.93)
-(def ^:private jw-threshold-low  0.83)
+(def ^:private jw-threshold-low 0.83)
 
 ;; Private methods
 (defn- -clean-name [name]
@@ -63,19 +63,19 @@
                            fns-nap (tform/unparse const/numeric-date-formatter (:dob nap))
                            edit-dist (smetric/levenshtein fns-dob fns-nap)]
                        (<= edit-dist 2))]
-    {:fns fns
-     :nap nap
-     ::low-dob-dist? low-dob-dist
-     ::jw-eth-match? (and (< jw-threshold-low jw-full)
-                          eth-match)
-     ::jw-sep-names? (and (< jw-threshold-high
-                             jw-first)
-                          (< jw-threshold-high
-                             jw-last))
+    {:fns             fns
+     :nap             nap
+     ::low-dob-dist?  low-dob-dist
+     ::jw-eth-match?  (and (< jw-threshold-low jw-full)
+                           eth-match)
+     ::jw-sep-names?  (and (< jw-threshold-high
+                              jw-first)
+                           (< jw-threshold-high
+                              jw-last))
      ::mra-eth-match? (and (:match mra-first)
                            (:match mra-last)
                            eth-match)
-     ::jw jw-full}))
+     ::jw             jw-full}))
 
 (defn- -fuzzy-match? [{::keys [jw-eth-match? mra-eth-match? jw-sep-names? low-dob-dist?]}]
   "Takes the result of -fuzzy-match-data as input.
@@ -90,7 +90,7 @@
 (defn- -select-best-jw
   "Reducing function applied to a sequence of -fuzzy-match-data results.
   Returns the element with the highest Jaro-Winkler value."
-  ([]     {::jw 0})
+  ([] {::jw 0})
   ([& xs] (apply max-key ::jw xs)))
 
 (defn- -bin-fn [key-fn]
@@ -113,13 +113,13 @@
   Where either source map has no value for a given key in the other map, nil should
   be used."
   (let [fns-converted (reduce (fn [m [k v]]
-                                  (assoc m k {::fns-coll v}))
-                                {}
-                                binned-fns)
+                                (assoc m k {::fns-coll v}))
+                              {}
+                              binned-fns)
         nap-converted (reduce (fn [m [k v]]
-                                  (assoc m k {::nap-coll v}))
-                                {}
-                                binned-nap)]
+                                (assoc m k {::nap-coll v}))
+                              {}
+                              binned-nap)]
     (merge-with into fns-converted nap-converted)))
 
 (defn- -bin-by-dob [records]
@@ -134,31 +134,30 @@
 
 ;; Public Method
 (defn apply-fuzzy-match-algorithm [fns-records nap-records]
-  "Attempt to match records from FNS and NAP registrations using a combination of fuzzy string metrics, DOB matching, and ethnicity matching.  O(f * n)"
-  (let [fns-set (set fns-records)
-        nap-set (set nap-records)
-        total-fns (count fns-set)
-        total-nap (count nap-set)
-        fns-by-date (-bin-by-dob fns-set)
-        nap-by-date (-bin-by-dob nap-set)
+  "Attempt to match records from FNS and NAP registrations using a combination
+  of fuzzy string metrics, DOB matching, and ethnicity matching.  O(f * n)"
+  (let [fns-set                  (set fns-records)
+        nap-set                  (set nap-records)
+        fns-by-date              (-bin-by-dob fns-set)
+        nap-by-date              (-bin-by-dob nap-set)
         combined-records-by-date (-merge-binned fns-by-date nap-by-date)
-        matched-fns (atom [])
-        unmatched-fns (atom fns-set)
-        unmatched-nap (atom nap-set)
+        matched-fns              (atom [])
+        unmatched-fns            (atom fns-set)
+        unmatched-nap            (atom nap-set)
 
-        compare-fns-to-nap-coll  (fn compare-fns-to-nap [nap-coll fns]
-                                   (let [match (->> (r/map (partial -fuzzy-match-data fns) nap-coll)
-                                                    (r/filter -fuzzy-match?)
-                                                    (r/fold -select-best-jw))]
-                                     (when (< 0 (::jw match))
-                                       (swap! matched-fns conj match)
-                                       (swap! unmatched-fns disj (:fns match))
-                                       (swap! unmatched-nap disj (:nap match)))))
+        compare-fns-to-nap-coll (fn compare-fns-to-nap [nap-coll fns]
+                                  (let [match (->> (r/map (partial -fuzzy-match-data fns) nap-coll)
+                                                   (r/filter -fuzzy-match?)
+                                                   (r/fold -select-best-jw))]
+                                    (when (< 0 (::jw match))
+                                      (swap! matched-fns conj match)
+                                      (swap! unmatched-fns disj (:fns match))
+                                      (swap! unmatched-nap disj (:nap match)))))
 
         match-binned-records (fn match-binned-records [dob {::keys [fns-coll nap-coll]}]
                                (r/foldcat (r/map
-                                           (partial compare-fns-to-nap-coll nap-coll)
-                                           fns-coll)))
+                                            (partial compare-fns-to-nap-coll nap-coll)
+                                            fns-coll)))
 
         run-matching-algo (fn [records] (r/foldcat (r/map match-binned-records records)))]
 
@@ -169,8 +168,9 @@
           combined-records-by-mra (-merge-binned fns-by-mra nap-by-mra)]
 
       (run-matching-algo combined-records-by-mra))
-      
+
     (vector @matched-fns (seq @unmatched-fns) (seq @unmatched-nap))))
+()
 
 (spec/def
   ::fns-records
