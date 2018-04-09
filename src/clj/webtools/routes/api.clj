@@ -1,13 +1,14 @@
 (ns webtools.routes.api
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
+            [clojure.string :as cstr]
             [compojure.core :refer [GET POST defroutes]]
             [ring.util.http-response :as resp]
             [webtools.config :refer [env]]
-            [webtools.constants :refer [max-cookie-age]]
+            [webtools.constants :as const]
             [webtools.db.core :as db]
             [webtools.email :as email]
-            [webtools.json :refer :all]
+            [webtools.json :as json]
             [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :refer :all]
             [webtools.wordpress-api :as wp]
@@ -18,7 +19,7 @@
 (defn json-response
   "Pass a JSON body to supplied ring response fn"
   [ring-response body]
-  (-> (edn->json body)
+  (-> (json/edn->json body)
       ring-response
       (resp/header "Content-Type" "application/json")))
 
@@ -37,6 +38,7 @@
       ~@body
       (json-response resp/ok (~q))
       (catch Exception e#
+        (future (email/alert-error e#))
         (log/error e#)
         (json-response resp/internal-server-error (.getMessage e#))))))
 
@@ -77,44 +79,47 @@
   (GET "/api/all-procurement" [] (query-route get-all-procurement))
 
   (POST "/api/subscribe-procurement" {:keys [body] :as request}
-        (let [{:keys [company person email tel proc_id]} body
-              pid (p/make-uuid proc_id)
-              existing-subs (p/get-subs-from-db pid)
-              subscription {:id (java.util.UUID/randomUUID)
-                            :proc_id pid
-                            :company_name company
-                            :contact_person person
-                            :email email
-                            :telephone (read-string (clojure.string/replace tel #"\D" ""))
-                            :subscription_number (count existing-subs)}]
+        (let [{:keys [company
+                      person
+                      email
+                      tel
+                      proc_id]} (json/json->edn body)
+              pid               (p/make-uuid proc_id)
+              existing-subs     (p/get-subs-from-db pid)
+              subscription      {:id                  (java.util.UUID/randomUUID)
+                                 :proc_id             pid
+                                 :company_name        company
+                                 :contact_person      person
+                                 :email               email
+                                 :telephone           (read-string (cstr/replace tel #"\D" ""))
+                                 :subscription_number (count existing-subs)}]
           (try
             (let [created (db/create-subscription! subscription)
-                  pns (get-pns-from-db pid)]
+                  pns     (get-pns-from-db pid)]
               (future (email/confirm-subscription subscription pns))
-              (future (email/notify-procurement subscription pns))
+              (future (email/notify-procurement   subscription pns))
               (json-response resp/ok created))
             
             (catch java.sql.BatchUpdateException ex
-              (if-let [not-unique (->> (.getMessage ex)
-                                       (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\""))]
-                (let [wrapped-ex (w-ex/sql-duplicate-key
-                                  {:msg (:duplicate error-msg)
-                                   :cause ex
-                                   :data {:call `(POST "/api/subscribe-procurement" ~(pr-str request))}})]
-                  (json-response resp/internal-server-error {:message (.getMessage wrapped-ex)
-                                                             :ex-data (ex-data wrapped-ex)}))
-                (let [wrapped-ex (w-ex/sql-duplicate-key
-                                  {:msg (:other-sql error-msg)
-                                   :cause ex
-                                   :data {:call `(POST "/api/subscribe-procurement" ~request)}})]
-                  (json-response resp/internal-server-error {:message (str (.getMessage wrapped-ex)
-                                                                           " "
-                                                                           (.getMessage ex))
-                                                             :ex-data (ex-data wrapped-ex)}))))
+              (log/error ex)
+              (let [wrapped-ex (w-ex/sql-duplicate-key
+                                {:msg   (if (re-find const/duplicate-sub-re (.getMessage ex))
+                                          (:duplicate error-msg)
+                                          (str (str (:other-sql error-msg)
+                                                    " "
+                                                    (.getMessage ex))))
+                                 :cause ex
+                                 :data  {:call `(POST "/api/subscribe-procurement"
+                                                      ~(pr-str request))}})]
+                (json-response resp/internal-server-error
+                               {:message (.getMessage wrapped-ex) 
+                                :ex-data (ex-data wrapped-ex)})))
+            
             (catch Exception ex
-              (let [wrapped-ex (w-ex/wrap-ex
-                                ex 
-                                {:call `(POST "/api/subscribe-procurement" ~request)})]
+              (future (email/alert-error ex))
+              (log/error ex)
+              (let [wrapped-ex (w-ex/wrap-ex ex 
+                                             {:call `(POST "/api/subscribe-procurement" ~request)})]
                 (json-response resp/internal-server-error {:message (str (.getMessage wrapped-ex)
                                                                          " "
                                                                          (.getMessage ex))
@@ -127,18 +132,20 @@
                (resp/set-cookie "wt-success" "true" {:max-age 60 :path "/unsubscribed"})
                (resp/set-cookie "wt-data" (pr-str result) {:max-age 60 :path "/unsubscribed"})))
          (catch Exception ex
+           (future (email/alert-error ex))
+           (log/error ex)
            (let [wrapped-ex (w-ex/wrap-ex ex {})]
-             (json-response resp/internal-server-error {:message (.getMessage ex)
+             (json-response resp/internal-server-error {:message   (.getMessage ex)
                                                         :exception ex})))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
-          (let [email (get-in request [:cookies "wt-email" :value])
-                user-email (keyed [email])
+          (let [email         (get-in request [:cookies "wt-email" :value])
+                user-email    (keyed [email])
                 correct-token ((db/get-user-token user-email) :token)
-                user (-> (db/get-user-info user-email)
-                         (dissoc :id))
-                is-admin ((db/is-user-admin? user-email) :admin)]
+                user          (-> (db/get-user-info user-email)
+                                  (dissoc :id))
+                is-admin      ((db/is-user-admin? user-email) :admin)]
             (if (= token correct-token)
               (json-response resp/ok (keyed [user is-admin]))
               (json-response resp/forbidden (keyed [user is-admin]))))
@@ -151,9 +158,9 @@
 
 (defroutes api-routes-with-auth
   (GET "/api/refresh-session" request
-       (let [wt-token (get-in request [:cookies "wt-token" :value])
-             wt-email (get-in request [:cookies "wt-email" :value])
-             cookie-opts {:http-only true :max-age max-cookie-age :path "/webtools"}]
+       (let [wt-token    (get-in request [:cookies "wt-token" :value])
+             wt-email    (get-in request [:cookies "wt-email" :value])
+             cookie-opts {:http-only true :max-age const/max-cookie-age :path "/webtools"}]
          (log/info "Refreshing session for: " wt-email)
          (-> (resp/ok)
              (resp/set-cookie "wt-token" wt-token cookie-opts)
@@ -170,10 +177,11 @@
   (GET "/api/all-users" [] (query-route db/get-all-users))
   
   (POST "/api/create-user" request
-        (let [{:keys [email roles]} (request :body)
-              admin (-> (get-in request [:body :admin]) truthy)
-              id (java.util.UUID/randomUUID)
-              user (keyed [email admin roles id])]
+        (let [{:keys  [email roles]
+               admin? :admin} (json/json->edn (request :body))
+              admin           (truthy admin?)
+              id              (java.util.UUID/randomUUID)
+              user            (keyed [email admin roles id])]
           (log/info "Created User: " user)
           (query-route db/get-all-users
                        (db/create-user! user)
@@ -214,7 +222,7 @@
                      (db/delete-jva! body)))
 
   (POST "/api/update-procurement" {:keys [body]}
-        (let [new (convert-pns-from-map body)
+        (let [new  (convert-pns-from-map body)
               orig (get-pns-from-db (:id new))]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :update orig new))
@@ -236,7 +244,7 @@
 
   (POST "/api/delete-fns-nap" request
         (let [{record :body} request
-              sub-str (fn substring [s] (subs s (count "/webtools/download/")))]
+              sub-str        (fn substring [s] (subs s (count "/webtools/download/")))]
           (query-route db/get-all-fns-nap
                        (db/delete-fns-nap! record)
                        (io/delete-file (sub-str (:fns_file_link record)))

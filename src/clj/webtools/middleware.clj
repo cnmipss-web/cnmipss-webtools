@@ -91,9 +91,9 @@
       (wrap-json-body {:keywords? true})
       wrap-webjars
       (wrap-defaults
-        (-> site-defaults
-            (assoc-in [:security :anti-forgery] false)
-            (dissoc :session)))
+       (-> site-defaults
+           (assoc-in [:security :anti-forgery] false)
+           (dissoc :session)))
       wrap-cookies 
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only false}})

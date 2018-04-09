@@ -103,7 +103,7 @@
                      :tel "+1 (670) 555-6666"}]
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
-                      :body (assoc subscriber :proc_id rfp-id)}
+                      :body (json/edn->json (assoc subscriber :proc_id rfp-id))}
         (testing "should handle subscriptions to rfps"
           (testing "should return status 200"
             (is (= 200 status)))
@@ -128,7 +128,7 @@
 
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
-                      :body (assoc subscriber :proc_id rfp-id)}
+                      :body (json/edn->json (assoc subscriber :proc_id rfp-id))}
         (testing "should only allow a single subscription per subscriber"
           (testing "should return status 500"
             (is (= 500 status))
@@ -146,7 +146,7 @@
                      :tel "+1 (670) 555-6666"}]
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
-                      :body (assoc subscriber :proc_id ifb-id)}
+                      :body (json/edn->json (assoc subscriber :proc_id ifb-id))}
         (testing "should handle subscriptions to ifbs"
           (testing "should return status 200"
             (is (= 200 status)))
@@ -170,7 +170,7 @@
               (is (= (:email subscriber) (:email contact)))))))
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
-                      :body (assoc subscriber :proc_id ifb-id)}
+                      :body (json/edn->json (assoc subscriber :proc_id ifb-id))}
         (testing "should only allow a single subscription per subscriber"
           (testing "should return status 500"
             (is (= 500 status))
@@ -255,9 +255,9 @@
     (testing-route {:route  "/api/create-user"
                     :method :post
                     :auth   true
-                    :body   {:email "test@test.com"
-                             :admin "true"
-                             :roles "Testing"}}
+                    :body   (json/edn->json {:email "test@test.com"
+                                             :admin "true"
+                                             :roles "Testing"})}
       (testing "should return status 200"
         (is (= 200 status)))
       

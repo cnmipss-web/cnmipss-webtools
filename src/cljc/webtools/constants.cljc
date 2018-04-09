@@ -44,3 +44,5 @@
                                 "TI" "Thai"
                                 "TR" "Chuukese"
                                 "YA" "Yapese"})
+
+(def duplicate-sub-re #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\"")
