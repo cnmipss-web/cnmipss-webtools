@@ -10,7 +10,8 @@
             [webtools.json :refer :all]
             [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :refer :all]
-            [webtools.wordpress-api :as wp]))
+            [webtools.wordpress-api :as wp]
+            [webtools.exceptions :as w-ex]))
 
 (def truthy (comp some? #{"true" true}))
 
@@ -64,9 +65,9 @@
       (mapv (comp wp/delete-media :id) addenda)
       (db/delete-pnsa! body))))
 
-(def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address.  "
-                :other-sql "Error performing SQL transaction.  "
-                :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance. "})
+(def error-msg {:duplicate "Duplicate subscription.  You have already subscribed to this announcement with that email address."
+                :other-sql "Error performing SQL transaction."
+                :unknown "Unknown error.  Please contact webmaster@cnmipss.org for assistance."})
 
 (defroutes api-routes
   (GET "/api/all-certs" [] (query-route db/get-all-certs))
@@ -92,16 +93,43 @@
               (future (email/confirm-subscription subscription pns))
               (future (email/notify-procurement subscription pns))
               (json-response resp/ok created))
+            
+            (catch java.sql.BatchUpdateException ex
+              (if-let [not-unique (->> (.getMessage ex)
+                                       (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\""))]
+                (let [wrapped-ex (w-ex/sql-duplicate-key
+                                  {:msg (:duplicate error-msg)
+                                   :cause ex
+                                   :data {:call `(POST "/api/subscribe-procurement" ~(pr-str request))}})]
+                  (json-response resp/internal-server-error {:message (.getMessage wrapped-ex)
+                                                             :ex-data (ex-data wrapped-ex)}))
+                (let [wrapped-ex (w-ex/sql-duplicate-key
+                                  {:msg (:other-sql error-msg)
+                                   :cause ex
+                                   :data {:call `(POST "/api/subscribe-procurement" ~request)}})]
+                  (json-response resp/internal-server-error {:message (str (.getMessage wrapped-ex)
+                                                                           " "
+                                                                           (.getMessage ex))
+                                                             :ex-data (ex-data wrapped-ex)}))))
+            (catch Exception ex
+              (let [wrapped-ex (w-ex/wrap-ex
+                                ex 
+                                {:call `(POST "/api/subscribe-procurement" ~request)})]
+                (json-response resp/internal-server-error {:message (str (.getMessage wrapped-ex)
+                                                                         " "
+                                                                         (.getMessage ex))
+                                                           :ex-data (ex-data wrapped-ex)}))))))
 
-            (catch java.sql.BatchUpdateException e
-              (if-let [not-unique (->> e .getMessage (re-find #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\""))]
-                (json-response resp/internal-server-error {:message (:duplicate error-msg)})
-                (json-response resp/internal-server-error {:message (str (:other-sql error-msg)
-                                                                         (.getMessage e))})))
-
-            (catch Exception e
-              (json-response resp/internal-server-error {:message (str (:unknown error-msg)
-                                                                       (.getMessage e))})))))
+  (GET "/api/unsubscribe-procurement/:id" [id :as request]
+       (try
+         (let [result (db/deactivate-subscription {:id (make-uuid id)})]
+           (-> (resp/found "/unsubscribed")
+               (resp/set-cookie "wt-success" "true" {:max-age 60 :path "/unsubscribed"})
+               (resp/set-cookie "wt-data" (pr-str result) {:max-age 60 :path "/unsubscribed"})))
+         (catch Exception ex
+           (let [wrapped-ex (w-ex/wrap-ex ex {})]
+             (json-response resp/internal-server-error {:message (.getMessage ex)
+                                                        :exception ex})))))
   
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]

@@ -6,17 +6,19 @@
             [webtools.exceptions :as w-ex]
             [webtools.models.procurement.core :refer :all]
             [webtools.util :as util]
-            [webtools.util.dates :as util-dates])) 
+            [webtools.util.dates :as util-dates]
+            [webtools.db.core :as db])) 
 
-(defn unsubscribe-option [email k]
-  (let [routes {:procurement "https://cnmipss.org/webtoolspec/api/procurement-unsubscribe"}]
+(defn unsubscribe-option [id k]
+  (let [routes {:procurement (str "https://cnmipss.org/webtools/api/unsubscribe-procurement/"
+                                  id)}]
     (if (some? (get routes k))
       [:div
        [:a {:href (get routes k)} "Unsubscribe"]]
       (throw (w-ex/illegal-argument
               {:cause (IllegalArgumentException.
                        (str "No such link in webtools.email/unsubscribe-option for key " k))
-               :data {:call [#'unsubscribe-option email k]
+               :data {:call `(unsubscribe-option ~id ~k)
                       :valid-options routes}})))))
 
 (defn invitation [{:keys [email roles admin] :as user}]
@@ -57,7 +59,7 @@
         [:a {:href "mailto:tyler.collins@cnmipss.org"}
          "tyler.collins@cnmipss.org"]]]])))
 
-(defn confirm-subscription [{:keys [email contact_person company_name] :as subscription} pns]
+(defn confirm-subscription [{:keys [id contact_person company_name] :as subscription} pns]
   (html
    [:html
     [:body
@@ -73,15 +75,16 @@
      [:p "Kimo Rosario"]
      [:p "Procurement & Supply Officer"]
      [:p "CNMI PSS"]
-     (unsubscribe-option email :procurement)]]))
+     (unsubscribe-option id :procurement)]]))
 
 (defn notify-changes [new orig {email :email
+                                id :id
                                 :as sub}]
   (html [:html
          (conj (changes-email orig new sub)
-               (unsubscribe-option email :procurement))]))
+               (unsubscribe-option id :procurement))]))
 
-(defn notify-deletion [pns {:keys [email contact_person] :as sub}]
+(defn notify-deletion [pns {:keys [id contact_person] :as sub}]
   (html
    [:html
     [:body
@@ -96,9 +99,9 @@
      [:p "Kimo Rosario"]
      [:p "Procurement & Supply Officer"]
      [:p "CNMI PSS"]
-     (unsubscribe-option email :procurement)]]))
+     (unsubscribe-option id :procurement)]]))
 
-(defn notify-addenda [addendum pns {:keys [email contact_person]}]
+(defn notify-addenda [addendum pns {:keys [id contact_person]}]
   (let [title (title-string pns)]
     (html
      [:html
@@ -116,49 +119,51 @@
        [:p "Kimo Rosario"]
        [:p "Procurement & Supply Officer"]
        [:p "CNMI PSS"]
-       (unsubscribe-option email :procurement)]])))
+       (unsubscribe-option id :procurement)]])))
 
 (defn warning-24hr [pns contact email]
-  (html
-   [:html
-    [:body
-     [:p (str "Greetings " contact ",")]
-     [:p (str "We would like to notify you that all submissions for "
-              (-> pns :type name cstr/upper-case) "# "
-              (:number pns)
-              " " (:title pns)
-              " must be turned in to the PSS Procurement office no later than "
-              (util-dates/print-date-at-time (:close_date pns)))]
-     [:p "Any submissions turned in after that time will not be considered."]
-     [:br]
-     [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-     [:br]
-     [:p "Thank you,"]
-     [:p "Kimo Rosario"]
-     [:p "Procurement & Supply Officer"]
-     [:p "CNMI PSS"]
-     (unsubscribe-option email :procurement)]]))
+  (let [db-sub (first (db/get-users-subscription {:email email :proc_id (:id pns)}))]
+    (html
+     [:html
+      [:body
+       [:p (str "Greetings " contact ",")]
+       [:p (str "We would like to notify you that all submissions for "
+                (-> pns :type name cstr/upper-case) "# "
+                (:number pns)
+                " " (:title pns)
+                " must be turned in to the PSS Procurement office no later than "
+                (util-dates/print-date-at-time (:close_date pns)))]
+       [:p "Any submissions turned in after that time will not be considered."]
+       [:br]
+       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+       [:br]
+       [:p "Thank you,"]
+       [:p "Kimo Rosario"]
+       [:p "Procurement & Supply Officer"]
+       [:p "CNMI PSS"]
+       (unsubscribe-option (:id db-sub) :procurement)]])))
 
 (defn notify-closed [pns contact email]
-  (html
-   [:html
-    [:body
-     [:p (str "Greetings " contact ",")]
-     [:p (str "We would like to notify you that the deadline to submit a response for "
-              (-> pns :type name cstr/upper-case) "# "
-              (:number pns)
-              " " (:title pns)
-              " has passed as of "
-              (util-dates/print-date-at-time (:close_date pns))
-              ".  No further submissions will be accepted after this time.")]
-     [:br]
-     [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-     [:br]
-     [:p "Thank you,"]
-     [:p "Kimo Rosario"]
-     [:p "Procurement & Supply Officer"]
-     [:p "CNMI PSS"]
-     (unsubscribe-option email :procurement)]]))
+  (let [db-sub (first (db/get-users-subscription {:email email :proc_id (:id pns)}))]
+    (html
+     [:html
+      [:body
+       [:p (str "Greetings " contact ",")]
+       [:p (str "We would like to notify you that the deadline to submit a response for "
+                (-> pns :type name cstr/upper-case) "# "
+                (:number pns)
+                " " (:title pns)
+                " has passed as of "
+                (util-dates/print-date-at-time (:close_date pns))
+                ".  No further submissions will be accepted after this time.")]
+       [:br]
+       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+       [:br]
+       [:p "Thank you,"]
+       [:p "Kimo Rosario"]
+       [:p "Procurement & Supply Officer"]
+       [:p "CNMI PSS"]
+       (unsubscribe-option (:id db-sub) :procurement)]])))
 
 (defn error-alert
   [exception]

@@ -91,12 +91,12 @@
 
         (is (= 4 (count subscriptions)))
         (is (every? (partial spec/valid? :webtools.spec.subscription/record)
-                    (map convert-sub-from-map subscriptions))))))
+                    (map convert-sub-from-map subscriptions)))))))
 
+(deftest test-api-rfp-subscriptions
   (with-stub! [[email/confirm-subscription (constantly nil)]
                [email/notify-procurement (constantly nil)]]
     (let [rfp-id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
-          ifb-id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")
           subscriber{:company "Test Centers of America"
                      :person "TV's Adam West"
                      :email "iambatman@gotham.tv"
@@ -124,32 +124,69 @@
             (let [contact (first (args-from-call email/confirm-subscription))]
               (is (= (:company subscriber) (:company_name contact)))
               (is (= (:person subscriber) (:contact_person contact)))
-              (is (= (:email subscriber) (:email contact))))))
+              (is (= (:email subscriber) (:email contact)))))))
 
-        (testing-route {:route "/api/subscribe-procurement"
-                        :method :post
-                        :body (assoc subscriber :proc_id ifb-id)}
-          (testing "should handle subscriptions to ifbs"
-            (testing "should return status 200"
-              (is (= 200 status)))
-            
-            (testing "should return JSON"
-              (is (= "application/json" (get headers "Content-Type"))))
-            
-            (testing "should add subscription to the DB"
-              (let [subscriptions (get-subs-from-db ifb-id)]
-                (is (= 2 (count subscriptions)))
-                (is (= "Test Centers of America" (-> subscriptions last :company_name)))
-                (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
-                (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
+      (testing-route {:route "/api/subscribe-procurement"
+                      :method :post
+                      :body (assoc subscriber :proc_id rfp-id)}
+        (testing "should only allow a single subscription per subscriber"
+          (testing "should return status 500"
+            (is (= 500 status))
+            (is (= "Duplicate subscription.  You have already subscribed to this announcement with that email address." (:message body)))
+            (is (= (:message body) (get-in body [:ex-data :msg])))
+            (is (= "class java.sql.BatchUpdateException" (get-in body [:ex-data :type])))))))))
 
-            (testing "should send confirmation email to subscriber"
-              (is (= 2 (count-calls email/confirm-subscription)))
-              (is (= 2 (count (args-from-call email/confirm-subscription))))
-              (let [contact (first (args-from-call email/confirm-subscription))]
-                (is (= (:company subscriber) (:company_name contact)))
-                (is (= (:person subscriber) (:contact_person contact)))
-                (is (= (:email subscriber) (:email contact)))))))))))
+(deftest test-api-ifb-subscriptions
+  (with-stub! [[email/confirm-subscription (constantly nil)]
+               [email/notify-procurement (constantly nil)]]
+    (let [ifb-id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")
+          subscriber{:company "Test Centers of America"
+                     :person "TV's Adam West"
+                     :email "iambatman@gotham.tv"
+                     :tel "+1 (670) 555-6666"}]
+      (testing-route {:route "/api/subscribe-procurement"
+                      :method :post
+                      :body (assoc subscriber :proc_id ifb-id)}
+        (testing "should handle subscriptions to ifbs"
+          (testing "should return status 200"
+            (is (= 200 status)))
+
+          (testing "should return JSON"
+            (is (= "application/json" (get headers "Content-Type"))))
+
+          (testing "should add subscription to the DB"
+            (let [subscriptions (get-subs-from-db ifb-id)]
+              (is (= 2 (count subscriptions)))
+              (is (= "Test Centers of America" (-> subscriptions last :company_name)))
+              (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
+              (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
+
+          (testing "should send confirmation email to subscriber"
+            (is (= 1 (count-calls email/confirm-subscription)))
+            (is (= 2 (count (args-from-call email/confirm-subscription))))
+            (let [contact (first (args-from-call email/confirm-subscription))]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))))
+      (testing-route {:route "/api/subscribe-procurement"
+                      :method :post
+                      :body (assoc subscriber :proc_id ifb-id)}
+        (testing "should only allow a single subscription per subscriber"
+          (testing "should return status 500"
+            (is (= 500 status))
+            (is (= "Duplicate subscription.  You have already subscribed to this announcement with that email address." (:message body)))
+            (is (= (:message body) (get-in body [:ex-data :msg])))
+            (is (= "class java.sql.BatchUpdateException" (get-in body [:ex-data :type])))))))))
+
+(deftest test-api-unsubscribe-procurement
+  (testing-route {:route "/api/unsubscribe-procurement/2af76ca0-3711-7551-a9a3-903d93a42f65"
+                  :method :get}
+    (testing "should redirect user the the /unsubscribed page after successfully unsubscribing"
+      (is (= 302 status))
+
+      (let [sub (db/get-users-subscription {:email "tyler.collins@cnmipss.org"
+                                            :proc_id (make-uuid "cf82deed-c84f-446c-a3f0-0d826428ddbd")})]
+        (is (not (:active sub)))))))
 
 (deftest test-api-authentication
   (testing "POST /api/verify-token"

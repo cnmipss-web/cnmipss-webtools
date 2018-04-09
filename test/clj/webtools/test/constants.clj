@@ -58,3 +58,5 @@
 (def full-fns-file (file "test/clj/webtools/test/full-fns.xlsx"))
 (def full-nap-file (file "test/clj/webtools/test/full-nap.xlsx"))
 
+(def unsubscribe-url-re #"\/webtools\/api\/unsubscribe\-procurement\/[\d\w]{8}\-([\d\w]{4}\-){3}[\d\w]{12}")
+
