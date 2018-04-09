@@ -9,18 +9,26 @@
             #?(:clj  [clj-time.format :as format]
                :cljs [cljs-time.format :as format])))
 
+(defmacro pull
+  "Pull all symbols from ns into the calling ns.  Used to refer-through, providing 
+  a wrapper for the target ns."
+  {:style/indent 1}
+  [ns vlist]
+  `(do ~@(for [i vlist]
+           `(def ^{:doc "Test"} ~i ~(symbol (str ns "/" i))))))
+
 (let [transforms {:keys keyword
                   :strs str
                   :syms identity}]
   (defmacro keyed
-      "Create a map in which, for each symbol S in vars, (keyword S) is a
+    "Create a map in which, for each symbol S in vars, (keyword S) is a
   key mapping to the value of S in the current scope. If passed an optional
   :strs or :syms first argument, use strings or symbols as the keys instead."
     ([vars] `(keyed :keys ~vars))
     ([key-type vars]
-       (let [transform (comp (partial list `quote)
-                             (transforms key-type))]
-         (into {} (map (juxt transform identity) vars))))))
+     (let [transform (comp (partial list `quote)
+                           (transforms key-type))]
+       (into {} (map (juxt transform identity) vars))))))
 
 (defn full-response-format [body-format]
   (-> (body-format)
