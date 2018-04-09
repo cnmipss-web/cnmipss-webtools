@@ -10,7 +10,8 @@
             [webtools.components.roles.fns :refer [fns-view]]
             [webtools.components.roles.certification :refer [certification-view]]
             [webtools.components.roles.hro :refer [hro-view]]
-            [webtools.components.roles.procurement :refer [pns-view]]))
+            [webtools.components.roles.procurement :refer [pns-view]]
+            [webtools.components.roles.mhd :refer [mhd-view]]))
 
 (defn- error-message
   [error]
@@ -31,12 +32,13 @@
 
 (defn display-role [role]
   (case role
-    "Certification" [certification-view]
-    "HRO"           [hro-view]
-    "Procurement"   [pns-view]
-    "Manage Users"  [manage-users]
-    "Manage DB"     [manage-db]
-    "FNS"           [fns-view]
+    "Certification"  [certification-view]
+    "HRO"            [hro-view]
+    "Procurement"    [pns-view]
+    "Manage Users"   [manage-users]
+    "Manage DB"      [manage-db]
+    "FNS"            [fns-view]
+    "Mojo Help Desk" [mhd-view]
     (if (not= ""  (first @(rf/subscribe [:roles])))
       [:div]
       [:div.no-role
