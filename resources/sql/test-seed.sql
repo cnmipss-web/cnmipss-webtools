@@ -117,17 +117,17 @@ delete from procurement_addenda where true;
 
 -- :name seed-subscriptions :! :n
 -- :doc seed the database with dummy subscriptions to procurement announcements.
-insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
-values ('8fd0eb24-82d5-4d79-ae44-676694e3b555', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 0, 'Simple Construction', 'John Doe', 'john.doe@notarealdomain.org', 16705555550);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone, active)
+values ('8fd0eb24-82d5-4d79-ae44-676694e3b555', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 0, 'Simple Construction', 'John Doe', 'john.doe@notarealdomain.org', 16705555550, true);
 
-insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
-values ('7cb66ca0-8741-4067-a9a3-993d93c42e69', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 1, 'Complected Construction', 'Juan Tzu', 'j.tzu@complect.thisdomainisfake', 16705505550);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone, active)
+values ('7cb66ca0-8741-4067-a9a3-993d93c42e69', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 1, 'Complected Construction', 'Juan Tzu', 'j.tzu@complect.thisdomainisfake', 16705505550, true);
 
-insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
-values ('8eb76ca0-8751-4561-a9a3-903d93a42f65', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 7456123);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone, active)
+values ('8eb76ca0-8751-4561-a9a3-903d93a42f65', 'd2b4e97c-5d7c-4ccd-8fae-a27a27c863e3', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 7456123, false);
 
-insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone)
-values ('2af76ca0-3711-7551-a9a3-903d93a42f65', 'cf82deed-c84f-446c-a3f0-0d826428ddbd', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 8456123);
+insert into procurement_subscriptions (id, proc_id, subscription_number, company_name, contact_person, email, telephone, active)
+values ('2af76ca0-3711-7551-a9a3-903d93a42f65', 'cf82deed-c84f-446c-a3f0-0d826428ddbd', 2, 'Testing Subscriptions', 'Tyler Collins', 'tyler.collins@cnmipss.org', 8456123, true);
 
 -- :name clear-subscriptions :! :n
 -- :doc clear the db of all procurement subscriptions
