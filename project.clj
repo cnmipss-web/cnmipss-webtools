@@ -4,6 +4,7 @@
   :url "http://www.cnmipss.org/webtools/"
 
   :dependencies [[cheshire "5.8.0"]
+                 [cider/cider-nrepl "0.16.0"]
                  [clj-fuzzy "0.4.1"]
                  [clj-http "3.7.0"]
                  [clj-time "0.14.2"]
