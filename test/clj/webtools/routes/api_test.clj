@@ -96,14 +96,14 @@
 (deftest test-api-rfp-subscriptions
   (with-stub! [[email/confirm-subscription (constantly nil)]
                [email/notify-procurement (constantly nil)]]
-    (let [rfp-id (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
-          subscriber{:company "Test Centers of America"
-                     :person "TV's Adam West"
-                     :email "iambatman@gotham.tv"
-                     :tel "+1 (670) 555-6666"}]
-      (testing-route {:route "/api/subscribe-procurement"
+    (let [rfp-id     (make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
+          subscriber {:company "Test Centers of America"
+                      :person  "TV's Adam West"
+                      :email   "iambatman@gotham.tv"
+                      :tel     "+1 (670) 555-6666"}]
+      (testing-route {:route  "/api/subscribe-procurement"
                       :method :post
-                      :body (json/edn->json (assoc subscriber :proc_id rfp-id))}
+                      :body   (json/edn->json (assoc subscriber :proc_id rfp-id))}
         (testing "should handle subscriptions to rfps"
           (testing "should return status 200"
             (is (= 200 status)))
@@ -126,9 +126,9 @@
               (is (= (:person subscriber) (:contact_person contact)))
               (is (= (:email subscriber) (:email contact)))))))
 
-      (testing-route {:route "/api/subscribe-procurement"
+      (testing-route {:route  "/api/subscribe-procurement"
                       :method :post
-                      :body (json/edn->json (assoc subscriber :proc_id rfp-id))}
+                      :body   (json/edn->json (assoc subscriber :proc_id rfp-id))}
         (testing "should only allow a single subscription per subscriber"
           (testing "should return status 500"
             (is (= 500 status))

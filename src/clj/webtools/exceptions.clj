@@ -3,11 +3,6 @@
             [webtools.exceptions.core :as ex]
             [webtools.util :refer [pull]]))
 
-;; Refer fns from webtools.expcetions.core through this ns
-(pull webtools.exceptions.core
-  [wrap-ex
-   null-pointer illegal-argument sql-duplicate-key])
-
 (defn exception->string [exception]
   "Pretty print exception data to a string and return that string."
   (let [sw (java.io.StringWriter.)
@@ -44,3 +39,7 @@
   (ex/null-pointer      [opts] (-implement-error NullPointerException opts))
   (ex/illegal-argument  [opts] (-implement-error IllegalArgumentException opts)))
 
+;; Refer fns from webtools.exceptions.core through this ns
+(pull webtools.exceptions.core
+  [wrap-ex
+   null-pointer illegal-argument sql-duplicate-key])
