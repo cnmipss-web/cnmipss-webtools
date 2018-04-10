@@ -16,10 +16,10 @@
 (def ^:private nap-records (-> test-const/full-nap-file nap-parse :valid))
 
 (deftest test-dob-match
-  (println "\n------------------------------------------------------------\n\n")
-  (println "testing w.m.m.a/dob-match: ")
+  ;; (println "\n------------------------------------------------------------\n\n")
+  ;; (println "testing w.m.m.a/dob-match: ")
   (let [[matches unmatched] (time (malgo/dob-match fns-records nap-records))]
-    (println "Matched: " (count matches) "Unmatched: " (count unmatched))
+    ;; (println "Matched: " (count matches) "Unmatched: " (count unmatched))
     (testing "should return vector containing two seqable elements"
       (is (seqable? matches))
       (is (seqable? unmatched)))
@@ -36,12 +36,12 @@
       (is (every? (partial instance? FNSRegistration) unmatched)))))
 
 (deftest test-fuzzy-match
-  (println "\n------------------------------------------------------------\n\n")
-  (println "testing w.m.m.a/jw-match-names: ")
+  ;; (println "\n------------------------------------------------------------\n\n")
+  ;; (println "testing w.m.m.a/jw-match-names: ")
   (let [[matches um-fns um-nap] (time (malgo/fuzzy-match fns-records nap-records))]
-    (println "Matched: " (count matches)
-             "Unmatched FNS: " (count um-fns)
-             "Unmatched NAP: " (count um-nap))
+    ;; (println "Matched: " (count matches)
+    ;;          "Unmatched FNS: " (count um-fns)
+    ;;          "Unmatched NAP: " (count um-nap))
     (testing "should return vector containing two seqable elements"
       (is (seqable? matches))
       (is (seqable? um-fns))

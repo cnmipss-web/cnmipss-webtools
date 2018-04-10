@@ -20,6 +20,6 @@
            (layout/render "unsubscribed.html" sub)
            (response/internal-server-error))))
 
-  (GET "/webtools/" request
+  (GET "/webtools" request
        (response/found (str (env :server-uri) "/#/app"))))
 
