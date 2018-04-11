@@ -1,13 +1,14 @@
 (ns webtools.components.nav
   (:require [re-frame.core :as rf]
             [webtools.handlers.events :as e]
-            [webtools.constants :refer [role-list]]))
+            [webtools.constants :refer [role-list]]
+            [webtools.util :refer [get-version]]))
 
 (defn header []
   (let [{:keys [email]} @(rf/subscribe [:session])]
     [:header.navbar
      [:div.navbar-header
-      [:a.navbar-brand {:href "#/app"} "CNMI PSS Webtools"]
+      [:a.navbar-brand {:href "#/app"} "CNMI PSS Webtools v" (get-version)]
       [:ul.navbar-nav
        (if (some? email)
          [:li.nav-item>button.nav-link {:on-click #(rf/dispatch [:toggle-roles])
