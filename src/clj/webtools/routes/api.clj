@@ -128,7 +128,7 @@
   (GET "/api/unsubscribe-procurement/:id" [id :as request]
        (try
          (let [result (db/deactivate-subscription {:id (make-uuid id)})]
-           (-> (resp/found "/unsubscribed")
+           (-> (resp/found (str "/unsubscribed/" id))
                (resp/set-cookie "wt-success" "true" {:max-age 60 :path "/unsubscribed"})
                (resp/set-cookie "wt-data" (pr-str result) {:max-age 60 :path "/unsubscribed"})))
          (catch Exception ex

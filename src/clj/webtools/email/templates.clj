@@ -4,17 +4,21 @@
             [hiccup.core :refer [html]]
             [webtools.config :refer [env]]
             [webtools.exceptions :as w-ex]
+            [webtools.models.procurement.server]
             [webtools.models.procurement.core :refer :all]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.db.core :as db])) 
 
 (defn unsubscribe-option [id k]
-  (let [routes {:procurement (str "https://cnmipss.org/webtools/api/unsubscribe-procurement/"
+  (let [routes {:procurement (str "https://www.cnmipss.org/webtools/api/unsubscribe-procurement/"
                                   id)}]
     (if (some? (get routes k))
       [:div
-       [:a {:href (get routes k)} "Unsubscribe"]]
+       [:br]
+       [:p
+        "If you do not wish to receive further messages regarding this matter you may "
+        [:a {:href (get routes k)} "unsubscribe"]]]
       (throw (w-ex/illegal-argument
               {:cause (IllegalArgumentException.
                        (str "No such link in webtools.email/unsubscribe-option for key " k))
