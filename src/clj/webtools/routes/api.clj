@@ -1,19 +1,19 @@
 (ns webtools.routes.api
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
             [clojure.string :as cstr]
+            [clojure.tools.logging :as log]
             [compojure.core :refer [GET POST defroutes]]
             [ring.util.http-response :as resp]
             [webtools.config :refer [env]]
             [webtools.constants :as const]
             [webtools.db.core :as db]
             [webtools.email :as email]
+            [webtools.exceptions :as w-ex]
             [webtools.json :as json]
             [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :refer :all]
             [webtools.util.dates :as util-dates]
-            [webtools.wordpress-api :as wp]
-            [webtools.exceptions :as w-ex]))
+            [webtools.wordpress-api :as wp]))
 
 (def truthy (comp some? #{"true" true}))
 

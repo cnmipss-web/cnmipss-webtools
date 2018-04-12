@@ -3,12 +3,11 @@
             [clojure.string :as cstr]
             [hiccup.core :refer [html]]
             [webtools.config :refer [env]]
+            [webtools.db.core :as db]
             [webtools.exceptions :as w-ex]
-            [webtools.models.procurement.server]
             [webtools.models.procurement.core :as p]
             [webtools.util :as util]
-            [webtools.util.dates :as util-dates]
-            [webtools.db.core :as db])) 
+            [webtools.util.dates :as util-dates])) 
 
 (defn unsubscribe-option [id k]
   (let [routes {:procurement (str "https://www.cnmipss.org/webtools/api/unsubscribe-procurement/"

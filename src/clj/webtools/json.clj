@@ -1,11 +1,9 @@
 (ns webtools.json
   (:require [cheshire.core :as json]
             [cheshire.generate :refer [add-encoder]]
-            [clojure.walk :as walk]
-            [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [webtools.util.dates :as util-dates]
-            ))
+            [clojure.walk :as walk]
+            [webtools.util.dates :as util-dates]))
 
 
 ;; Create custom JSON encoders that we will use

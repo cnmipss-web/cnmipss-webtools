@@ -1,10 +1,10 @@
 (ns webtools.routes.home
-  (:require [compojure.core :refer [GET defroutes]]
+  (:require [clojure.string :as cstr]
+            [compojure.core :refer [GET defroutes]]
             [ring.util.http-response :as response]
-            [clojure.string :as cstr]
             [webtools.config :refer [env]]
-            [webtools.layout :as layout]
             [webtools.db.core :as db]
+            [webtools.layout :as layout]
             [webtools.models.procurement.core :refer [make-uuid]]))
 
 (defroutes home-routes
