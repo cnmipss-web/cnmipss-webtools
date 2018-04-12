@@ -2,6 +2,7 @@
   (:require [cemerick.url :as curl]
             [clojure.string :as cstr]
             [clojure.tools.logging :as log]
+            [webtools.constants :as const]
             [webtools.db.core :as db]
             [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :as util]
@@ -13,13 +14,10 @@
 (extend-type webtools.models.procurement.core.PSAnnouncement
   procurement-to-db
   (proc-type [pnsa]
-    (-> pnsa :type keyword))
+    (keyword (:type pnsa)))
   
   (save-to-db [pnsa]
-    (-> pnsa
-        (db/make-sql-date :open_date)
-        (db/make-sql-datetime :close_date)
-        (db/create-pnsa!)))
+    (db/create-pnsa! pnsa))
 
   (change-in-db [pnsa]
     (db/update-pnsa! pnsa))
@@ -54,9 +52,7 @@
                 filename]} ann-file
         pdf-doc            (PDDocument/load tempfile)
         announcement       (.getText (PDFTextStripper.) pdf-doc)
-        desc               (-> (re-find
-                                #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/"
-                                announcement)
+        desc               (-> (re-find const/procurement-description-re announcement)
                                (last)
                                (cstr/trim))
         lines              (cstr/split announcement #"\n")]
@@ -96,12 +92,15 @@
                               :slug (str (:id rec) "-spec")))
       (map->PSAnnouncement rec))))
 
+(defn- -get-pnsa [map]
+  (if-let [pnsa (db/get-single-pnsa map)]
+    (-> (update pnsa :type keyword)
+        (map->PSAnnouncement))))
+
 (extend-protocol procurement-from-db
   java.lang.String
   (get-pns-from-db [id]
-    (-> {:id (make-uuid id)}         
-        (db/get-single-pnsa)
-        (map->PSAnnouncement)))
+    (-get-pnsa {:id (make-uuid id)}))
 
   (get-subs-from-db [proc_id]
     (map p/convert-sub-from-map (db/get-subscriptions {:proc_id (p/make-uuid proc_id)})))
@@ -110,9 +109,7 @@
 
   java.util.UUID
   (get-pns-from-db [uuid]
-    (-> {:id uuid}
-        (db/get-single-pnsa)
-        (map->PSAnnouncement)))
+    (-get-pnsa {:id uuid}))
 
   (get-subs-from-db [proc_id]
     (map p/convert-sub-from-map (db/get-subscriptions {:proc_id proc_id})))
@@ -125,31 +122,36 @@
   (make-uuid [id] nil))
 
 
-(let [f (fn [pns]
-          (try
-            (if (every? some? [(:number pns) (:type pns) (:id pns)])
-              (-> (assoc pns :id (-> pns :id make-uuid))
-                  (assoc :open_date (-> pns :open_date util-dates/parse-date))
-                  (assoc :close_date (-> pns :close_date util-dates/parse-date-at-time))
-                  map->PSAnnouncement))
-            (catch Exception e
-              (log/error e)
-              (throw e))))
-      g (fn [sub]
-          (try
-            (if (every? some? [(:id sub) (:proc_id sub)])
-              (-> (assoc sub :id (-> sub :id make-uuid))
-                  (assoc :proc_id (-> sub :proc_id make-uuid))
-                  (assoc :telephone (-> sub :telephone util/format-tel-num))
-                  map->Subscription))
-            (catch Exception e
-              (log/error e)
-              (throw e))))]
-  (extend-protocol create-procurement
-    clojure.lang.PersistentArrayMap
-    (convert-pns-from-map [pns] (f pns))
-    (convert-sub-from-map [sub] (g sub))
+(defn- -convert-pns
+  [{:keys [number type id] :as pns}]
+  (try
+    (if (every? some? [number type id])
+      (-> (update pns :id make-uuid)
+          (update :type keyword)
+          (update :open_date util-dates/parse-date)
+          (update :close_date util-dates/parse-date-at-time)
+          map->PSAnnouncement))
+    (catch Exception e
+      (log/error e)
+      (throw e))))
 
-    clojure.lang.PersistentHashMap
-    (convert-pns-from-map [pns] (f pns))
-    (convert-sub-from-map [sub] (g sub))))
+(defn- -convert-sub
+  [{:keys [id proc_id] :as sub}]
+  (try
+    (if (every? some? [id proc_id])
+      (-> (update sub :id make-uuid)
+          (update :proc_id make-uuid)
+          (update :telephone util/format-tel-num)
+          map->Subscription))
+    (catch Exception e
+      (log/error e)
+      (throw e))))
+
+(extend-protocol create-procurement
+  clojure.lang.PersistentArrayMap
+  (convert-pns-from-map [pns] (-convert-pns pns))
+  (convert-sub-from-map [sub] (-convert-sub sub))
+
+  clojure.lang.PersistentHashMap
+  (convert-pns-from-map [pns] (-convert-pns pns))
+  (convert-sub-from-map [sub] (-convert-sub sub)))

@@ -90,12 +90,14 @@ with validation and type conversions."))
 
 (s/fdef make-uuid
         :args (s/cat :id (s/alt :string :webtools.spec.core/uuid-str
-                                :uuid :webtools.spec.core/uuid))
-        :ret :webtools.spec.core/uuid)
+                                :uuid :webtools.spec.core/uuid
+                                :nil :webtools.spec.core/nil))
+        :ret (s/nilable :webtools.spec.core/uuid))
 
 (s/fdef get-pns-from-db
         :args (s/cat :id (s/alt :string :webtools.spec.core/uuid-str
-                                :uuid :webtools.spec.core/uuid))
+                                :uuid :webtools.spec.core/uuid
+                                :nil :webtools.spec.core/nil))
         :ret  (s/or :pns ::procurement
                     :nil nil?))
 

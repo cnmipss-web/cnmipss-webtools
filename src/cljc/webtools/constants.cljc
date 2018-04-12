@@ -46,3 +46,5 @@
                                 "YA" "Yapese"})
 
 (def duplicate-sub-re #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\"")
+
+(def procurement-description-re #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/")
