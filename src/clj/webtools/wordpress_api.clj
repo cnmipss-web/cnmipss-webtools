@@ -17,7 +17,7 @@
                                            :password (env :wp-pw)})})]
     (if error
       (throw error)
-      (str "Bearer " (get (json/json->edn body) "token")))))
+      (str "Bearer " (:token (json/json->edn body))))))
 
 (defn reduce-media-opts
   [acc [key val]]
