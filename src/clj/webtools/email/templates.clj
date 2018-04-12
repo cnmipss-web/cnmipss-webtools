@@ -39,7 +39,7 @@
                 wp-un
                 " has invited you to use the Webtools interface to publish content"
                 " to the CNMI PSS website.  You will have access to the "
-                (if (> (count roles) 0)
+                (if (pos? (count roles))
                   (str
                    (-> roles
                        (cstr/split #",")

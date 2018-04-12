@@ -9,8 +9,8 @@
         matched-fns (atom [])
         unmatched-fns (atom [])
         comparisons (atom 0)]
-    (while (and (> (count @sorted-fns) 0)
-                (> (count @sorted-nap) 0))
+    (while (and (pos? (count @sorted-fns))
+                (pos? (count @sorted-nap)))
       (let [fns (first @sorted-fns)
             nap (first @sorted-nap)]
         (swap! comparisons inc)
@@ -23,8 +23,8 @@
           (swap! sorted-fns next))
         (when (time/after? (:dob fns) (:dob nap))
           (swap! sorted-nap next))))
-    (when (> (count @sorted-fns) 0)
-      (swap! unmatched-fns #(conj %)))
+    (when (pos? (count @sorted-fns))
+      (swap! unmatched-fns conj))
     (println "Total Comparisons: " @comparisons)
     (vector @matched-fns @unmatched-fns)))
 

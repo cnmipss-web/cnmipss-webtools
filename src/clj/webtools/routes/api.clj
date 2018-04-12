@@ -20,7 +20,7 @@
 (defn json-response
   "Pass a JSON body to supplied ring response fn"
   [ring-response body]
-  (-> (json/edn->json body)
+  (-> (json/data->json body)
       ring-response
       (resp/header "Content-Type" "application/json")))
 
@@ -84,7 +84,7 @@
                       person
                       email
                       tel
-                      proc_id]} (json/json->edn body)
+                      proc_id]} (json/json->data body)
               pid               (p/make-uuid proc_id)
               existing-subs     (p/get-subs-from-db pid)
               subscription      {:id                  (java.util.UUID/randomUUID)
@@ -144,8 +144,7 @@
           (let [email         (get-in request [:cookies "wt-email" :value])
                 user-email    (keyed [email])
                 correct-token ((db/get-user-token user-email) :token)
-                user          (-> (db/get-user-info user-email)
-                                  (dissoc :id))
+                user          (dissoc (db/get-user-info user-email) :id)
                 is-admin      ((db/is-user-admin? user-email) :admin)]
             (if (= token correct-token)
               (json-response resp/ok (keyed [user is-admin]))
@@ -169,8 +168,7 @@
   
   (GET "/api/user" request
        (if-let [email (get-in request [:cookies "wt-email" :value])]
-         (if-let [user (-> (db/get-user-info (keyed [email]))
-                           (dissoc :id))]
+         (if-let [user (dissoc (db/get-user-info (keyed [email])) :id)]
            (json-response resp/ok {:user user})
            (resp/not-found))
          (resp/bad-request)))
@@ -179,7 +177,7 @@
   
   (POST "/api/create-user" request
         (let [{:keys  [email roles]
-               admin? :admin} (json/json->edn (request :body))
+               admin? :admin} (json/json->data (request :body))
               admin           (truthy admin?)
               id              (java.util.UUID/randomUUID)
               user            (keyed [email admin roles id])]

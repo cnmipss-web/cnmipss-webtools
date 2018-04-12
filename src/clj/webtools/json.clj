@@ -19,13 +19,9 @@
 
 (add-encoder java.lang.Class
              (fn [class jg]
-               (.writeString jg (.toString class))))
+               (.writeString jg (str class))))
 
-                                        ;(add-encoder compojure.core.)
+(defn json->data [string]   (walk/keywordize-keys (json/parse-string string)))
 
-
-(defn json->edn [string]   (walk/keywordize-keys (json/parse-string string)))
-
-(def edn->json
-  (comp json/generate-string))
+(defn data->json [data] (json/generate-string data))
 

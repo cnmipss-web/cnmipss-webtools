@@ -70,15 +70,15 @@
 
   Renewal records take the form of a new certificaiton with -renewal-# added as a suffix to the certification number."
   [cert]
-  (let [{:keys [cert_no start_date expiry_date]} cert
-        existing-certs (->> (db/get-all-certs)
-                            (filter (fn [old-cert]
-                                      (re-seq (re-pattern cert_no) (:cert_no old-cert)))))
-        renewal-no (count existing-certs)]
+  (let [{:keys [cert_no
+                start_date
+                expiry_date]} cert
+        existing-certs        (filter (fn [cert] (re-seq (re-pattern cert_no) (:cert_no cert)))
+                                      (db/get-all-certs))
+        renewal-no            (count existing-certs)]
     (if (not-any? #(and (= start_date (:start_date %))
                         (= expiry_date (:expiry_date %))) existing-certs)
-        (-> (assoc cert :cert_no (str cert_no "-renewal-" renewal-no))
-            db/create-cert!))))
+      (db/create-cert! (assoc cert :cert_no (str cert_no "-renewal-" renewal-no))))))
 
 
 (defn handle-collision
@@ -92,15 +92,16 @@
         same-name? (not-any? nil? (map joint [:first_name :last_name])) 
         same-cert-type? (some? (:cert_type joint))
         same-dates? (not-any? nil? (map joint [:start_date :expiry_date])) ]
-    (if (not (and same-name? same-cert-type?))
+    (if-not (and same-name? same-cert-type?)
       (swap! errors conj (ex-info
                           (str "Certificate Collision: " (:cert_no orig-cert))
                           {:orig-cert orig-cert
                            :new-cert new-cert}))
-      (if (not same-dates?)
+      (if-not same-dates?
         (if (is-renewal? orig-cert new-cert)
           (renew-cert! new-cert)
-          (db/update-cert! new-cert))))))
+          (db/update-cert! new-cert))
+        :ignore-identical-existing-cert))))
 
 (defn process-cert-csv
   "Determine whether a certificate is new, a renewal, or erroneous and store it accordingly.
@@ -120,9 +121,9 @@
           (if (cert-changed? fresh-cert cert)
             (handle-collision fresh-cert cert errors))
           (db/create-cert! fresh-cert)))
-      (if (> (count rem) 0)
+      (if (pos? (count rem))
         (recur (first rem) (next rem) errors)
-        (if (> (count @errors) 0)
+        (if (pos? (count @errors))
           (let [five-errors (take 5 @errors)]
             (throw (ex-info "Certification Collisions"
                             {:err-type :cert-collision

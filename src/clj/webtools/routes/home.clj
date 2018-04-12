@@ -15,7 +15,7 @@
 
   (GET "/unsubscribed/:id" [id :as request]
        (let [raw-sub (db/get-subscription {:id (make-uuid id)})
-             sub (assoc raw-sub :type (cstr/upper-case (:type raw-sub)))]
+             sub (update raw-sub :type cstr/upper-case)]
          (if-not (:active sub)
            (layout/render "unsubscribed.html" sub)
            (response/internal-server-error))))

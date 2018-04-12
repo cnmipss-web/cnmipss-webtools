@@ -76,8 +76,8 @@
       [:th.custom-col-8.text.text--center {:scope "col"} "Description"]
       [:th.custom-col-3.text.text--center {:scope "col"} "Links"]]]
     [:tbody
-     (for [item (-> m k)]
-       ^{:key (str (name k) (:title item))} [procurement-row (assoc item :status true)])]]])
+     (for [item (get m k)]
+       ^{:key (random-uuid)} [procurement-row (assoc item :status true)])]]])
 
 (defn- rfp-ifb-list []
   (let [procurement-list  @(rf/subscribe [:procurement-list])]

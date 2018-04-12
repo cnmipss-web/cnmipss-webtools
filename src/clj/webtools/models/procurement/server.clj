@@ -94,8 +94,7 @@
 
 (defn- -get-pnsa [map]
   (if-let [pnsa (db/get-single-pnsa map)]
-    (-> (update pnsa :type keyword)
-        (map->PSAnnouncement))))
+    (map->PSAnnouncement (update pnsa :type keyword))))
 
 (extend-protocol procurement-from-db
   java.lang.String

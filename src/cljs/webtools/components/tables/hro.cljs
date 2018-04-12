@@ -52,7 +52,7 @@
       open_date]
 
      [:td.custom-col-2.text.text--center 
-      (if close_date
+      (if (some? close_date)
         close_date
         "Until Filled")]
 
