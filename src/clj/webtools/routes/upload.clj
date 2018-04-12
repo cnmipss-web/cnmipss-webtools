@@ -162,8 +162,8 @@
             jva (.getText (PDFTextStripper.) pdf-document)
             text-list (split jva #"\n")
             jva-record (as-> (reduce jva-reducer {} text-list) jva
-                         (db/make-sql-date jva :open_date)
-                         (db/make-sql-date jva :close_date)                       
+                         (update jva :open_date util-dates/parse-date)
+                         (update jva :close_date util-dates/parse-date)
                          (util/make-status jva)
                          (assoc jva :id (java.util.UUID/randomUUID))
                          (assoc jva :file_link
@@ -185,8 +185,8 @@
         jva (.getText (PDFTextStripper.) pdf-document)
         text-list (split jva #"\n")
         jva-record (as-> (reduce jva-reducer {} text-list) jva
-                     (db/make-sql-date jva :open_date)
-                     (db/make-sql-date jva :close_date)                       
+                     (update jva :open_date util-dates/parse-date)
+                     (update jva :close_date util-dates/parse-date)
                      (util/make-status jva)
                      (assoc jva :id (java.util.UUID/randomUUID)))
         existing-jva (db/get-jva jva-record)]

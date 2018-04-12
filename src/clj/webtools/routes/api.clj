@@ -11,6 +11,7 @@
             [webtools.json :as json]
             [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :refer :all]
+            [webtools.util.dates :as util-dates]
             [webtools.wordpress-api :as wp]
             [webtools.exceptions :as w-ex]))
 
@@ -205,9 +206,8 @@
         (query-route db/get-all-certs (db/delete-cert! body)))
 
   (POST "/api/update-jva" {:keys [body]}
-        (let [jva (-> body
-                      (db/make-sql-date :open_date)
-                      (db/make-sql-date :close_date))]
+        (let [jva (-> (update body :open_date util-dates/parse-date)
+                      (update :close_date util-dates/parse-date-at-time))]
           (query-route db/get-all-jvas (db/update-jva! jva))))
 
   (POST "/api/delete-jva" {:keys [body]}

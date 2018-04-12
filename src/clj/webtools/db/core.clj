@@ -75,32 +75,3 @@
   org.joda.time.DateTime
   (sql-value [value] (c/to-sql-time value)))
 
-(defn make-sql-date
-  [m k]
-  (if (= java.lang.String (type (get m k)))
-    (assoc m k (try
-                 (->>
-                  (get m k)
-                  (util-dates/parse-date)
-                  (c/to-sql-date))
-                 (catch Exception e
-                   (log/error e)
-                   nil)))
-    m))
-
-(defn make-sql-datetime
-  [m k]
-  (if (= java.lang.String (type (get m k)))
-    (assoc m k (try
-                 (->>
-                  (get m k)
-                  (re-find const/date-at-time-re)
-                  (second)
-                  ((fn [date-at-time]
-                     (-> date-at-time util-dates/parse-date-at-time c/to-sql-time))))
-                 (catch Exception e
-                   (log/error e)
-                   nil)))
-    m))
-
-
