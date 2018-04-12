@@ -253,7 +253,7 @@
       (is (= :div (first markup))))
     
     (testing "should include valid link to unsubscribe including uuid of subscription record"
-      (let [{href :href} (get-in markup [1 1])
+      (let [{href :href} (get-in markup [2 2 1])
             url? #(.isValid (UrlValidator.) %)]
         (is (url? href))
         (is (some? (re-seq const/unsubscribe-url-re href))))))

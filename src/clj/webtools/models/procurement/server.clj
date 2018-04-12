@@ -32,49 +32,9 @@
     (-> pns :type name cstr/upper-case))
 
   (title-string [{:keys [number title] :as pns}]
-    (str (uppercase-type pns) "# " number " " title))
-  
-  (changes-email [orig new sub]
-    (let [title-string (str (-> new :type name cstr/upper-case)
-                            "# " (:number orig) " " (:title orig))
-          referent-term (if (= :rfp (:type new)) "request" "invitation")]
-      [:body
-       [:p (str "Greetings " (:contact_person sub) ",")]
-       [:p (str "We would like to notify you that details of " title-string " have been changed.")]
+    (str (uppercase-type pns) "# " number " " title)))
 
-       (if (not= (:open_date orig) (:open_date new))
-         [:p (str "The window for submissions will now begin on "
-                  (util-dates/print-date (:open_date new)) ".  ")])
-
-       (if (not= (:close_date orig) (:close_date new))
-         [:p (str "The window for submissions will now close at "
-                  (util-dates/print-date-at-time (:close_date new)) ".  ")])
-
-       (if (not= (:number orig) (:number new))
-         [:p (str "The " (-> new :type name cstr/upper-case)
-                  "# of this request has been changed to "
-                  (:number new) ".  ")])
-
-       (if (not= (:title orig) (:title new))
-         [:p (str "The title of this " referent-term " has been changed to: ")
-          [:em (:title new)] ".  "])
-
-       (if (not= (:description orig) (:description new))
-         [:p
-          (str "The description of this " referent-term " has been change to the following: ")
-          [:br]
-          [:br]
-          (:description new)])
-
-       [:br]
-       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-       [:br]
-       [:p "Thank you,"]
-       [:p "Kimo Rosario"]
-       [:p "Procurement & Supply Officer"]
-       [:p "CNMI PSS"]])))
-
-(def procurement-regexes
+(def ^:private procurement-regexes
   {:type #"(RFP|IFB)"
    :number #"(?i)PSS\s*(RFP|IFB)\s*\#\s*\:?\s*(\d+\-\d+)"
    :open_date #"(?i)^(\.*OPEN\:\s*)(\w+\s\d{2},\s\d{4})"

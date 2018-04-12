@@ -5,7 +5,7 @@
             [webtools.config :refer [env]]
             [webtools.exceptions :as w-ex]
             [webtools.models.procurement.server]
-            [webtools.models.procurement.core :refer :all]
+            [webtools.models.procurement.core :as p]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.db.core :as db])) 
@@ -82,11 +82,48 @@
      (unsubscribe-option id :procurement)]]))
 
 (defn notify-changes [new orig {email :email
-                                id :id
-                                :as sub}]
-  (html [:html
-         (conj (changes-email orig new sub)
-               (unsubscribe-option id :procurement))]))
+                                id    :id
+                                contact_person :contact_person
+                                :as   sub}]
+  (html
+   [:html
+    (let [referent-term (if (= :rfp (:type new)) "request" "invitation")]
+      [:body
+       [:p (str "Greetings " contact_person ",")]
+       [:p (str "We would like to notify you that details of " (p/title-string orig) " have been changed.")]
+
+       (if (not= (:open_date orig) (:open_date new))
+         [:p (str "The window for submissions will now begin on "
+                  (util-dates/print-date (:open_date new)) ".  ")])
+
+       (if (not= (:close_date orig) (:close_date new))
+         [:p (str "The window for submissions will now close at "
+                  (util-dates/print-date-at-time (:close_date new)) ".  ")])
+
+       (if (not= (:number orig) (:number new))
+         [:p (str "The " (p/uppercase-type orig)
+                  "# of this " referent-term " has been changed to "
+                  (:number new) ".  ")])
+
+       (if (not= (:title orig) (:title new))
+         [:p (str "The title of this " referent-term " has been changed to: ")
+          [:em (:title new)] ".  "])
+
+       (if (not= (:description orig) (:description new))
+         [:p
+          (str "The description of this " referent-term " has been change to the following: ")
+          [:br]
+          [:br]
+          (:description new)])
+
+       [:br]
+       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+       [:br]
+       [:p "Thank you,"]
+       [:p "Kimo Rosario"]
+       [:p "Procurement & Supply Officer"]
+       [:p "CNMI PSS"]
+       (unsubscribe-option id :procurement)])]))
 
 (defn notify-deletion [pns {:keys [id contact_person] :as sub}]
   (html
@@ -94,7 +131,7 @@
     [:body
      [:p (str "Greetings " contact_person ",")]
      [:p (str "We would like to notify you that "
-              (title-string pns)
+              (p/title-string pns)
               " has been withdrawn from the CNMI PSS website along with any addenda or other documentation.  You will not receive any further emails regarding this matter.")]
      [:br]
      [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
@@ -106,7 +143,7 @@
      (unsubscribe-option id :procurement)]]))
 
 (defn notify-addenda [addendum pns {:keys [id contact_person]}]
-  (let [title (title-string pns)]
+  (let [title (p/title-string pns)]
     (html
      [:html
       [:body
@@ -189,7 +226,7 @@
 (defn new-subscription-request
   [{:keys [company_name contact_person email telephone] :as sub}
    {:keys [type number title] :as pns}]
-  (let [title-str (title-string pns)]
+  (let [title-str (p/title-string pns)]
     (html
      [:html
       [:body
