@@ -11,7 +11,7 @@
             [webtools.exceptions :as w-ex]
             [webtools.json :as json]
             [webtools.models.procurement.core :as p :refer :all]
-            [webtools.util :refer :all]
+            [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.wordpress-api :as wp]))
 
@@ -142,13 +142,13 @@
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
           (let [email         (get-in request [:cookies "wt-email" :value])
-                user-email    (keyed [email])
+                user-email    (util/keyed [email])
                 correct-token ((db/get-user-token user-email) :token)
                 user          (dissoc (db/get-user-info user-email) :id)
                 is-admin      ((db/is-user-admin? user-email) :admin)]
             (if (= token correct-token)
-              (json-response resp/ok (keyed [user is-admin]))
-              (json-response resp/forbidden (keyed [user is-admin]))))
+              (json-response resp/ok (util/keyed [user is-admin]))
+              (json-response resp/forbidden (util/keyed [user is-admin]))))
           (resp/forbidden)))
   
   (GET "/logout" request
@@ -168,7 +168,7 @@
   
   (GET "/api/user" request
        (if-let [email (get-in request [:cookies "wt-email" :value])]
-         (if-let [user (dissoc (db/get-user-info (keyed [email])) :id)]
+         (if-let [user (dissoc (db/get-user-info (util/keyed [email])) :id)]
            (json-response resp/ok {:user user})
            (resp/not-found))
          (resp/bad-request)))
@@ -180,7 +180,7 @@
                admin? :admin} (json/json->data (request :body))
               admin           (truthy admin?)
               id              (java.util.UUID/randomUUID)
-              user            (keyed [email admin roles id])]
+              user            (util/keyed [email admin roles id])]
           (log/info "Created User: " user)
           (query-route db/get-all-users
                        (db/create-user! user)
@@ -189,13 +189,13 @@
   (POST "/api/update-user" request
         (let [{:keys [email roles admin]} (request :body)]
           (query-route db/get-all-users
-                       (db/set-user-roles! (keyed [email roles]))
-                       (db/set-user-admin! (keyed [email admin])))))
+                       (db/set-user-roles! (util/keyed [email roles]))
+                       (db/set-user-admin! (util/keyed [email admin])))))
   
   (POST "/api/delete-user" request
         (let [{:keys [email]} (request :body)]
           (query-route db/get-all-users
-                       (db/delete-user! (keyed [email])))))
+                       (db/delete-user! (util/keyed [email])))))
 
   (POST "/api/update-cert" {:keys [body]}
         (query-route db/get-all-certs (db/update-cert! body)))
