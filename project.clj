@@ -1,4 +1,4 @@
-(defproject cnmipss-webtools "0.3.2"
+(defproject cnmipss-webtools "0.3.3"
 
   :description "Internal Web Application for various CNMI PSS Webtools"
   :url "http://www.cnmipss.org/webtools/"
