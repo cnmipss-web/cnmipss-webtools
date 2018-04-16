@@ -19,7 +19,7 @@
 ;; Private methods
 (defn- -clean-name [name]
   "Clean a name by lower-casing and removing punctuation and spaces"
-  (apply str (remove #((set "/.;,'") %) (cstr/lower-case name))))
+  (cstr/join (remove #((set "/.;,'") %) (cstr/lower-case name))))
 
 (defn- -full-name [record]
   "Clean :first-name and :last-name of punctuation and join first & last names 
@@ -149,15 +149,15 @@
                                   (let [match (->> (r/map (partial -fuzzy-match-data fns) nap-coll)
                                                    (r/filter -fuzzy-match?)
                                                    (r/fold -select-best-jw))]
-                                    (when (< 0 (::jw match))
+                                    (when (pos? (::jw match))
                                       (swap! matched-fns conj match)
                                       (swap! unmatched-fns disj (:fns match))
                                       (swap! unmatched-nap disj (:nap match)))))
 
         match-binned-records (fn match-binned-records [dob {::keys [fns-coll nap-coll]}]
                                (r/foldcat (r/map
-                                            (partial compare-fns-to-nap-coll nap-coll)
-                                            fns-coll)))
+                                           (partial compare-fns-to-nap-coll nap-coll)
+                                           fns-coll)))
 
         run-matching-algo (fn [records] (r/foldcat (r/map match-binned-records records)))]
 

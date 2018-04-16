@@ -45,8 +45,7 @@
                           :on-click delete-cert-fn}]]]))
 
 (defn- flatten-errors [list next-error]
-  (let [certs (->> (cstr/split next-error #"\n")
-                   (mapv read-string))]
+  (let [certs (mapv read-string (cstr/split next-error #"\n"))]
     (concat list certs)))
 
 (defn- sort-certs

@@ -31,7 +31,7 @@
      :id (str "checklist-" id-stem)}
     [:legend.sr-only "User Roles"]
     (for [role const/role-list]
-      (let [role-id (apply str(re-seq #"\S" role))
+      (let [role-id (cstr/join (re-seq #"\S" role))
             id (str role-id "-" id-stem)]
         [-checkbox-group {:key (random-uuid)
                           :id id

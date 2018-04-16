@@ -9,6 +9,9 @@
             #?(:clj  [clj-time.format :as format]
                :cljs [cljs-time.format :as format])))
 
+(defmacro get-version []
+  (System/getProperty "cnmipss-webtools.version"))
+
 (defmacro pull
   "Pull all symbols from ns into the calling ns.  Used to refer-through, providing 
   a wrapper for the target ns."

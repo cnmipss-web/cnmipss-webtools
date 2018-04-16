@@ -12,7 +12,7 @@
 
 (deftest test-wp-auth-token
   (testing "returns a string from wp-token-route containing JWT from wp"
-    (with-stub! [[http/post (constantly {:body (edn->json {:token "JWT from wp"})})]]
+    (with-stub! [[http/post (constantly {:body (data->json {:token "JWT from wp"})})]]
       (let [token (wp/wp-auth-token)]
         (is (= "Bearer JWT from wp" token))
         (is (= 1 (-> http/post calls count)))
@@ -21,8 +21,8 @@
 
 (deftest test-create-media
   (testing "POSTs a file to wordpress server, then GETs information about that file"
-    (with-stub! [[http/post (constantly {:body (edn->json {})})]
-                 [http/get (constantly {:body (edn->json {:source_url "https://dummyl.ink"})})]]
+    (with-stub! [[http/post (constantly {:body (data->json {})})]
+                 [http/get (constantly {:body (data->json {:source_url "https://dummyl.ink"})})]]
       (let [slug (java.util.UUID/randomUUID)
             file_link (wp/create-media "test.pdf" "test/clj/webtools/test/jva-sample.pdf"
                                        :date "today"
@@ -45,9 +45,9 @@
 
 (deftest test-delete-media
   (testing "DELETEs a file from the wordpress server"
-    (with-stub-ns [[clj-http.client (constantly {:body (edn->json [{:id "1234"}])})]]
+    (with-stub-ns [[clj-http.client (constantly {:body (data->json [{:id "1234"}])})]]
       (let [slug "f9869a17-7a64-40a9-ba5b-83e53f855268"
-              url (str (:wp-host env) wp-media-route "/1234")]
+            url (str (:wp-host env) wp-media-route "/1234")]
         (wp/delete-media slug)
 
         (testing "should http/get id for media url"

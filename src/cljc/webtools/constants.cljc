@@ -26,8 +26,6 @@
 (def nap-date-formatter     (f/formatter nap-date-string))
 (def numeric-date-formatter (f/formatter numeric-date-string))
 
-;(def procurement-date-format date-string)
-;(def procurement-datetime-format "MMMM dd, YYYY 'at' h:mm a")
 (def date-at-time-re #"(\w+\s\d+,\s\d{4} at \d+\:\d\d\s\w{2})")
 
 (def fns-nap-ethnicity-mapping {"BA" "Bangladeshi"
@@ -45,4 +43,8 @@
                                 "TR" "Chuukese"
                                 "YA" "Yapese"})
 
-(def duplicate-sub-re #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\"")
+#?(:clj
+   (do
+     (def duplicate-sub-re #"duplicate key value violates unique constraint \"procurement_subscriptions_email_proc_id_key\"")
+
+     (def procurement-description-re #"(?i)Title\:\s*[\p{L}\p{M}\p{P}\n\s\d]*?\n([\p{L}\p{M}\p{P}\n\s\d]+?)\/s\/")))

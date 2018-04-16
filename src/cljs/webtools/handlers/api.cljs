@@ -54,7 +54,6 @@
 
 (defn fns-nap
   [[ok {:keys [body status headers] :as response}]]
-  (when ok
-    (rf/dispatch [:store-fns-nap body]))
-  (when (not ok)
+  (if ok
+    (rf/dispatch [:store-fns-nap body])
     (erro! "Error fetching fns-nap: " status body)))

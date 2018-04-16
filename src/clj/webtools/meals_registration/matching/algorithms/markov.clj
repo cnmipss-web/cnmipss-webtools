@@ -15,7 +15,7 @@
   "Computes how many times did each 'next state' come from a 'previous state'.
   Order must be < (count coll).
   The result type is {previous_state {next_state count}}."
-  (let [zipped  (mapcat #(-multi-prefix-val-list % coll) (range 1 (+ 1 size)))
+  (let [zipped  (mapcat #(-multi-prefix-val-list % coll) (range 1 (inc size)))
         sorted  (sort zipped)
         grouped (group-by first sorted)
         seconds (map (fn [[key pairs]] [key (map second pairs)]) (seq grouped))
@@ -27,10 +27,8 @@
 
 
 (defn seed [fns-records nap-records]
-  (let [all-names (->> (apply conj
-                              (-get-names fns-records)
-                              (-get-names nap-records))
-                       (map clojure.string/lower-case))
+  (let [all-names  (map clojure.string/lower-case
+                        (apply conj (-get-names fns-records) (-get-names nap-records)))
         longest (count (last all-names))]
     (create-counts longest all-names)))
 
@@ -56,7 +54,7 @@
 (defn probs-splitter [probs name]
   (for [i (range 1 (count name))]
     (let [prefix (apply vector (take i name))
-          value (first (first (partition 1 (get (s/split name #"") i))))]
+          value (ffirst (partition 1 (get (s/split name #"") i)))]
       [prefix value (get-in probs [prefix value])])))
 
 (defn compare-names [probs name1 name2]

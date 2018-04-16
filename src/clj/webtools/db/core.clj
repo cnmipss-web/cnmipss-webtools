@@ -1,16 +1,11 @@
 (ns webtools.db.core
   (:require [cheshire.core :refer [generate-string parse-string]]
-            [cheshire.generate :refer [add-encoder]]
             [clj-time.coerce :as c]
-            [clj-time.core :as t]
             [clojure.java.jdbc :as jdbc]
             [clojure.string :as cstr]
-            [clojure.tools.logging :as log]
             [conman.core :as conman]
             [mount.core :refer [defstate]]
-            [webtools.config :refer [env]]
-            [webtools.constants :as const]
-            [webtools.util.dates :as util-dates])
+            [webtools.config :refer [env]])
   (:import (clojure.lang IPersistentMap IPersistentVector)
            (java.sql Array)
            (org.postgresql.util PGobject)))
@@ -74,33 +69,4 @@
   (sql-value [value] (to-pg-json value))
   org.joda.time.DateTime
   (sql-value [value] (c/to-sql-time value)))
-
-(defn make-sql-date
-  [m k]
-  (if (= java.lang.String (type (get m k)))
-    (assoc m k (try
-                 (->>
-                  (get m k)
-                  (util-dates/parse-date)
-                  (c/to-sql-date))
-                 (catch Exception e
-                   (log/error e)
-                   nil)))
-    m))
-
-(defn make-sql-datetime
-  [m k]
-  (if (= java.lang.String (type (get m k)))
-    (assoc m k (try
-                 (->>
-                  (get m k)
-                  (re-find const/date-at-time-re)
-                  (second)
-                  ((fn [date-at-time]
-                     (-> date-at-time util-dates/parse-date-at-time c/to-sql-time))))
-                 (catch Exception e
-                   (log/error e)
-                   nil)))
-    m))
-
 

@@ -23,7 +23,7 @@
   is checked.  Returns a comma seperated list of all check marked roles."
   [id-stem]
   (->> (for [role const/role-list]
-         (if-let [checked (as-> (apply str (re-seq #"\S" role)) role-id
+         (if-let [checked (as-> (cstr/join (re-seq #"\S" role)) role-id
                             (str "#" role-id "-" id-stem)
                             (-> role-id jq (.is ":checked")))]
            role))
@@ -38,7 +38,7 @@
   (fn 
     [event]
     (.preventDefault event) 
-    (let [clean-email (apply str (re-seq #"[\w]" email))
+    (let [clean-email (cstr/join (re-seq #"[\w]" email))
           roles (get-all-roles clean-email)
           admin (-> (str "#admin-" clean-email) jq (.is ":checked"))]
       (ajax/ajax-request {:uri "/webtools/api/update-user"

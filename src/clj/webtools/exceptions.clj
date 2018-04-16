@@ -8,7 +8,7 @@
   (let [sw (java.io.StringWriter.)
         pw (java.io.PrintWriter. sw)]
     (pprint exception pw)
-    (.toString sw)))
+    (str sw)))
 
 
 ;; Implementations of protocols defined in webtools.exceptions.core

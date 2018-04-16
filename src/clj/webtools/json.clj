@@ -1,11 +1,9 @@
 (ns webtools.json
   (:require [cheshire.core :as json]
             [cheshire.generate :refer [add-encoder]]
-            [clojure.walk :as walk]
-            [clj-time.coerce :as c]
             [clj-time.core :as t]
-            [webtools.util.dates :as util-dates]
-            ))
+            [clojure.walk :as walk]
+            [webtools.util.dates :as util-dates]))
 
 
 ;; Create custom JSON encoders that we will use
@@ -19,13 +17,9 @@
 
 (add-encoder java.lang.Class
              (fn [class jg]
-               (.writeString jg (.toString class))))
+               (.writeString jg (str class))))
 
-                                        ;(add-encoder compojure.core.)
+(defn json->data [string]   (walk/keywordize-keys (json/parse-string string)))
 
-
-(defn json->edn [string]   (walk/keywordize-keys (json/parse-string string)))
-
-(def edn->json
-  (comp json/generate-string))
+(defn data->json [data] (json/generate-string data))
 

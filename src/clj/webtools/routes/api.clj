@@ -1,25 +1,26 @@
 (ns webtools.routes.api
   (:require [clojure.java.io :as io]
-            [clojure.tools.logging :as log]
             [clojure.string :as cstr]
+            [clojure.tools.logging :as log]
             [compojure.core :refer [GET POST defroutes]]
             [ring.util.http-response :as resp]
             [webtools.config :refer [env]]
             [webtools.constants :as const]
             [webtools.db.core :as db]
             [webtools.email :as email]
+            [webtools.exceptions :as w-ex]
             [webtools.json :as json]
             [webtools.models.procurement.core :as p :refer :all]
-            [webtools.util :refer :all]
-            [webtools.wordpress-api :as wp]
-            [webtools.exceptions :as w-ex]))
+            [webtools.util :as util]
+            [webtools.util.dates :as util-dates]
+            [webtools.wordpress-api :as wp]))
 
 (def truthy (comp some? #{"true" true}))
 
 (defn json-response
   "Pass a JSON body to supplied ring response fn"
   [ring-response body]
-  (-> (json/edn->json body)
+  (-> (json/data->json body)
       ring-response
       (resp/header "Content-Type" "application/json")))
 
@@ -83,7 +84,7 @@
                       person
                       email
                       tel
-                      proc_id]} (json/json->edn body)
+                      proc_id]} (json/json->data body)
               pid               (p/make-uuid proc_id)
               existing-subs     (p/get-subs-from-db pid)
               subscription      {:id                  (java.util.UUID/randomUUID)
@@ -128,7 +129,7 @@
   (GET "/api/unsubscribe-procurement/:id" [id :as request]
        (try
          (let [result (db/deactivate-subscription {:id (make-uuid id)})]
-           (-> (resp/found "/unsubscribed")
+           (-> (resp/found (str "/unsubscribed/" id))
                (resp/set-cookie "wt-success" "true" {:max-age 60 :path "/unsubscribed"})
                (resp/set-cookie "wt-data" (pr-str result) {:max-age 60 :path "/unsubscribed"})))
          (catch Exception ex
@@ -141,14 +142,13 @@
   (POST "/api/verify-token" request
         (if-let [token (get-in request [:cookies "wt-token" :value])]
           (let [email         (get-in request [:cookies "wt-email" :value])
-                user-email    (keyed [email])
+                user-email    (util/keyed [email])
                 correct-token ((db/get-user-token user-email) :token)
-                user          (-> (db/get-user-info user-email)
-                                  (dissoc :id))
+                user          (dissoc (db/get-user-info user-email) :id)
                 is-admin      ((db/is-user-admin? user-email) :admin)]
             (if (= token correct-token)
-              (json-response resp/ok (keyed [user is-admin]))
-              (json-response resp/forbidden (keyed [user is-admin]))))
+              (json-response resp/ok (util/keyed [user is-admin]))
+              (json-response resp/forbidden (util/keyed [user is-admin]))))
           (resp/forbidden)))
   
   (GET "/logout" request
@@ -168,8 +168,7 @@
   
   (GET "/api/user" request
        (if-let [email (get-in request [:cookies "wt-email" :value])]
-         (if-let [user (-> (db/get-user-info (keyed [email]))
-                           (dissoc :id))]
+         (if-let [user (dissoc (db/get-user-info (util/keyed [email])) :id)]
            (json-response resp/ok {:user user})
            (resp/not-found))
          (resp/bad-request)))
@@ -178,10 +177,10 @@
   
   (POST "/api/create-user" request
         (let [{:keys  [email roles]
-               admin? :admin} (json/json->edn (request :body))
+               admin? :admin} (json/json->data (request :body))
               admin           (truthy admin?)
               id              (java.util.UUID/randomUUID)
-              user            (keyed [email admin roles id])]
+              user            (util/keyed [email admin roles id])]
           (log/info "Created User: " user)
           (query-route db/get-all-users
                        (db/create-user! user)
@@ -190,13 +189,13 @@
   (POST "/api/update-user" request
         (let [{:keys [email roles admin]} (request :body)]
           (query-route db/get-all-users
-                       (db/set-user-roles! (keyed [email roles]))
-                       (db/set-user-admin! (keyed [email admin])))))
+                       (db/set-user-roles! (util/keyed [email roles]))
+                       (db/set-user-admin! (util/keyed [email admin])))))
   
   (POST "/api/delete-user" request
         (let [{:keys [email]} (request :body)]
           (query-route db/get-all-users
-                       (db/delete-user! (keyed [email])))))
+                       (db/delete-user! (util/keyed [email])))))
 
   (POST "/api/update-cert" {:keys [body]}
         (query-route db/get-all-certs (db/update-cert! body)))
@@ -205,9 +204,8 @@
         (query-route db/get-all-certs (db/delete-cert! body)))
 
   (POST "/api/update-jva" {:keys [body]}
-        (let [jva (-> body
-                      (db/make-sql-date :open_date)
-                      (db/make-sql-date :close_date))]
+        (let [jva (-> (update body :open_date util-dates/parse-date)
+                      (update :close_date util-dates/parse-date-at-time))]
           (query-route db/get-all-jvas (db/update-jva! jva))))
 
   (POST "/api/delete-jva" {:keys [body]}

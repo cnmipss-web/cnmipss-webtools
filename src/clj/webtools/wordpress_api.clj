@@ -13,11 +13,11 @@
         {:keys [status body error] :as response}
         (http/post (str wp-host wp-token-route)
                    {:headers {"Content-Type" "application/json"}
-                    :body (json/edn->json {:username (env :wp-un)
-                                           :password (env :wp-pw)})})]
+                    :body (json/data->json {:username (env :wp-un)
+                                            :password (env :wp-pw)})})]
     (if error
       (throw error)
-      (str "Bearer " (get (json/json->edn body) "token")))))
+      (str "Bearer " (:token (json/json->data body))))))
 
 (defn reduce-media-opts
   [acc [key val]]
@@ -38,7 +38,7 @@
             file-info (:body (http/get (get headers "Location")
                                        {:headers {"Authorization" (wp-auth-token)}}))]
         (if error (throw error))
-        (-> file-info json/json->edn :source_url))
+        (-> file-info json/json->data :source_url))
       (catch Exception e
         (log/error e)))))
 
@@ -47,12 +47,12 @@
   (let [{:keys [wp-host]} env
         media-url (str wp-host wp-media-route "?slug=" slug)
         {:keys [body status error]} (http/get media-url)
-        {:keys [id]} (-> body json/json->edn clojure.walk/keywordize-keys first)]
+        {:keys [id]} (-> body json/json->data clojure.walk/keywordize-keys first)]
     (try
       (http/delete (str wp-host wp-media-route "/" id)
                    {:headers {"Content-Type" "application/json"
                               "Authorization" (wp-auth-token)}
-                    :body (json/edn->json {:force true})
+                    :body (json/data->json {:force true})
                     :error-handler (fn [e] (log/error e))})
       (catch Exception e
         (log/error e)))))
