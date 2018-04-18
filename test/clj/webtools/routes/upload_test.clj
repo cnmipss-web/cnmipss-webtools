@@ -32,7 +32,7 @@
   (testing "POST /upload/certification-csv"
     (testing "should store certifications in the database"
       (let [csv-file (file "test/clj/webtools/test/certificates-clean.csv")
-            {:keys [status body headers error] :as response}
+            {:keys [status body headers] :as response}
             (auth-req :post "/upload/certification-csv"
               (assoc :params {:file {:tempfile csv-file
                                      :file-name "certificates-clean.csv"
@@ -42,7 +42,6 @@
             success-cookie (cookie->map (first cookies))
             role-cookie (cookie->map (second cookies))]
         (is (= 302 status))
-        (is (nil? error))
         (is (=  "/app" (:anchor redirect-url)))
         (is (= "true" (get success-cookie "wt-success")))
         (is (= "Certification" (get role-cookie "wt-role")))
@@ -63,7 +62,7 @@
         (is (= 302 status))
         (is (=  "/app" (:anchor redirect-url)))
         (is (= "" body))
-        (is (= "A database collision has occurred between certification BI-003-2006 for Victor Jones and BI-003-2006 for Terra Allen.  Please correct the error."
+        (is (= "A database collision has occurred with certification BI-003-2006 for Victor Jones and BI-003-2006 for Terra Allen.  Please correct the error."
                (get  error "wt-error")))
         (is (= "false"
                (get  success "wt-success")))))
@@ -123,8 +122,8 @@
               spec (file "test/clj/webtools/test/rfp-sample.pdf")
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
-                        (assoc :params {:ann-file {:tempfile pdf :filename "rfp-sample.pdf" :size (.length pdf)}
-                                        :spec-file {:tempfile spec :filename "rfp-specs.pdf" :size (.length spec)}}))
+                (assoc :params {:ann-file {:tempfile pdf :filename "rfp-sample.pdf" :size (.length pdf)}
+                                :spec-file {:tempfile spec :filename "rfp-specs.pdf" :size (.length spec)}}))
               cookies (get headers "Set-Cookie")
               success-cookie (cookie->map (first cookies))
               role-cookie (cookie->map (second cookies))]
@@ -149,8 +148,8 @@
               spec (file "test/clj/webtools/test/rfp-sample.pdf")
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
-                        (assoc :params {:ann-file {:tempfile pdf :filename "ifb-sample.pdf" :size (.length pdf)}
-                                        :spec-file {:tempfile spec :filename "ifb-specs.pdf" :size (.length spec)}}))
+                (assoc :params {:ann-file {:tempfile pdf :filename "ifb-sample.pdf" :size (.length pdf)}
+                                :spec-file {:tempfile spec :filename "ifb-specs.pdf" :size (.length spec)}}))
               cookies (get headers "Set-Cookie")
               success-cookie (cookie->map (first cookies))
               role-cookie (cookie->map (second cookies))]
@@ -173,8 +172,8 @@
         (let [pdf (file "test/clj/webtools/test/rfp-malformed-dates.pdf")
               {:keys [status body headers error params] :as response}
               (auth-req :post "/upload/procurement-pdf"
-                        (assoc :params {:ann-file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}
-                                        :spec-file {:tempfile pdf :filename "sample-spec.pdf" :size (.length pdf)}}))
+                (assoc :params {:ann-file {:tempfile pdf :filename "sample-rfp.pdf" :size (.length pdf)}
+                                :spec-file {:tempfile pdf :filename "sample-spec.pdf" :size (.length pdf)}}))
               [success-cookie
                error-cookie
                code-cookie] (map cookie->map (get headers "Set-Cookie"))]
@@ -186,7 +185,7 @@
             (is (= "false" (get success-cookie "wt-success"))))
           
           (testing "should supply an error code via cookie"
-            (is (= "bad-date" (get code-cookie "wt-code"))))
+            (is (= "bad-sql-date" (get code-cookie "wt-code"))))
 
           (testing "should supply an error message via cookie"
             (let [cookies (-> response :headers (get "Set-Cookie"))]
