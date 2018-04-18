@@ -1,6 +1,6 @@
 (ns webtools.exceptions.core)
 
-(defprotocol generate-ex-info
+(defprotocol wrap-exceptions
   (wrap-ex [ex data] "Wrap a Java or JS runtime Exception or Error with clojure.lang.ExceptionInfo"))
 
 (defprotocol create-ex-info
