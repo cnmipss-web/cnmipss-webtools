@@ -1,5 +1,6 @@
 (ns webtools.error-handler.core
-  (:require [webtools.error-handler.ex-info :as info-error]
+  (:require [webtools.constants.exceptions :as cex]
+            [webtools.error-handler.ex-info :as info-error]
             [webtools.error-handler.sql :as sql-error]))
 
 (defprotocol HandleErrors
@@ -20,5 +21,5 @@
     (info-error/msg err))
   
   Exception
-  (code [err] "unknown-err")
-  (msg [err] "An unknown error occurred.  Please contact the developer."))
+  (code [err] cex/unknown-error-code)
+  (msg [err] cex/unknown-error-msg))

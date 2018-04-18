@@ -1,5 +1,8 @@
 (ns webtools.constants.exceptions)
 
+(def unknown-error-code "unknown-error")
+(def unknown-error-msg  "An unknown error occurred.  Please contact the developer.")
+
 (def bad-sql-date-code "bad-sql-date")
 (def bad-sql-date-msg "One of the required dates is incorrectly formatted.")
 
