@@ -6,9 +6,9 @@
 
 (defprotocol procurement-to-db
   "Methods for manipulating procurement records"
-  (save-to-db     [pns] "Save a record to the DB")
-  (change-in-db   [pns] "Update a record in the DB")
-  (delete-from-db [pns] "Delete a record from the DB"))
+  (save-to-db!     [pns] "Save a record to the DB")
+  (change-in-db!   [pns] "Update a record in the DB")
+  (delete-from-db! [pns] "Delete a record from the DB"))
 
 (defprotocol procurement-from-db
   "Methods to retrive procurement records from DB"
