@@ -1,4 +1,5 @@
 (ns webtools.routes.upload.fns-nap
+  "Provides public routines for processing uploaded files related to the FNS role."
   (:require [clojure.java.io :as io]
             [clojure.spec.alpha :as spec]
             [clojure.string :as cstr]
