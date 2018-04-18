@@ -1,47 +1,41 @@
-(ns webtools.error-handler.ex-info)
+(ns webtools.error-handler.ex-info
+  (:require [clojure.string :as cstr]))
 
-(defprotocol ReportError
-  (code [x] "Return an error-code based on the type of error in terms of our data model.")
-  (msg [x]  "A human friendly error message based on the type of error in terms of our data model"))
+(defmulti code
+  (fn [error] (:err-type (ex-data error))))
 
-(defn- cert-collision-error-msg [error]
-  (let [{:keys [orig-cert new-cert]} (ex-data error)]
-    (str "A database collision has occurred between certification "
-         (:cert_no orig-cert)
-         " for " (:first_name orig-cert) " " (:last_name orig-cert)
-         " and " (:cert_no new-cert) " for " (:first_name new-cert) " " (:last_name new-cert)
-         ".  Please correct the error.")))
+(defmulti msg
+  (fn [error] (:err-type (ex-data error))))
 
-(defrecord cert-collision-error [error]
-  ReportError
-  (code [{:keys [error]}] "cert-collision")
-  (msg  [{:keys [error]}]
-    (let [{:keys [err-type errors]} (ex-data error)]
-      (clojure.string/join
-       "\n"
-       (map
-        cert-collision-error-msg
-        errors)))))
+;; Implementations for :cert-collision
+(defmethod code :cert-collision [error]
+  "cert-collision")
 
-(defrecord unknown-error [error]
-  ReportError
-  (code [x] "unknown-info")
-  (msg  [x] "Unknown INFO error.  Please contact the developer."))
+(defmethod msg :cert-collision [error]
+  (let [{:keys [err-type errors]} (ex-data error)]
+    (cstr/join
+     "\n"
+     (map
+      (fn cert-collision-error-msg [error]
+        (let [{:keys [orig-cert new-cert]} (ex-data error)]
+          (str "A database collision has occurred with certification "
+               (:cert_no orig-cert)
+               " for " (:first_name orig-cert) " " (:last_name orig-cert)
+               " and " (:cert_no new-cert) " for " (:first_name new-cert) " " (:last_name new-cert)
+               ".  Please correct the error.")))
+      errors))))
 
-(defn cert-collision? [error]
-  (= :cert-collision (:err-type (ex-data error))))
+;; Implementations for :wordpress-upload
+(defmethod code :wordpress-upload [error]
+  "wordpress-upload")
 
-(defn err-type
-  "Determine the type of error in terms of our data model"
-  [error]
-  (cond
-    (cert-collision? error) (->cert-collision-error error)
-    :else (->unknown-error error)))
+(defmethod msg :wordpress-upload [error]
+  (let [{:keys [filename]} (ex-data error)]
+    (str "Error uploading " filename " to the public website.  Please contact the webmaster.")))
 
+;; Implementations for :default
+(defmethod code :default [error]
+  "unknown-info")
 
-(extend-protocol ReportError
-  clojure.lang.ExceptionInfo
-  (code [err]
-    (code (err-type err)))
-  (msg  [err]
-    (msg  (err-type err))))
+(defmethod msg :default [error]
+  "Unknown INFO error.  Please contact the developer.")

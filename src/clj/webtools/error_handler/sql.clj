@@ -1,34 +1,23 @@
-(ns webtools.error-handler.sql)
-
+(ns webtools.error-handler.sql
+  (:require [webtools.constants.exceptions :as cex]))
 
 ;;Regexes to identify source of sql errors
 (def open_date_null #"null value in column \"open_date\" violates not-null constraint")
 
-(defprotocol ReportError
-  (code [x] "Return an error-code based on the type of error in terms of our data model.")
-  (msg [x]  "A human friendly error message based on the type of error in terms of our data model"))
-
-(defrecord malformed-date-error [error]
-  ReportError
-  (code [x] "bad-date")
-  (msg [x]  "One of the required dates is incorrectly formatted."))
-
-(defrecord unknown-error [error]
-  ReportError
-  (code [x] "unknown-sql")
-  (msg  [x] "Unknown SQL error.  Please contact the developer."))
-
-(defn err-type
-  "Determine the type of error in terms of our data model"
-  [error]
+(defn- dispatch-fn [error]
   (let [message (.getMessage error)]
     (cond
-      (re-seq open_date_null message) (->malformed-date-error error)
-      "" (->unknown-error error))))
+      (re-seq open_date_null message) :malformed-date-error
+      "" :default)))
 
-(extend-protocol ReportError
-  java.sql.BatchUpdateException
-  (code [err]
-    (code (err-type err)))
-  (msg [err]
-    (msg (err-type err))))
+(defmulti code dispatch-fn)
+(defmulti msg dispatch-fn)
+
+;; Implementations for :malformed-date-error
+(defmethod code :malformed-date-error [error] cex/bad-sql-date-code)
+(defmethod msg :malformed-date-error [error] cex/bad-sql-date-msg)
+
+;; Implementations for :default
+(defmethod code :default [error] cex/unknown-sql-code)
+(defmethod msg :default [error] cex/unknown-sql-msg)
+
