@@ -10,7 +10,7 @@
             [webtools.email :as email]
             [webtools.exceptions :as w-ex]
             [webtools.json :as json]
-            [webtools.models.procurement.core :as p :refer :all]
+            [webtools.models.procurement.core :as p]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.wordpress-api :as wp]))
@@ -53,7 +53,7 @@
 (defn clear-procurement
   "Delete all records associated with a PSAnnouncement id and delete WP media files associated with that id"
   [type {:keys [id] :as body}]
-  (let [uuid (make-uuid id)
+  (let [uuid (p/make-uuid id)
         query-map {:proc_id uuid}]
     (try
       ;; Delete announcement file and spec file from WP media files
@@ -96,7 +96,7 @@
                                  :subscription_number (count existing-subs)}]
           (try
             (let [created (db/create-subscription! subscription)
-                  pns     (get-pns-from-db pid)]
+                  pns     (p/get-pns-from-db pid)]
               (future (email/confirm-subscription subscription pns))
               (future (email/notify-procurement   subscription pns))
               (json-response resp/ok created))
@@ -128,7 +128,7 @@
 
   (GET "/api/unsubscribe-procurement/:id" [id :as request]
        (try
-         (let [result (db/deactivate-subscription {:id (make-uuid id)})]
+         (let [result (db/deactivate-subscription {:id (p/make-uuid id)})]
            (-> (resp/found (str "/unsubscribed/" id))
                (resp/set-cookie "wt-success" "true" {:max-age 60 :path "/unsubscribed"})
                (resp/set-cookie "wt-data" (pr-str result) {:max-age 60 :path "/unsubscribed"})))
@@ -220,20 +220,20 @@
                      (db/delete-jva! body)))
 
   (POST "/api/update-procurement" {:keys [body]}
-        (let [new  (convert-pns-from-map body)
-              orig (get-pns-from-db (:id new))]
+        (let [new  (p/convert-pns-from-map body)
+              orig (p/get-pns-from-db (:id new))]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :update orig new))
-                       (change-in-db new))))
+                       (p/change-in-db! new))))
 
   (POST "/api/delete-rfp" {:keys [body]}
-        (let [rfp (convert-pns-from-map body)]
+        (let [rfp (p/convert-pns-from-map body)]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :delete :rfps rfp))
                        (clear-procurement :rfp rfp))))
 
   (POST "/api/delete-ifb" {:keys [body]}
-        (let [ifb (convert-pns-from-map body)]
+        (let [ifb (p/convert-pns-from-map body)]
           (query-route get-all-procurement
                        (future (email/notify-subscribers :delete :ifbs ifb))
                        (clear-procurement :ifb ifb))))
