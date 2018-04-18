@@ -53,7 +53,7 @@
       (testing "method save-to-db"
         (testing "should save PSAnnouncement to DB"
           (doseq [pns valid-pns]
-            (p/save-to-db pns)
+            (p/save-to-db! pns)
             (let [record (p/get-pns-from-db (:id pns))]
               (doseq [[k v] pns]
                 (is (= v (get record k))))))))
@@ -62,7 +62,7 @@
         (testing "should save changes in PSAnnouncement to DB"
           (doseq [pns (for [orig valid-pns]
                         (assoc orig :close_date (time/now)))]
-            (p/change-in-db pns)
+            (p/change-in-db! pns)
             (let [record (p/get-pns-from-db (:id pns))]
               (doseq [[k v] pns]
                 (is (= v (get record k))))))))
@@ -70,7 +70,7 @@
       (testing "method delete-from-db"
         (testing "should remove a PSAnnouncement from the DB"
           (doseq [pns valid-pns]
-            (p/delete-from-db pns)
+            (p/delete-from-db! pns)
             (let [record (p/get-pns-from-db (:id pns))]
               (is (nil? record)))))))))
 
