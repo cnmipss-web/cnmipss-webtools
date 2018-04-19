@@ -3,7 +3,7 @@
             [clj-time.core :as t]
             [clojure.test :refer :all]
             [webtools.cron.jobs :as jobs]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email :as email]
             [webtools.models.procurement.core :as p]
             [webtools.test.fixtures :as fixtures]

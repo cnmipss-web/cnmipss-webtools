@@ -3,7 +3,7 @@
   (:require [cemerick.url :as curl]
             [clojure.string :as cstr]
             [webtools.constants :as const]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email :as email]
             [webtools.exceptions.procurement :as ex]
             [webtools.models.procurement.core :as p]

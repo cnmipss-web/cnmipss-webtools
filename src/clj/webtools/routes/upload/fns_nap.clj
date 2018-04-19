@@ -5,7 +5,7 @@
             [clojure.string :as cstr]
             [clojure.tools.logging :as log]
             [dk.ative.docjure.spreadsheet :as ss]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.meals-registration.core
              :refer [->FNSRegistration
                      ->NAPRegistration]

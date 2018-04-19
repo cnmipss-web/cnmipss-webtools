@@ -3,7 +3,7 @@
             [compojure.core :refer [GET defroutes]]
             [ring.util.http-response :as response]
             [webtools.config :refer [env]]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.layout :as layout]
             [webtools.models.procurement.core :refer [make-uuid]]))
 

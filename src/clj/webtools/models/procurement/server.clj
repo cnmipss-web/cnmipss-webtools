@@ -2,7 +2,7 @@
   (:require [clojure.string :as cstr]
             [clojure.tools.logging :as log]
             [webtools.constants :as const]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.models.procurement.core :as p :refer :all]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]

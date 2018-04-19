@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as spec]
             [clojure.tools.logging :as log]
             [postal.core :refer [send-message]]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email.templates :as templates]
             [webtools.exceptions :as w-ex]
             [webtools.models.procurement.core :as p]

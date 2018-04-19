@@ -1,4 +1,4 @@
-(ns webtools.db.core
+(ns webtools.db
   (:require [cheshire.core :refer [generate-string parse-string]]
             [clj-time.coerce :as c]
             [clojure.java.jdbc :as jdbc]

@@ -7,7 +7,7 @@
             [webtools.auth :as auth]
             [webtools.config :refer [env]]
             [webtools.constants :refer [max-cookie-age]]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.util :refer :all]))
 
 (defn config<-

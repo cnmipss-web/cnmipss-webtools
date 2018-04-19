@@ -4,7 +4,7 @@
             [clojure.string :as cstr]
             [clojure.test :refer :all]
             [ring.mock.request :as mock]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email :as email]
             [webtools.handler :refer [app]]
             [webtools.models.procurement.core :refer :all]

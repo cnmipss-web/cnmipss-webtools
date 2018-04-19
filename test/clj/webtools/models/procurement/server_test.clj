@@ -3,7 +3,7 @@
             [clojure.spec.alpha :as spec]
             [clj-time.core :as time]
             [clj-time.coerce :as c]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.test.fixtures :as fixtures]
             [webtools.models.procurement.server]
             [webtools.models.procurement.core :as p]

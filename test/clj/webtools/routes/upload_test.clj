@@ -14,7 +14,7 @@
             [webtools.json :refer :all]
             [webtools.config :refer [env]]
             [webtools.email :as email]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.constants :as const]
             [webtools.test.constants :as test-const]
             [webtools.test.fixtures :as fixtures]

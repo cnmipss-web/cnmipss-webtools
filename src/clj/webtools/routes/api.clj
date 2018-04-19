@@ -6,7 +6,7 @@
             [ring.util.http-response :as resp]
             [webtools.config :refer [env]]
             [webtools.constants :as const]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email :as email]
             [webtools.exceptions :as w-ex]
             [webtools.json :as json]

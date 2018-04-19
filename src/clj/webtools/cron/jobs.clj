@@ -1,6 +1,6 @@
 (ns webtools.cron.jobs
   (:require [clj-time.core :as t]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email :as email]
             [webtools.models.procurement.core :as p]))
 

@@ -3,7 +3,7 @@
             [webtools.util.dates :as util-dates]
             [clj-time.core :as t]
             [clojure.tools.logging :as log]
-            [webtools.db.core :as db])
+            [webtools.db :as db])
   (:import [webtools.models.certification.core CertificationRecord]))
 
 (extend-type CertificationRecord

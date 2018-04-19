@@ -2,7 +2,7 @@
   (:require [clojure.java.jdbc :as sql]
             [clojure.spec.test.alpha :as stest]
             [mount.core :as mount]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.spec.certification]
             [webtools.spec.core]
             [webtools.spec.dates]

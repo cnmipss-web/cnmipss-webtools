@@ -1,7 +1,7 @@
 (ns webtools.routes.upload.hro
   "Provides public routines for processing uploaded files related to the HRO role."
   (:require [clojure.string :as cstr]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
             [webtools.wordpress-api :as wp])

@@ -13,7 +13,7 @@
             [ring.middleware.multipart-params :refer [wrap-multipart-params]]
             [ring.middleware.webjars :refer [wrap-webjars]]
             [webtools.config :refer [env]]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.env :refer [defaults]]
             [webtools.layout :refer [*app-context* error-page]])
   (:import (javax.servlet ServletContext)))

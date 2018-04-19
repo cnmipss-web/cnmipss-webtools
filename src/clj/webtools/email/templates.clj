@@ -3,7 +3,7 @@
             [clojure.string :as cstr]
             [hiccup.core :refer [html]]
             [webtools.config :refer [env]]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.exceptions :as w-ex]
             [webtools.models.procurement.core :as p]
             [webtools.util :as util]

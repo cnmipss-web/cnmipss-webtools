@@ -2,7 +2,7 @@
   "Provides public routines for processing uploaded files related to the Certification role."
   (:require [clojure.data :refer [diff]]
             [clojure.data.csv :as csv]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.exceptions.certification :as ex]
             [webtools.models.certification.core :as cert]
             [webtools.models.certification.server]))

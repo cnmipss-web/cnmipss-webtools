@@ -3,7 +3,7 @@
             [clj-time.core :as t]
             [clojure.test :refer :all]
             [postal.core :refer [send-message]]
-            [webtools.db.core :as db]
+            [webtools.db :as db]
             [webtools.email :as email :refer [notify-addenda
                                               notify-deletion]]
             [webtools.email.templates :as etemp]
