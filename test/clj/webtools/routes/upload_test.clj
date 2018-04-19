@@ -7,6 +7,7 @@
             [cemerick.url :as curl]
             [ring.mock.request :as mock]
             [bond.james :refer [calls with-spy with-stub!]]
+            [clj-time.core :as t]
             [clj-time.format :as f]
             [webtools.handler :refer :all]
             [webtools.util :refer :all]
@@ -95,23 +96,107 @@
         (is (equal-props? S-04-095 S-04-095-renewal :first_name :last_name :cert_type ))
         (is (not-equal-props?  S-04-095 S-04-095-renewal :start_date :expiry_date :cert_no))))))
 
-(deftest test-upload-hro
+(deftest test-upload-jva-pdf
   (testing "POST /upload/jva-pdf"
     (with-stub! [[wp/create-media (constantly "http://nil")]]
       (let [pdf (file "test/clj/webtools/test/jva-sample.pdf")
             {:keys [status body headers]}
             (auth-req :post "/upload/jva-pdf"
-                      (assoc :params {:file {:tempfile pdf :filename "jva-sample.pdf" :size (.length pdf)}}))]
+              (assoc :params {:file {:tempfile pdf :filename "jva-sample.pdf" :size (.length pdf)}}))]
         (testing "should redirect after successful upload"
           (is (= 302 status)))
 
         (testing "should store jva info in DB"
           (let [jva (db/get-jva {:announce_no "PSS-2017-041"})]
+            (is (= "Truant Officer (Re-Announcement II)" (:position jva)))
+            (is (= "PAY LEVEL/GRADE: 20 Step(s): 02; $15,105.87 Per Annum" (:salary jva)))
             (is (= (util-dates/parse-date "August 4, 2017") (:open_date jva)))
             (is (= (util-dates/parse-date "August 18, 2017") (:close_date jva)))))
 
         (testing "should create wp media"
           (is (= 1 (-> wp/create-media calls count)))
+          (println (-> wp/create-media calls first :args))
+          (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))
+
+      (let [pdf (file "test/clj/webtools/test/jva-sample-until-filled.pdf")
+            {:keys [status body headers]}
+            (auth-req :post "/upload/jva-pdf"
+              (assoc :params {:file {:tempfile pdf :filename "jva-sample-until-filled.pdf" :size (.length pdf)}}))]
+        (testing "should redirect after successful upload"
+          (is (= 302 status)))
+
+        (testing "should store jva info in DB"
+          (let [jva (db/get-jva {:announce_no "PSS-2018-015"})]
+            (is (= "Early Head Start Teacher Aide" (:position jva)))
+            (is (= "Pay Level/Grade: I; Step(s): 01; $22,692.80 Per Annum" (:salary jva)))
+            (is (= (util-dates/parse-date "April 18, 2018") (:open_date jva)))
+
+            (testing "close_date should be nil if jva stated \"Until Filled\"")
+            (is (= (util-dates/parse-date nil) (:close_date jva)))))
+
+        (testing "should create wp media"
+          (is (= 2 (-> wp/create-media calls count)))
+          (is (= java.util.UUID (-> wp/create-media calls first :args last type))))))))
+
+(deftest test-upload-reannounce-jva
+  (testing "POST /upload/reannounce-jva"
+    (with-stub! [[wp/create-media (constantly "http://nil")
+                  wp/delete-media (constantly nil)]]
+      (let [existing-jva (db/create-jva! {:id          (java.util.UUID/randomUUID)
+                                          :announce_no "PSS-2017-041"
+                                          :position    ""
+                                          :status      false
+                                          :open_date   (t/now)
+                                          :close_date  nil
+                                          :salary      ""
+                                          :location    ""
+                                          :file_link   ""})
+            pdf          (file "test/clj/webtools/test/jva-sample.pdf")
+            {:keys [status body headers]}
+            (auth-req :post "/upload/reannounce-jva"
+              (assoc :params {:file {:tempfile pdf :filename "jva-sample.pdf" :size (.length pdf)}}))]
+        (testing "should redirect after successful upload"
+          (is (= 302 status)))
+
+        (testing "should store jva info in DB"
+          (let [jva (db/get-jva {:announce_no "PSS-2017-041"})]
+            (is (= "Truant Officer (Re-Announcement II)" (:position jva)))
+            (is (= "PAY LEVEL/GRADE: 20 Step(s): 02; $15,105.87 Per Annum" (:salary jva)))
+            (is (= (util-dates/parse-date "August 4, 2017") (:open_date jva)))
+            (is (= (util-dates/parse-date "August 18, 2017") (:close_date jva)))))
+
+        (testing "should create wp media"
+          (is (= 1 (-> wp/create-media calls count)))
+          (println (-> wp/create-media calls first :args))
+          (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))
+
+      (let [existing-jva (db/create-jva! {:id          (java.util.UUID/randomUUID)
+                                          :announce_no "PSS-2018-015"
+                                          :position    ""
+                                          :status      false
+                                          :open_date   (t/now)
+                                          :close_date  nil
+                                          :salary      ""
+                                          :location    ""
+                                          :file_link   ""})
+            pdf (file "test/clj/webtools/test/jva-sample-until-filled.pdf")
+            {:keys [status body headers]}
+            (auth-req :post "/upload/reannounce-jva"
+              (assoc :params {:file {:tempfile pdf :filename "jva-sample-until-filled.pdf" :size (.length pdf)}}))]
+        (testing "should redirect after successful upload"
+          (is (= 302 status)))
+
+        (testing "should store jva info in DB"
+          (let [jva (db/get-jva {:announce_no "PSS-2018-015"})]
+            (is (= "Early Head Start Teacher Aide" (:position jva)))
+            (is (= "Pay Level/Grade: I; Step(s): 01; $22,692.80 Per Annum" (:salary jva)))
+            (is (= (util-dates/parse-date "April 18, 2018") (:open_date jva)))
+
+            (testing "close_date should be nil if jva stated \"Until Filled\"")
+            (is (= (util-dates/parse-date nil) (:close_date jva)))))
+
+        (testing "should create wp media"
+          (is (= 2 (-> wp/create-media calls count)))
           (is (= java.util.UUID (-> wp/create-media calls first :args last type))))))))
 
 (deftest test-upload-p&s

@@ -33,54 +33,60 @@
                 close
                 "until filled.")))
 
+(defn- format-close-date [date]
+  (if-not (re-seq #"(?i)until filled" date)
+    (util-dates/parse-date date)
+    nil))
+
+(defn- make-jva-record [text]
+  (as-> (reduce jva-reducer {} text) jva
+    (update jva :open_date util-dates/parse-date)
+    (update jva :close_date format-close-date)
+    (util/make-status jva)
+    (assoc jva :id (java.util.UUID/randomUUID))))
+
 (defn process-jva-pdf
   ""
   [params]
   (let [{:keys [file]} params]
     (if (= (type file) clojure.lang.PersistentArrayMap)
-      (let [{:keys [tempfile size filename]} file
-            pdf-document (PDDocument/load tempfile)
-            jva (.getText (PDFTextStripper.) pdf-document)
-            text-list (cstr/split jva #"\n")
-            jva-record (as-> (reduce jva-reducer {} text-list) jva
-                         (update jva :open_date util-dates/parse-date)
-                         (update jva :close_date util-dates/parse-date)
-                         (util/make-status jva)
-                         (assoc jva :id (java.util.UUID/randomUUID))
-                         (assoc jva :file_link
-                                (wp/create-media filename tempfile
-                                                 :title (:position jva)
-                                                 :alt_text (str "Job Vacancy Announcement for "
-                                                                (:position jva))
-                                                 :description (jva-desc jva)
-                                                 :slug (:id jva))))]
+      (let [{:keys [tempfile
+                    size
+                    filename]} file
+            pdf-document       (PDDocument/load tempfile)
+            jva                (.getText (PDFTextStripper.) pdf-document)
+            text-list          (cstr/split jva #"\n")
+            jva-record         (as-> (make-jva-record text-list) jva
+                                 (assoc jva :file_link
+                                        (wp/create-media filename tempfile
+                                                         :title (:position jva)
+                                                         :alt_text (str "Job Vacancy Announcement for "
+                                                                        (:position jva))
+                                                         :description (jva-desc jva)
+                                                         :slug (:id jva))))]
         (.close pdf-document)
         (db/create-jva! jva-record))
       (mapv (comp process-jva-pdf #(into {} [[:file %]])) file))))
 
 (defn process-reannouncement
   [params]
-  (let [{:keys [file]} params
+  (let [{:keys [file]}                   params
         {:keys [tempfile size filename]} file
-        pdf-document (PDDocument/load tempfile)
-        jva (.getText (PDFTextStripper.) pdf-document)
-        text-list (cstr/split jva #"\n")
-        jva-record (as-> (reduce jva-reducer {} text-list) jva
-                     (update jva :open_date util-dates/parse-date)
-                     (update jva :close_date util-dates/parse-date)
-                     (util/make-status jva)
-                     (assoc jva :id (java.util.UUID/randomUUID)))
-        existing-jva (db/get-jva jva-record)]
+        pdf-document                     (PDDocument/load tempfile)
+        jva                              (.getText (PDFTextStripper.) pdf-document)
+        text-list                        (cstr/split jva #"\n")
+        jva-record                       (make-jva-record text-list)
+        existing-jva                     (db/get-jva jva-record)]
     (db/delete-jva! existing-jva)
     (wp/delete-media (str (:id existing-jva)))
-    (->
-     (assoc jva-record :file_link
-            (wp/create-media filename tempfile
-                             :title (:position jva-record)
-                             :alt_text (str "Job Vacancy Announcement for"
-                                            (:position jva-record))
-                             :description (jva-desc jva-record)
-                             :slug (:id jva-record)))
-     (.close pdf-document)
-     (db/create-jva!))))
+    (.close pdf-document)
+    (->(assoc jva-record :file_link
+              (wp/create-media filename tempfile
+                               :title (:position jva-record)
+                               :alt_text (str "Job Vacancy Announcement for"
+                                              (:position jva-record))
+                               :description (jva-desc jva-record)
+                               :slug (:id jva-record)))
+       
+       (db/create-jva!))))
 
