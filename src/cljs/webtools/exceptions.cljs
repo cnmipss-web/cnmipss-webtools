@@ -23,7 +23,7 @@
                       :type error-type}]
     (ex-info msg (merge default-data data) cause)))
 
-(extend-protocol ex/wrap-ex
+(extend-protocol ex/wrap-exceptions
   js/Error
   (ex/wrap-ex [ex data]
     (ex-info (.-message ex)
