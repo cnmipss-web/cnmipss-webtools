@@ -1,0 +1,12 @@
+.error-message {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    margin: 25px 0px 0px 15px;
+    width: 100%;
+}
+
+.error-message__text {
+    font-size: $base-font-size * 1.5;
+    font-family: $base-font-family;
+}

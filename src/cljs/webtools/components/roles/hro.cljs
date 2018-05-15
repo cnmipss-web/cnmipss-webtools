@@ -8,7 +8,8 @@
   [:div.row
    [:div.col-xs-12.col-sm-10.offset-sm-1
     [forms/jva-upload]]
-   [error/reporter]
+   [:div.col-xs-12.col-sm-10.offset-sm-1
+    [error/reporter]]
    [:div.col-xs-12.col-sm-10.offset-sm-1
     [forms/search-jva-records]
     [tables/jva-list]]])

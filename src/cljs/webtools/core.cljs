@@ -1,8 +1,9 @@
 (ns webtools.core
   (:require
+   cljsjs.jquery
    [webtools.routes]
-   [webtools.actions.reframe]
-   [webtools.subscriptions.reframe-subs]
+   [webtools.re-frame.events.core]
+   [webtools.re-frame.subscriptions.core]
    [webtools.handlers.api :as ajax-handlers]
    [webtools.ajax :refer [load-interceptors!]]
    [webtools.components.forms :as forms]
@@ -15,8 +16,7 @@
    [webtools.models.procurement]
    [webtools.history :refer [hook-browser-navigation!]]
    [ajax.core :as ajax]
-   [cemerick.url :refer [url-decode]]
-   cljsjs.jquery
+   [cemerick.url :refer [url-decode]] 
    [markdown.core :refer [md->html]]
    [reagent.core :as r]
    [re-frame.core :as rf]))

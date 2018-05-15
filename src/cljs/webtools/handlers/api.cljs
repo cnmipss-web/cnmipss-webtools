@@ -1,5 +1,6 @@
 (ns webtools.handlers.api
-  (:require [re-frame.core :as rf]
+  (:require cljsjs.jquery
+            [re-frame.core :as rf]
             [webtools.constants :as const]
             [webtools.util :as util]
             [ajax.core :as ajax]

@@ -5,8 +5,9 @@
 
 (defn pns-view []
   [:div.row
-   [:div.col-xs-12
+   [:div.col-xs-12.col-sm-10.offset-sm-1
     [forms/procurement-upload]]
-   [error/reporter]
-   [:div.col-xs-12
+   [:div.col-xs-12.col-sm-10.offset-sm-1
+    [error/reporter]]
+   [:div.col-xs-12.col-sm-10.offset-sm-1
     [tables/rfp-ifb-list]]])
