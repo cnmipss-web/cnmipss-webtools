@@ -1,4 +1,4 @@
-(ns webtools.actions.errors
+(ns webtools.re-frame.events.errors
   (:require [re-frame.core :refer [reg-event-db dispatch]]))
 
 (reg-event-db

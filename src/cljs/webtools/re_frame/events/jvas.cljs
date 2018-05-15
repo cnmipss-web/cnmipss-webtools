@@ -1,4 +1,4 @@
-(ns webtools.actions.jvas
+(ns webtools.re-frame.events.jvas
   (:require [re-frame.core :refer [reg-event-db]]))
 
 (reg-event-db

@@ -1,4 +1,4 @@
-(ns webtools.subscriptions.reframe-subs
+(ns webtools.re-frame.subscriptions.core
   (:require [re-frame.core :refer [reg-sub]]))
 
 (reg-sub

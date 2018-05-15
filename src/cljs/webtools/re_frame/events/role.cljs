@@ -1,9 +1,9 @@
-(ns webtools.actions.role
-    (:require
-     [webtools.handlers.api :as api-handlers]
-     [webtools.util :as util]
-     [ajax.core :as ajax]
-     [re-frame.core :refer [reg-event-db]]))
+(ns webtools.re-frame.events.role
+  (:require
+   [webtools.handlers.api :as api-handlers]
+   [webtools.util :as util]
+   [ajax.core :as ajax]
+   [re-frame.core :refer [reg-event-db]]))
 
 (defn- ajax-get
   [opts]

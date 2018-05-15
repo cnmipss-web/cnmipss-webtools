@@ -1,13 +1,13 @@
-(ns webtools.actions.reframe
+(ns webtools.re-frame.events.core
   (:require
    [cemerick.url :as curl]
    [clojure.string :as cstr]
    [re-frame.core :refer [dispatch reg-event-db]]
-   [webtools.actions.errors]
-   [webtools.actions.fns]
-   [webtools.actions.jvas]
-   [webtools.actions.login]
-   [webtools.actions.role]
+   [webtools.re-frame.events.errors]
+   [webtools.re-frame.events.fns]
+   [webtools.re-frame.events.jvas]
+   [webtools.re-frame.events.login]
+   [webtools.re-frame.events.role]
    [webtools.constants :as const]
    [webtools.db :as db]
    [webtools.handlers.api :as ajax-handlers]
@@ -16,14 +16,14 @@
    [webtools.util.dates :as util-dates]))
 
 (reg-event-db
-  :initialize-db
-  (fn [_ _]
-    db/default-db))
+ :initialize-db
+ (fn [_ _]
+   db/default-db))
 
 (reg-event-db
-  :set-active-page
-  (fn [db [_ page]]
-    (assoc db :page page)))
+ :set-active-page
+ (fn [db [_ page]]
+   (assoc db :page page)))
 
 (reg-event-db
  :set-session
