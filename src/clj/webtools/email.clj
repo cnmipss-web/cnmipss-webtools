@@ -193,10 +193,14 @@
            :args (spec/cat :pns :webtools.spec.procurement/record
                            :sub :webtools.spec.subscription/record))
 
+(defn- np-log-message [{:keys [email] :as user} {:keys [company_name contact_person] :as sub}]
+  (str "Notifying " email " of Procurement Subscription by " contact_person " at " company_name))
+
 (defn notify-procurement [{:keys [company_name proc_id] :as sub} pns]
   (doseq [user (db/get-proc-users)]
     (let [tstr (p/title-string pns)]
       (try
+        (log/info (np-log-message user sub))
         (send-message {:to (:email user)
                        :from "no-reply@cnmipss.org"
                        :subject (str company_name " has requested information regarding " tstr)
