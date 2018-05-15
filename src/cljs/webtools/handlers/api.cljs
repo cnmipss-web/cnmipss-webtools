@@ -13,7 +13,6 @@
 
 (defn verified-token?
   [[ok full-response]]
-  ()
   (let [response (if-let [res (:response full-response)] res full-response) ;Deal with different response structures
         admin (get-in response [:body "is-admin"])
         user (get-in response [:body "user"])
@@ -21,7 +20,7 @@
         email (get user "email")]
     (if ok
       (do
-        (rf/dispatch [:verified-token email admin roles])
+        (rf/dispatch [:login email admin roles])
         (rf/dispatch [:set-active-page :main]))
       (if email
         (bad-login response)))))
@@ -52,3 +51,9 @@
     (if ok
       (rf/dispatch [:store-cert-list (clojure.walk/keywordize-keys body)])
       (erro! response))))
+
+(defn fns-nap
+  [[ok {:keys [body status headers] :as response}]]
+  (if ok
+    (rf/dispatch [:store-fns-nap body])
+    (erro! "Error fetching fns-nap: " status body)))

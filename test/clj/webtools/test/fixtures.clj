@@ -1,10 +1,18 @@
 (ns webtools.test.fixtures
-  (:require [webtools.config :refer [env]]
-            [webtools.db.core :as db]
-            [conman.core :refer [bind-connection] :as conman]
-            [clojure.java.jdbc :as sql]
+  (:require [clojure.java.jdbc :as sql]
+            [clojure.spec.test.alpha :as stest]
             [mount.core :as mount]
-            [clojure.spec.test.alpha :as stest]))
+            [webtools.db :as db]
+            [webtools.spec.certification]
+            [webtools.spec.core]
+            [webtools.spec.dates]
+            [webtools.spec.fns-nap]
+            [webtools.spec.internet]
+            [webtools.spec.jva]
+            [webtools.spec.procurement]
+            [webtools.spec.procurement-addendum]
+            [webtools.spec.subscription]
+            [webtools.spec.user]))
 
 (defn instrument [ts]
   (stest/instrument)
@@ -21,6 +29,7 @@
   (db/seed-ifbs)
   (db/seed-addenda)
   (db/seed-subscriptions)
+  (db/seed-fns-nap)
   (ts)
   (mount/stop))
 

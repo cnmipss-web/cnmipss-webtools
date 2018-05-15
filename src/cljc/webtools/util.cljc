@@ -1,6 +1,7 @@
 (ns webtools.util
   (:require [webtools.constants :as const]
             [clojure.spec.alpha :as s]
+            [clojure.string :as cstr]
             #?(:clj  [clj-time.core :as time]
                :cljs [cljs-time.core :as time])
             #?(:clj  [clj-time.coerce :as coerce]
@@ -8,18 +9,29 @@
             #?(:clj  [clj-time.format :as format]
                :cljs [cljs-time.format :as format])))
 
+(defmacro get-version []
+  (System/getProperty "cnmipss-webtools.version"))
+
+(defmacro pull
+  "Pull all symbols from ns into the calling ns.  Used to refer-through, providing 
+  a wrapper for the target ns."
+  {:style/indent 1}
+  [ns vlist]
+  `(do ~@(for [i vlist]
+           `(def ^{:doc "Test"} ~i ~(symbol (str ns "/" i))))))
+
 (let [transforms {:keys keyword
                   :strs str
                   :syms identity}]
   (defmacro keyed
-      "Create a map in which, for each symbol S in vars, (keyword S) is a
+    "Create a map in which, for each symbol S in vars, (keyword S) is a
   key mapping to the value of S in the current scope. If passed an optional
   :strs or :syms first argument, use strings or symbols as the keys instead."
     ([vars] `(keyed :keys ~vars))
     ([key-type vars]
-       (let [transform (comp (partial list `quote)
-                             (transforms key-type))]
-         (into {} (map (juxt transform identity) vars))))))
+     (let [transform (comp (partial list `quote)
+                           (transforms key-type))]
+       (into {} (map (juxt transform identity) vars))))))
 
 (defn full-response-format [body-format]
   (-> (body-format)
@@ -54,7 +66,7 @@
 (defn line-parser
   [re line]
   (if-let [match (peek (re-find re line))]
-    (clojure.string/trim match)
+    (cstr/trim match)
     nil))
 
 #?(:clj
@@ -104,6 +116,21 @@
 (defn capitalize-words 
   "Capitalize every word in a string"
   [s]
-  (->> (clojure.string/split (str s) #"\b") 
-       (map clojure.string/capitalize)
-       clojure.string/join))
+  (->> (cstr/split (str s) #"\b") 
+       (map cstr/capitalize)
+       cstr/join))
+
+(defn cookie->map
+  [cookie-string]
+  (when cookie-string
+    (into {}
+          (for [cookie (.split cookie-string ";")]
+            (let [keyval (map #(.trim %) (.split cookie "=" 2))]
+              [(first keyval) (second keyval)])))))
+
+(defn email->name [email]
+  (as-> (cstr/split email #"@") names
+    (first names)
+    (cstr/split names #"\.")
+    (map cstr/capitalize names)
+    (cstr/join " " names)))

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CNMI PSS Webtools</title>
+    </head>
+    <body>
+        <main class="unsubscribed" >
+            <h1 class="unsubscribed__title">
+                Success
+            </h1>
+            <p class="unsubscribed__text">
+                {{contact_person}}, you have successfully unsubscribed from further notifications related to {{type}}# {{number}} {{title}}.
+            </p>
+            <p>
+                Any other subscriptions you may have are unaffected by this action.
+            </p>
+        </main>
+        
+        <!-- scripts and styles -->
+        {% style "/webtools/assets/bootstrap/css/bootstrap.min.css" %}
+        {% style "/webtools/assets/font-awesome/css/font-awesome.min.css" %}
+        {% style "/webtools/css/screen.css" %}
+        
+        <script type="text/javascript">
+         var context = "{{servlet-context}}";
+         var csrfToken = "{{csrf-token}}";
+        </script>
+        {% script "/webtools/js/app.js" %}
+        {% script "/webtools/assets/tether/dist/js/tether.min.js" %}
+        {% script "/webtools/assets/bootstrap/js/bootstrap.min.js" %}
+    </body>
+</html>

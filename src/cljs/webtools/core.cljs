@@ -1,26 +1,25 @@
 (ns webtools.core
-  (:require [ajax.core :as ajax]
-            cljsjs.jquery
-            [webtools.handlers.reframe]
-            [webtools.handlers.reframe-subs]
-            [reagent.core :as r]
-            [re-frame.core :as rf]
-            [webtools.ajax :refer [load-interceptors!]]
-            [webtools.handlers.api :as ajax-handlers]
-            [webtools.components.forms :as forms]
-            [webtools.components.nav :as nav]
-            [webtools.components.roles :as roles]
-            [webtools.components.modals :refer [all-modals]]
-            [webtools.util :as util]
-            [webtools.timeout :as timeout]
-            [webtools.cookies :refer [get-cookie] :as cookies]
-            [webtools.procurement.front-end]
-            [cemerick.url :refer [url-decode]]
-            [goog.events :as events]
-            [goog.history.EventType :as HistoryEventType]
-            [markdown.core :refer [md->html]]
-            [secretary.core :as secretary])
-  (:import goog.History))
+  (:require
+   [webtools.routes]
+   [webtools.actions.reframe]
+   [webtools.subscriptions.reframe-subs]
+   [webtools.handlers.api :as ajax-handlers]
+   [webtools.ajax :refer [load-interceptors!]]
+   [webtools.components.forms :as forms]
+   [webtools.components.nav :as nav]
+   [webtools.components.roles :as roles]
+   [webtools.components.modals :refer [all-modals]]
+   [webtools.util :as util]
+   [webtools.timeout :as timeout]
+   [webtools.cookies :refer [get-cookie]]
+   [webtools.models.procurement]
+   [webtools.history :refer [hook-browser-navigation!]]
+   [ajax.core :as ajax]
+   [cemerick.url :refer [url-decode]]
+   cljsjs.jquery
+   [markdown.core :refer [md->html]]
+   [reagent.core :as r]
+   [re-frame.core :as rf]))
 
 (defn main-view [& children]
   [:main#main-container {:on-click #(if @(rf/subscribe [:show-roles?])
@@ -50,53 +49,6 @@
    [all-modals]
    [nav/header]
    [(pages @(rf/subscribe [:page]))]])
-
-;; -------------------------
-;; Routes
-(defn redirect-bad-login []
-  (rf/dispatch [:bad-login])
-  (set! (.-href js/location) "#/"))
-
-(secretary/set-config! :prefix "/webtools/#")
-
-(secretary/defroute "/" []
-  (set! (.-href js/location) "#/app"))
-
-(secretary/defroute "/login" []
-  (if-let [matches (re-seq #"login_failed=true" (.-hash js/location))]
-    (rf/dispatch [:bad-login]))
-  (rf/dispatch [:set-active-page :login]))
-
-(secretary/defroute "/app" []
-  (let [token (get-cookie :token)
-        email (url-decode (get-cookie :email))
-        success (get (first (re-seq #"&?success=(true|false)&?" (.-hash js/location))) 1)
-        current-role (get (first (re-seq #"role=(.*)&?" (.-hash js/location))) 1)]
-    (case success
-      "true" (rf/dispatch [:action-success])
-      "false" (rf/dispatch [:action-failed])
-      "")
-    (when current-role
-      (rf/dispatch [:set-active-role current-role])
-      (rf/dispatch [:hide-roles]))
-    (ajax/ajax-request {:uri "/webtools/api/verify-token"
-                        :method :post
-                        :format (ajax/json-request-format)
-                        :params {:email email :token token}
-                        :response-format (util/full-response-format ajax/json-response-format)
-                        :handler ajax-handlers/verified-token?
-                        :error-handler #(.log js/console %)})))
-
-;; -------------------------
-;; History
-;; must be called after routes have been defined
-(defn hook-browser-navigation! []
-  (doto (History.)
-    (events/listen
-      HistoryEventType/NAVIGATE
-      (fn [event]
-        (secretary/dispatch! (.-token event))))
-    (.setEnabled true)))
 
 ;; -------------------------
 ;; Initialize app

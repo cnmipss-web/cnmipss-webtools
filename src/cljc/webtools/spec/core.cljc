@@ -1,27 +1,35 @@
 (ns webtools.spec.core
-  (:require [clojure.spec.alpha :as s]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.spec.gen.alpha :as gen]
+            [clojure.string :as cstr]
             #?(:clj  [clj-time.core :refer [date-time]]
                :cljs [cljs-time.core :refer [date-time]])
-            #?(:clj  [ring.core.spec])))
+            #?(:clj [ring.core.spec])
+            [webtools.validation :refer [valid-url?]]))
 
-(s/def ::uuid (s/with-gen
-                #(instance? #?(:clj  java.util.UUID
-                               :cljs cljs.core/UUID) %)
-                gen/uuid))
+(spec/def ::uuid uuid?)
 
-(s/def ::uuid-str (s/with-gen
-                    string?
-                    (fn [] (gen/fmap str (gen/uuid)))))
+(spec/def ::uuid-str (spec/with-gen
+                       (spec/and string?
+                                 (fn [uuid]
+                                   (= 36 (count uuid))
+                                   (= 32 (count (cstr/replace uuid "-" "")))))
+                       (fn [] (gen/fmap str (gen/uuid)))))
 
-(s/def ::date (s/with-gen
-                (partial instance? #?(:clj org.joda.time.DateTime
-                                      :cljs js/Function))
-                (fn [] (gen/fmap (partial apply #(date-time %1 %2 %3))
-                                 (gen/tuple
-                                  (gen/choose 2000 2025) ;year
-                                  (gen/choose 1 12) ;month
-                                  (gen/choose 1 28) ;day
-                                  )))))
+(spec/def ::nil nil?)
+
+(spec/def ::link (spec/and string? valid-url?))
+
+(spec/def ::xlsx-file-link (spec/and ::link
+                                     (fn xlsx-extension? [url]
+                                       (let [ext ".xlsx"]
+                                         (=
+                                          (- (count url) (count ext))
+                                          (cstr/index-of url ext))))))
+
+(spec/def ::throwable? (partial instance? #?(:clj java.lang.Exception
+                                             :cljs js/Error)))
+
+
 
 

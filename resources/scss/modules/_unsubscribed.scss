@@ -1,0 +1,33 @@
+.unsubscribed {
+    position: fixed;
+    top: 25%;
+    border: 1px solid lightgray;
+    padding: 25px;
+
+    @include for-xs {
+        left: 5%;       
+        right: 5%;
+    }
+
+    @include for-sm {
+        left: 15%;       
+        right: 15%;
+    }
+
+    @include for-md {
+        left: 25%;       
+        right: 25%;
+    }
+}
+
+.unsubscribed__title {
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 3rem;
+    margin-bottom: 25px;
+}
+
+.unsubscribed__text {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}

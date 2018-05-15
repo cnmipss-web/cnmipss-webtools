@@ -1,11 +1,11 @@
 (ns webtools.middleware-test
-  (:require [webtools.middleware :as middleware]
-            [webtools.test.fixtures :as fixtures]
-            [webtools.test.constants :as c-t]
-            [webtools.layout :refer [error-page]]
+  (:require [bond.james :refer [calls with-spy]]
             [clojure.test :refer :all]
-            [bond.james :refer [with-spy calls]]
-            [ring.mock.request :as mock]))
+            [ring.mock.request :as mock]
+            [webtools.layout :refer [error-page]]
+            [webtools.middleware :as middleware]
+            [webtools.test.constants :as c-t]
+            [webtools.test.fixtures :as fixtures]))
 
 
 (def handler identity)
@@ -36,4 +36,6 @@
         (is (= 0 (-> handler calls count)))
         (is (= 1 (-> error-page calls count)))
         (is (= {:status 403
-                :title "Access Forbidden"} (-> error-page calls first :args first)))))))
+                :title "Access Forbidden"
+                :message "You do not have permission to access this resource."}
+               (-> error-page calls first :args first)))))))

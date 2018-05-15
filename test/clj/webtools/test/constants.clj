@@ -1,4 +1,5 @@
-(ns webtools.test.constants)
+(ns webtools.test.constants
+  (:require [clojure.java.io :refer [file]]))
 
 (def dummy-user {:id (java.util.UUID/randomUUID)
                  :email "email"
@@ -49,3 +50,13 @@
 (def jva-seed-count 3)
 
 (def auth-token "ya29.GluTBHe_gy2R2PBdSedi3oZKT64AltZN7EfIQKReuLOWcdMjySQnh5VeSCLC8-_aG1wdhaBrT4baVSvWnrDoiK5z3_nJkdKpfAhiXI1c2cenTSJyd8sx-dpqBm0B")
+
+(def valid-fns-file (file "test/clj/webtools/test/valid-fns.xlsx"))
+(def valid-nap-file (file "test/clj/webtools/test/valid-nap.xlsx"))
+(def typical-fns-file (file "test/clj/webtools/test/typical-fns.xlsx"))
+(def typical-nap-file (file "test/clj/webtools/test/typical-nap.xlsx"))
+(def full-fns-file (file "test/clj/webtools/test/full-fns.xlsx"))
+(def full-nap-file (file "test/clj/webtools/test/full-nap.xlsx"))
+
+(def unsubscribe-url-re #"\/webtools\/api\/unsubscribe\-procurement\/[\d\w]{8}\-([\d\w]{4}\-){3}[\d\w]{12}")
+

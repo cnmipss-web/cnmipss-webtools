@@ -2,7 +2,7 @@
 <configuration>
     <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/webtools/webtools.log</file>
+        <file>log/webtools.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>/var/log/webtools/webtools.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -16,10 +16,10 @@
             <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg %n</pattern>
         </encoder>
     </appender>
-    <logger name="org.apache.http" level="warn">
+    <logger name="org.apache.http" level="ERROR">
         <AppenderRef ref="FILE"/>
     </logger>
-    <logger name="org.xnio.nio" level="warn">
+    <logger name="org.xnio.nio" level="ERROR">
         <AppenderRef ref="FILE"/>
     </logger>
     <root level="INFO">

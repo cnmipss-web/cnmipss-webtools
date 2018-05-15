@@ -1,7 +1,6 @@
 (ns webtools.cron.config
   (:require [webtools.cron.core :as cron]
-            [webtools.cron.jobs :as job]
-            [clj-time.core :as t]))
+            [webtools.cron.jobs :as job]))
 
 (defn init!
   []

@@ -19,3 +19,9 @@ out/
 .idea/*iml
 .idea
 *.iml
+.vscode
+__pycache__
+settings.py
+/spreadsheet.xlsx
+/fns-nap/
+.sass-cache/

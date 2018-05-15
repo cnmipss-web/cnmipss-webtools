@@ -99,15 +99,6 @@ table {
 .align-items-center {
   align-items: center; }
 
-.text-center {
-  text-align: center; }
-
-.text-left {
-  text-align: left; }
-
-.text-right {
-  text-align: right; }
-
 #main-container {
   width: 100%;
   height: 100%;
@@ -121,6 +112,59 @@ table {
   height: 100vh; }
   div > .sidebar {
     padding: 0px; }
+
+/*********************************
+  CSS rules for P&S .record-tables
+**********************************/
+.pns-table-box {
+  box-shadow: none;
+  display: table;
+  margin-top: 20px;
+  margin-top: 20px;
+  max-height: 800px;
+  overflow-y: scroll;
+  padding: 0px;
+  padding-top: 10px; }
+
+.pns-table-box__title {
+  font-family: "Roboto", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 2;
+  text-align: center; }
+
+/*******************************************************
+  CSS Rules for tables displaying records from database
+********************************************************/
+.record-table {
+  margin-top: 15px;
+  width: 100%;
+  box-shadow: none;
+  border: 1px solid #ddd; }
+
+.record-table__row {
+  margin: 0px;
+  padding: 0px;
+  border-bottom: 1px solid #ddd; }
+  .record-table__row th[scope="col"] {
+    font-weight: 600;
+    text-align: center; }
+  .record-table__row:nth-of-type(even) {
+    background-color: #fbf7ea; }
+  .record-table__row th, .record-table__row td {
+    padding: 10px 5px; }
+  .record-table__row td:not(:first-child) {
+    border-left: 1px solid #ddd; }
+  .record-table__row strong {
+    font-weight: 600; }
+
+.record-table__row--closed {
+  background-color: lightgrey !important; }
+  .record-table__row--closed strong {
+    color: red; }
+
+.record-table__th--center, .record-table__td--center {
+  text-align: center; }
 
 /**
  * Accessible button colors to replace Bootstrap defaults
@@ -159,13 +203,17 @@ button.nav-link {
   background: inherit;
   color: inherit; }
 
-button.file-link {
+button.file-link, a.file-link {
   padding: 4px 6px;
-  margin: 0px 5px; }
+  margin: 5px;
+  font-weight: 600; }
 
 button.jva-reannounce {
   margin-right: auto; }
 
+/*************************************
+  Base styles for forms
+**************************************/
 form {
   margin-top: 25px;
   border: none;
@@ -175,9 +223,19 @@ form {
   form label {
     margin-bottom: 15px; }
 
-#upload-form {
+/*************************************
+  Upload forms
+**************************************/
+.upload-form {
   border: 1px solid #ddd;
   border-radius: 0px; }
+
+.upload-form__input {
+  border: 1px solid #ddd;
+  padding: 10px; }
+
+.upload-form__submit {
+  margin-top: 35px; }
 
 input[type='search'] {
   text-align: center; }
@@ -186,36 +244,6 @@ input[type='search'] {
   color: red;
   margin: 10px;
   margin-top: 0px; }
-
-.edit-user-roles {
-  margin: 0px !important;
-  padding: 0px; }
-
-.edit-user-roles, .invite-users {
-  border: none; }
-  .edit-user-roles input[type="checkbox"], .invite-users input[type="checkbox"] {
-    margin: 0 auto; }
-  .edit-user-roles label, .invite-users label {
-    margin: 0px;
-    border: none; }
-  .edit-user-roles fieldset, .invite-users fieldset {
-    margin: 5px;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start; }
-  .edit-user-roles .btn, .invite-users .btn {
-    margin-left: 20px;
-    margin-top: 10px;
-    margin-bottom: 5px; }
-  .edit-user-roles > div.form-group, .invite-users > div.form-group {
-    padding-top: 20px; }
-
-.invite-users {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch; }
-  .invite-users input[type="text"] {
-    margin-top: 10px; }
 
 form.edit-modal {
   box-shadow: none;
@@ -465,75 +493,12 @@ header.navbar {
 .sidebar-btn.active {
   background-color: rgba(223, 194, 83, 0.85); }
 
-table {
-  margin-top: 15px;
-  width: 100%;
-  box-shadow: none;
-  border: 1px solid #ddd;
-  font-family: "Roboto", Arial, sans-serif;
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1.25em; }
-  table tr.row:nth-of-type(even), table tr.row:nth-of-type(even) label {
-    background-color: #fbf7ea; }
-  table form {
-    box-shadow: none; }
-
-th, td {
-  padding: 10px 0px; }
-
-tr, tr.row {
-  margin: 0px;
-  padding: 0px;
-  border-bottom: 1px solid #ddd; }
-  tr td:not(:first-child), tr.row td:not(:first-child) {
-    border-left: 1px solid #ddd; }
-
 tr.row.user-list-row {
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
   padding-bottom: 5px; }
-
-table.jva-list {
-  max-height: 800px;
-  overflow-y: scroll; }
-
-tr.row.jva-list-row {
-  white-space: pre-wrap;
-  font-size: 14px;
-  border-bottom: 1px solid #ddd; }
-  tr.row.jva-list-row.closed {
-    background-color: lightgrey !important; }
-  tr.row.jva-list-row strong {
-    font-weight: 600; }
-  tr.row.jva-list-row em {
-    color: red;
-    font-weight: 600; }
-  tr.row.jva-list-row td {
-    max-height: 150px;
-    min-height: 75px; }
-    tr.row.jva-list-row td button {
-      margin: 5px; }
-
-div.procurement-table-box {
-  box-shadow: none;
-  display: table;
-  margin-top: 20px;
-  margin-top: 20px;
-  max-height: 800px;
-  overflow-y: scroll;
-  padding: 0px;
-  padding-top: 10px; }
-  div.procurement-table-box h2.procurement-title {
-    font-family: "Roboto", Arial, sans-serif;
-    font-size: 24px;
-    font-weight: 600;
-    line-height: 2; }
-  div.procurement-table-box table {
-    box-shadow: none;
-    margin: 0px; }
 
 td.custom-col-1 {
   width: 5%; }
@@ -679,3 +644,97 @@ th.custom-col-20 {
     caption-side: top;
     color: darkred;
     font-weight: 600; }
+
+.text {
+  font-family: "Roboto", Arial, sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5; }
+
+.text--center {
+  text-align: center; }
+
+.text--left {
+  text-align: left; }
+
+.text--right {
+  text-align: right; }
+
+.unsubscribed {
+  position: fixed;
+  top: 25%;
+  border: 1px solid lightgray;
+  padding: 25px;
+  left: 5%;
+  right: 5%; }
+  @media (min-width: 768px) {
+    .unsubscribed {
+      left: 15%;
+      right: 15%; } }
+  @media (min-width: 992px) {
+    .unsubscribed {
+      left: 25%;
+      right: 25%; } }
+
+.unsubscribed__title {
+  text-transform: uppercase;
+  text-align: center;
+  font-size: 3rem;
+  margin-bottom: 25px; }
+
+.unsubscribed__text {
+  font-size: 1rem;
+  margin-bottom: 10px; }
+
+.slow-fade {
+  transition-delay: 0s;
+  transition-timing-function: ease-in-out;
+  transition: opacity 1.5s;
+  opacity: 1; }
+  .slow-fade[data-invis="true"] {
+    opacity: 0; }
+
+.user-role-form {
+  display: flex;
+  flex-direction: column; }
+
+.user-role-form__btn-box {
+  display: flex;
+  justify-content: space-around;
+  margin: 0px 50px; }
+
+.user-role-form__save-btn,
+.user-role-form__del-btn {
+  margin: 5px 15px;
+  width: 25%; }
+
+.user-role-checklist {
+  display: flex;
+  flex-direction: column;
+  flex-flow: column wrap;
+  width: 100%; }
+  @media (min-width: 992px) {
+    .user-role-checklist {
+      height: 250px; } }
+
+.user-role-checklist__group {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0px 5px;
+  margin: 15px auto;
+  width: 75%; }
+  @media (min-width: 992px) {
+    .user-role-checklist__group {
+      width: 35%; } }
+
+.user-role-checklist__label,
+.user-role-checklist__checkbox {
+  margin: 0px 5px; }
+
+.invite-user-form {
+  border: 1px solid #ddd;
+  border-radius: 0px; }
+
+.invite-user-form__submit-btn {
+  width: 150px; }

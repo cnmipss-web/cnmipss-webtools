@@ -1,0 +1,9 @@
+.slow-fade {
+    @include custom-transition(opacity 1.5s, ease-in-out, 0s);
+
+    opacity: 1;
+
+    &[data-invis="true"] {
+        opacity: 0;
+    }
+}

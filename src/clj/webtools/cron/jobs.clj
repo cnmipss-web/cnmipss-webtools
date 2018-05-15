@@ -1,14 +1,14 @@
 (ns webtools.cron.jobs
-  (:require [webtools.db.core :as db]
-            [webtools.procurement.core :refer :all]
+  (:require [clj-time.core :as t]
+            [webtools.db :as db]
             [webtools.email :as email]
-            [clj-time.core :as t]))
+            [webtools.models.procurement.core :as p]))
 
 (defn- -deadline-notifier
   [interval mailer]
-  (doseq [pnsa (mapv convert-pns-from-map (db/get-all-pnsa))]
+  (doseq [pnsa (mapv p/convert-pns-from-map (db/get-all-pnsa))]
     (if (t/within? interval (:close_date pnsa))
-      (let [subscribers (db/get-subscriptions {:proc_id (:id pnsa)})]
+      (let [subscribers (p/get-subs-from-db (:id pnsa))]
         (mapv (partial mailer pnsa) subscribers)))))
 
 (defn check-notify-subscribers-24hr

@@ -1,11 +1,10 @@
 (ns webtools.spec.internet
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :as string]
             [clojure.test.check.generators :as gen])
-  (:import [java.net URI]
-           [java.util.regex Pattern]))
+  (:import (java.net URI)
+           (java.util.regex Pattern)))
 
 (s/def ::hostpart
   (letfn [(pred [s]

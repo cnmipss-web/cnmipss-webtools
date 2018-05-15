@@ -1,23 +1,22 @@
 (ns webtools.middleware
-  (:require [webtools.env :refer [defaults]]
-            [webtools.db.core :as db]
-            [webtools.config :refer [env]]
-            [webtools.layout :refer [*app-context* error-page]]
-            [clojure.tools.logging :as log]
+  (:require [clojure.tools.logging :as log]
             [immutant.web.middleware :refer [wrap-session]]
             [muuntaja.middleware :refer [wrap-format wrap-params]]
             [ring.middleware.anti-forgery :refer [wrap-anti-forgery]]
-            [ring.middleware.webjars :refer [wrap-webjars]]
-            [ring.middleware.json :refer [wrap-json-body]]
-            [ring.middleware.flash :refer [wrap-flash]]
-            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
-            [ring.middleware.cors :refer [wrap-cors]]
-            [ring.middleware.cookies :refer [wrap-cookies]]
             [ring.middleware.browser-caching :refer [wrap-browser-caching]]
-            ;;[ring.util.response :as response]
-            )
-  (:import [javax.servlet ServletContext]))
+            [ring.middleware.cookies :refer [wrap-cookies]]
+            [ring.middleware.cors :refer [wrap-cors]]
+            [ring.middleware.defaults :refer [site-defaults
+                                              wrap-defaults]]
+            [ring.middleware.flash :refer [wrap-flash]]
+            [ring.middleware.json :refer [wrap-json-body]]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
+            [ring.middleware.webjars :refer [wrap-webjars]]
+            [webtools.config :refer [env]]
+            [webtools.db :as db]
+            [webtools.env :refer [defaults]]
+            [webtools.layout :refer [*app-context* error-page]])
+  (:import (javax.servlet ServletContext)))
 
 (defn wrap-webtools-auth [handler]
   (fn [request]
@@ -92,9 +91,9 @@
       (wrap-json-body {:keywords? true})
       wrap-webjars
       (wrap-defaults
-        (-> site-defaults
-            (assoc-in [:security :anti-forgery] false)
-            (dissoc :session)))
+       (-> site-defaults
+           (assoc-in [:security :anti-forgery] false)
+           (dissoc :session)))
       wrap-cookies 
       wrap-flash
       (wrap-session {:cookie-attrs {:http-only false}})

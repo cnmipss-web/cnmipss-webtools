@@ -25,15 +25,15 @@
         </encoder>
     </appender>
     <logger name="org.apache.http" level="warn">
-        <AppenderRef ref="STDOUT"/>
+        <!-- <AppenderRef ref="STDOUT"/> -->
         <AppenderRef ref="FILE"/>
     </logger>
     <logger name="org.xnio.nio" level="warn">
-        <AppenderRef ref="STDOUT"/>
+        <!-- <AppenderRef ref="STDOUT"/> -->
         <AppenderRef ref="FILE"/>
     </logger>
     <root level="ERROR">
-        <appender-ref ref="STDOUT" />
+        <!-- <appender-ref ref="STDOUT" /> -->
         <appender-ref ref="FILE" />
     </root>
 </configuration>

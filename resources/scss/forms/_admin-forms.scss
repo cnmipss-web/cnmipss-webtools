@@ -1,0 +1,64 @@
+// ------------------------------------
+// Admin forms for "Manage Users" role
+// ------------------------------------
+
+.user-role-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-role-form__btn-box {
+    display: flex;
+    justify-content: space-around;
+    margin: 0px 50px;
+}
+
+.user-role-form__save-btn,
+.user-role-form__del-btn  {
+    margin: 5px 15px;
+    width: 25%;
+}
+
+.user-role-checklist {
+    display: flex;
+    flex-direction: column;
+    flex-flow: column wrap;
+
+    @include for-xs {
+        width: 100%;
+    }
+
+    @include for-md {
+        height: 250px;        
+    }
+}
+
+.user-role-checklist__group {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0px 5px;
+
+    @include for-xs {
+        margin: 15px auto;
+        width: 75%;
+    }
+
+    @include for-md {
+        width: 35%;
+    }
+}
+
+.user-role-checklist__label,
+.user-role-checklist__checkbox {
+    margin: 0px 5px;
+}
+
+.invite-user-form {
+    border: 1px solid #ddd;
+    border-radius: 0px;
+}
+
+.invite-user-form__submit-btn {
+    width: 150px;
+}

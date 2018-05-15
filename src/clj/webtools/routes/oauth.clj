@@ -1,17 +1,14 @@
 (ns webtools.routes.oauth
-  (:require [webtools.db.core :as db]
-            [webtools.config :refer [env]]
-            [webtools.auth :as auth]
-            [webtools.util :refer :all]
-            [webtools.constants :refer [max-cookie-age]]
-            [clj-http.client :as http]
-            [cemerick.url :refer [url-decode]]
-            [clj-oauth2.client :as oauth2]
+  (:require [clj-http.client :as http]
             [clojure.data.json :as json]
-            [compojure.core :refer [defroutes GET]]
+            [clojure.tools.logging :as log]
+            [compojure.core :refer [GET defroutes]]
             [ring.util.http-response :as respond]
-            [clojure.java.io :as io]
-            [clojure.tools.logging :as log]))
+            [webtools.auth :as auth]
+            [webtools.config :refer [env]]
+            [webtools.constants :refer [max-cookie-age]]
+            [webtools.db :as db]
+            [webtools.util :refer :all]))
 
 (defn config<-
   [env]

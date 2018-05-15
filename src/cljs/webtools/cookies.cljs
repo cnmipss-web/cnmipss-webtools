@@ -20,11 +20,3 @@
 (defn remove-cookie [key]
   "Removes and expires a cookie."
   (.remove cookies (name key)))
-
-(defn enabled?
-  ([] (enabled? cookies))
-  ([c] (.isEnabled c)))
-
-(defn empty?
-  ([] (empty? cookies))
-  ([c] (.isEmpty c)))
