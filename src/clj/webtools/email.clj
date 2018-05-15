@@ -278,45 +278,44 @@
                                  " has passed.")
                    :body [{:type "text/html"
                            :content (html
-                                      [:html
-                                       [:body
-                                        [:p (str "Greetings " contact_person ",")]
-                                        [:p (str "We would like to notify you that the deadline to submit a response for "
-                                                 (-> pns :type name clojure.string/upper-case) "# "
-                                                 (:number pns)
-                                                 " " (:title pns)
-                                                 " has passed as of "
-                                                 (util-dates/print-date-at-time (:close_date pns))
-                                                 ".  No further submissions will be accepted after this time.")]
-                                        [:br]
-                                        [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
-                                        [:br]
-                                        [:p "Thank you,"]
-                                        [:p "Kimo Rosario"]
-                                        [:p "Procurement & Supply Officer"]
-                                        [:p "CNMI PSS"]
-                                        (unsubscribe-option email :procurement)]])}]})
+                                     [:html
+                                      [:body
+                                       [:p (str "Greetings " contact_person ",")]
+                                       [:p (str "We would like to notify you that the deadline to submit a response for "
+                                                (-> pns :type name clojure.string/upper-case) "# "
+                                                (:number pns)
+                                                " " (:title pns)
+                                                " has passed as of "
+                                                (util-dates/print-date-at-time (:close_date pns))
+                                                ".  No further submissions will be accepted after this time.")]
+                                       [:br]
+                                       [:p "If you have any questions, please contact Kimo Rosario at kimo.rosario@cnmipss.org"]
+                                       [:br]
+                                       [:p "Thank you,"]
+                                       [:p "Kimo Rosario"]
+                                       [:p "Procurement & Supply Officer"]
+                                       [:p "CNMI PSS"]
+                                       (unsubscribe-option email :procurement)]])}]})
     (catch Exception e
       (log/error e))))
 
-(defn notify-procurement [{:keys [company_name contact_person email telephone] :as sub}
-                          {:keys [type number title] :as pns}]
+(defn notify-procurement [{:keys [company_name proc_id] :as sub} pns]
   (doseq [user (db/get-proc-users)]
-    (let [title-string (str (-> type name clojure.string/upper-case) "# " number " " title)]
+    (let [tstr (p/title-string pns)]
       (try
         (send-message {:to (:email user)
                        :from "no-reply@cnmipss.org"
                        :subject (str company_name " has requested information regarding " title-string)
                        :body [{:type "text/html"
                                :content (html
-                                          [:html
-                                           [:body
-                                            [:p (str contact_person " at " company_name
-                                                     " has subscribed to receive more information regarding "
-                                                     title-string)]
-                                            [:p (str "They may be contact by email at " email
-                                                     " or by telephone at " (util/format-tel-num telephone))]
-                                            [:p (str "They will be automatically notified by email regarding any changes or updates made to "
-                                                     title-string " via CNMI PSS Webtools.")]]])}]})
+                                         [:html
+                                          [:body
+                                           [:p (str contact_person " at " company_name
+                                                    " has subscribed to receive more information regarding "
+                                                    title-string)]
+                                           [:p (str "They may be contact by email at " email
+                                                    " or by telephone at " (util/format-tel-num telephone))]
+                                           [:p (str "They will be automatically notified by email regarding any changes or updates made to "
+                                                    title-string " via CNMI PSS Webtools.")]]])}]})
         (catch Exception e
           (log/error e))))))
