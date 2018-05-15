@@ -273,7 +273,7 @@
     (let [pid (p/make-uuid "d2b4e97c-5d7c-4ccd-8fae-a27a27c863e3")
           rfp (p/get-pns-from-db pid)
           sub (p/convert-sub-from-map (first (db/get-subscriptions {:proc_id pid})))]
-      (email/notify-procurement sub)
+      (email/notify-procurement sub rfp)
       (validate-emails (calls send-message))
       (is (= 1 (count-calls send-message)))
       (is (= 1 (count-calls etemp/new-subscription-request)))

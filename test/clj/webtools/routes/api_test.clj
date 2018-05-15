@@ -176,7 +176,17 @@
             (let [contact (first (args-from-call email/confirm-subscription))]
               (is (= (:company subscriber) (:company_name contact)))
               (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))
+
+          (testing "should send notification to administrators"
+            (is (= 1 (count-calls email/notify-procurement)))
+            (is (= 2 (count (args-from-call email/notify-procurement))))
+            (let [contact (first (args-from-call email/notify-procurement))]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
               (is (= (:email subscriber) (:email contact)))))))
+
+
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
                       :body (json/data->json (assoc subscriber :proc_id ifb-id))}
