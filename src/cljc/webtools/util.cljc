@@ -10,7 +10,8 @@
                :cljs [cljs-time.format :as format])))
 
 (defmacro get-version []
-  (System/getProperty "cnmipss-webtools.version"))
+  (let [git-version (clojure.edn/read-string (slurp "resources/version.edn"))]
+    (:version git-version)))
 
 (defmacro pull
   "Pull all symbols from ns into the calling ns.  Used to refer-through, providing 
@@ -20,7 +21,7 @@
   `(do ~@(for [i vlist]
            `(def ^{:doc "Test"} ~i ~(symbol (str ns "/" i))))))
 
-(let [transforms {:keys keyword
+(let [transforms {:keys keyword 
                   :strs str
                   :syms identity}]
   (defmacro keyed

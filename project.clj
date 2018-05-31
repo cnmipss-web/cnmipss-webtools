@@ -1,4 +1,4 @@
-(defproject cnmipss-webtools "0.3.7"
+(defproject cnmipss-webtools "0.3.8-SNAPSHOT"
 
   :description "Internal Web Application for various CNMI PSS Webtools"
   :url "http://www.cnmipss.org/webtools/"
@@ -80,7 +80,10 @@
             [lein-immutant "2.1.0"]
             [lein-sassc "0.10.4"]
             [migratus-lein "0.4.9"]
-            [lein-doo "0.1.7"]]
+            [lein-doo "0.1.7"]
+            [me.arrdem/lein-git-version "2.0.8"]]
+
+  :git-version {:version-file "resources/version.edn"}
 
   :sassc
   [{:src "resources/scss/screen.scss"
