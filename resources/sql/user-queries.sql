@@ -24,7 +24,7 @@ where true
 -- :name get-proc-users :? :*
 -- :doc Retrieve users with roles containing 'Procurement'
 select email from users
-where roles like 'Procurement';
+where roles like '%Procurement%';
 
 -- :name get-user-token :? :1
 -- :doc retrieve a user's auth token given the email

@@ -104,37 +104,46 @@
       (testing-route {:route  "/api/subscribe-procurement"
                       :method :post
                       :body   (json/data->json (assoc subscriber :proc_id rfp-id))}
-                     (testing "should handle subscriptions to rfps"
-                       (testing "should return status 200"
-                         (is (= 200 status)))
-                       
-                       (testing "should return JSON"
-                         (is (= "application/json" (get headers "Content-Type"))))
-                       
-                       (testing "should add subscription to the DB"
-                         (let [subscriptions (get-subs-from-db rfp-id)]
-                           (is (= 4 (count subscriptions)))
-                           (is (= "Test Centers of America" (-> subscriptions last :company_name)))
-                           (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
-                           (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
+        (testing "should handle subscriptions to rfps"
+          (testing "should return status 200"
+            (is (= 200 status)))
+          
+          (testing "should return JSON"
+            (is (= "application/json" (get headers "Content-Type"))))
+          
+          (testing "should add subscription to the DB"
+            (let [subscriptions (get-subs-from-db rfp-id)]
+              (is (= 4 (count subscriptions)))
+              (is (= "Test Centers of America" (-> subscriptions last :company_name)))
+              (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
+              (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
 
-                       (testing "should send confirmation email to subscriber"
-                         (is (= 1 (count-calls email/confirm-subscription)))
-                         (is (= 2 (count (args-from-call email/confirm-subscription))))
-                         (let [contact (first (args-from-call email/confirm-subscription))]
-                           (is (= (:company subscriber) (:company_name contact)))
-                           (is (= (:person subscriber) (:contact_person contact)))
-                           (is (= (:email subscriber) (:email contact)))))))
+          (testing "should send confirmation email to subscriber"
+            (is (= 1 (count-calls email/confirm-subscription)))
+            (is (= 2 (count (args-from-call email/confirm-subscription))))
+            (let [contact (first (args-from-call email/confirm-subscription))]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))
+
+          (testing "should send notification email to administrators"
+            (println (calls email/notify-procurement))
+            (is (pos-int? (count-calls email/notify-procurement)))
+            (is (= 2 (count (args-from-call email/confirm-subscription))))
+            (let [contact (first (args-from-call email/confirm-subscription))]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))))
 
       (testing-route {:route  "/api/subscribe-procurement"
                       :method :post
                       :body   (json/data->json (assoc subscriber :proc_id rfp-id))}
-                     (testing "should only allow a single subscription per subscriber"
-                       (testing "should return status 500"
-                         (is (= 500 status))
-                         (is (= "Duplicate subscription.  You have already subscribed to this announcement with that email address." (:message body)))
-                         (is (= (:message body) (get-in body [:ex-data :msg])))
-                         (is (= "class java.sql.BatchUpdateException" (get-in body [:ex-data :type])))))))))
+        (testing "should only allow a single subscription per subscriber"
+          (testing "should return status 500"
+            (is (= 500 status))
+            (is (= "Duplicate subscription.  You have already subscribed to this announcement with that email address." (:message body)))
+            (is (= (:message body) (get-in body [:ex-data :msg])))
+            (is (= "class java.sql.BatchUpdateException" (get-in body [:ex-data :type])))))))))
 
 (deftest test-api-ifb-subscriptions
   (with-stub! [[email/confirm-subscription (constantly nil)]
@@ -147,36 +156,46 @@
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
                       :body (json/data->json (assoc subscriber :proc_id ifb-id))}
-                     (testing "should handle subscriptions to ifbs"
-                       (testing "should return status 200"
-                         (is (= 200 status)))
+        (testing "should handle subscriptions to ifbs"
+          (testing "should return status 200"
+            (is (= 200 status)))
 
-                       (testing "should return JSON"
-                         (is (= "application/json" (get headers "Content-Type"))))
+          (testing "should return JSON"
+            (is (= "application/json" (get headers "Content-Type"))))
 
-                       (testing "should add subscription to the DB"
-                         (let [subscriptions (get-subs-from-db ifb-id)]
-                           (is (= 2 (count subscriptions)))
-                           (is (= "Test Centers of America" (-> subscriptions last :company_name)))
-                           (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
-                           (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
+          (testing "should add subscription to the DB"
+            (let [subscriptions (get-subs-from-db ifb-id)]
+              (is (= 2 (count subscriptions)))
+              (is (= "Test Centers of America" (-> subscriptions last :company_name)))
+              (is (= "TV's Adam West" (-> subscriptions last :contact_person)))
+              (is (= "+1 (670) 555-6666" (-> subscriptions last :telephone)))))
 
-                       (testing "should send confirmation email to subscriber"
-                         (is (= 1 (count-calls email/confirm-subscription)))
-                         (is (= 2 (count (args-from-call email/confirm-subscription))))
-                         (let [contact (first (args-from-call email/confirm-subscription))]
-                           (is (= (:company subscriber) (:company_name contact)))
-                           (is (= (:person subscriber) (:contact_person contact)))
-                           (is (= (:email subscriber) (:email contact)))))))
+          (testing "should send confirmation email to subscriber"
+            (is (= 1 (count-calls email/confirm-subscription)))
+            (is (= 2 (count (args-from-call email/confirm-subscription))))
+            (let [contact (first (args-from-call email/confirm-subscription))]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))
+
+          (testing "should send notification to administrators"
+            (is (= 1 (count-calls email/notify-procurement)))
+            (is (= 2 (count (args-from-call email/notify-procurement))))
+            (let [contact (first (args-from-call email/notify-procurement))]
+              (is (= (:company subscriber) (:company_name contact)))
+              (is (= (:person subscriber) (:contact_person contact)))
+              (is (= (:email subscriber) (:email contact)))))))
+
+
       (testing-route {:route "/api/subscribe-procurement"
                       :method :post
                       :body (json/data->json (assoc subscriber :proc_id ifb-id))}
-                     (testing "should only allow a single subscription per subscriber"
-                       (testing "should return status 500"
-                         (is (= 500 status))
-                         (is (= "Duplicate subscription.  You have already subscribed to this announcement with that email address." (:message body)))
-                         (is (= (:message body) (get-in body [:ex-data :msg])))
-                         (is (= "class java.sql.BatchUpdateException" (get-in body [:ex-data :type])))))))))
+        (testing "should only allow a single subscription per subscriber"
+          (testing "should return status 500"
+            (is (= 500 status))
+            (is (= "Duplicate subscription.  You have already subscribed to this announcement with that email address." (:message body)))
+            (is (= (:message body) (get-in body [:ex-data :msg])))
+            (is (= "class java.sql.BatchUpdateException" (get-in body [:ex-data :type])))))))))
 
 (deftest test-api-unsubscribe-procurement
   (testing-route {:route "/api/unsubscribe-procurement/2af76ca0-3711-7551-a9a3-903d93a42f65"
@@ -399,7 +418,7 @@
               (assoc :body rfp))]
         (testing "should return status 200"
           (is (= 200 status)))
-
+        
         (testing "should remove record of rfp from the database"
           (let [rfp (get-pns-from-db "d0002906-6432-42b5-b82b-35f0d710f827")]
             (is (every? nil? (vals rfp)))
@@ -455,3 +474,4 @@
         (testing "should delete related media: file_link, spec_link"
           (is (= 2 (-> wp/delete-media calls count)))
           (is (= (:id ifb) (-> wp/delete-media calls first :args first))))))))
+
