@@ -4,7 +4,8 @@
             [webtools.db :as db]
             [webtools.util :as util]
             [webtools.util.dates :as util-dates]
-            [webtools.wordpress-api :as wp])
+            [webtools.wordpress-api :as wp]
+            [webtools.exceptions.hro :as hex])
   (:import (org.apache.pdfbox.pdmodel PDDocument)
            (org.apache.pdfbox.text PDFTextStripper)))
 
@@ -84,6 +85,8 @@
         text-list                        (cstr/split jva #"\n")
         jva-record                       (make-jva-record text-list)
         existing-jva                     (db/get-jva jva-record)]
+    (if (not= (:announce_no jva-record) (:announce_no existing-jva))
+      (throw (hex/mismatched-jvas jva-record existing-jva)))
     (db/delete-jva! existing-jva)
     (wp/delete-media (str (:id existing-jva)))
     (.close pdf-document)

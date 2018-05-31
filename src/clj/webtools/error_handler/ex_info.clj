@@ -33,6 +33,12 @@
   (let [{:keys [filename]} (ex-data error)]
     (str "Error uploading " filename " to the public website.  Please contact the webmaster.")))
 
+;; Implementations for :mismatched-jvas
+(defmethod code :mismatched-jvas [error]
+  "mismatched-jvas")
+(defmethod msg :mismatched-jvas [error]
+  (.getMessage error))
+
 ;; Implementations for :default
 (defmethod code :default [error]
   "unknown-info")
