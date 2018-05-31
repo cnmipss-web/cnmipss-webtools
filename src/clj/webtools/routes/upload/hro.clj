@@ -45,6 +45,13 @@
     (util/make-status jva)
     (assoc jva :id (java.util.UUID/randomUUID))))
 
+(defn- create-jva-or-abort [jva-record]
+  (try
+    (db/create-jva! jva-record)
+    (catch Exception ex
+      (wp/delete-media (:id jva-record))
+      (throw ex))))
+
 (defn process-jva-pdf
   ""
   [params]
@@ -65,7 +72,7 @@
                                                          :description (jva-desc jva)
                                                          :slug (:id jva))))]
         (.close pdf-document)
-        (db/create-jva! jva-record))
+        (create-jva-or-abort jva-record))
       (mapv (comp process-jva-pdf #(into {} [[:file %]])) file))))
 
 (defn process-reannouncement
@@ -80,13 +87,13 @@
     (db/delete-jva! existing-jva)
     (wp/delete-media (str (:id existing-jva)))
     (.close pdf-document)
-    (->(assoc jva-record :file_link
-              (wp/create-media filename tempfile
-                               :title (:position jva-record)
-                               :alt_text (str "Job Vacancy Announcement for"
-                                              (:position jva-record))
-                               :description (jva-desc jva-record)
-                               :slug (:id jva-record)))
-       
-       (db/create-jva!))))
+    (-> (assoc jva-record :file_link
+               (wp/create-media filename tempfile
+                                :title (:position jva-record)
+                                :alt_text (str "Job Vacancy Announcement for"
+                                               (:position jva-record))
+                                :description (jva-desc jva-record)
+                                :slug (:id jva-record)))
+        
+        (create-jva-or-abort))))
 

@@ -1,5 +1,6 @@
 (ns webtools.components.error
-  (:require [clojure.string :as cstr ]
+  (:require [cemerick.url :as curl]
+            [clojure.string :as cstr ]
             [re-frame.core :as rf]))
 
 (defn reporter
@@ -8,4 +9,4 @@
   (if-let [error @(rf/subscribe [:error])]
     [:div.error-message
      [:p.error-message__text.slow-fade {:style {:color "red"}}
-      (str "Error: " (cstr/replace error "+" " "))]]))
+      (str "Error: " (curl/url-decode (cstr/replace error "+" " ")))]]))
