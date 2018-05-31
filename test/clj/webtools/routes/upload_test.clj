@@ -115,7 +115,6 @@
 
         (testing "should create wp media"
           (is (= 1 (-> wp/create-media calls count)))
-          (println (-> wp/create-media calls first :args))
           (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))
 
       (let [pdf (file "test/clj/webtools/test/jva-sample-until-filled.pdf")
@@ -167,7 +166,6 @@
 
         (testing "should create wp media"
           (is (= 1 (-> wp/create-media calls count)))
-          (println (-> wp/create-media calls first :args))
           (is (= java.util.UUID (-> wp/create-media calls first :args last type)))))
 
       (let [existing-jva (db/create-jva! {:id          (java.util.UUID/randomUUID)
