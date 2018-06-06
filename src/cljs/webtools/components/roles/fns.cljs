@@ -1,6 +1,7 @@
 (ns webtools.components.roles.fns
   (:require [clojure.walk :refer [keywordize-keys]]
             [re-frame.core :as rf]
+            [webtools.components.grid :as grid]
             [webtools.components.forms :as forms]
             [webtools.util.dates :as util-dates]
             [webtools.components.tables :as tables]
@@ -8,10 +9,10 @@
             [webtools.components.grid :as grid]))
 
 (defn fns-view []
-  [:div.row
+  [grid/row
    [grid/full-width-column
     [forms/fns-upload-form]]
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+   [grid/full-width-column
     [error/reporter]]
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+   [grid/full-width-column
     [tables/fns-recent-results]]])

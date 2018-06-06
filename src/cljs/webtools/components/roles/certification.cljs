@@ -1,5 +1,6 @@
 (ns webtools.components.roles.certification
   (:require [re-frame.core :as rf]
+            [webtools.components.grid :as grid]
             [webtools.components.error :as error]
             [webtools.components.forms.certification :as cforms]
             [webtools.components.forms.generic :as gforms]
@@ -7,14 +8,14 @@
             [webtools.cookies :refer [get-cookie]]))
 
 (defn certification-view []
-  [:div.row
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+  [grid/row
+   [grid/full-width-column
     [gforms/upload-form {:path     (.-hash js/location)
                          :action   "/webtools/upload/certification-csv"
                          :accept   "csv"
                          :label    "Upload CSV File"
                          :multiple false}]]
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+   [grid/full-width-column
     [error/reporter]]
    [:div {:style {:margin-top "15px" :text-align "center"}}
     (let [wt-success (get-cookie "wt-success")]

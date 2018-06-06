@@ -1,13 +1,14 @@
 (ns webtools.components.roles.procurement
-  (:require [webtools.components.forms.procurement :as forms]
+  (:require [webtools.components.grid :as grid]
+            [webtools.components.forms.procurement :as forms]
             [webtools.components.tables.procurement :as tables]
             [webtools.components.error :as error]))
 
 (defn pns-view []
-  [:div.row
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+  [grid/row
+   [grid/full-width-column
     [forms/procurement-upload]]
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+   [grid/full-width-column
     [error/reporter]]
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+   [grid/full-width-column
     [tables/rfp-ifb-list]]])
