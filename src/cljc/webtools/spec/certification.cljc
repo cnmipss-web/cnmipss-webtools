@@ -16,3 +16,9 @@
                                        ::last_name
                                        ::start_date
                                        ::expiry_date]))
+
+(spec/def ::cert1 ::record)
+(spec/def ::cert2 ::record)
+
+(spec/def ::collision (spec/keys :req-un [::cert1
+                                          ::cert2]))

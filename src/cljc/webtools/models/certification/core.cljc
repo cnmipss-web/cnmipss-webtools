@@ -25,6 +25,18 @@
                        (spec/gen :webtools.spec.certification/last-name)
                        (spec/gen :webtools.spec.certification/mi))))))
 
+(defrecord CertificationCollision
+    [cert1
+     cert2])
+
+(spec/def ::cert-collision
+  (spec/with-gen
+    :webtools.spec.certification/collision
+    (fn [] (sgen/fmap (partial apply ->CertificationCollision)
+                      (sgen/tuple
+                       (spec/gen ::certification)
+                       (spec/gen ::certification))))))
+
 (defprotocol handle-certs
   (changed? [new-cert orig-cert]
     "Compare two certification records and return true if they differ, false if they do not.")
@@ -45,6 +57,9 @@
 
   (change-in-db! [cert]
     "update a certification record in the db, applying any typecasting as needed"))
+
+(defprotocol handle-collision
+  (save-collision-to-db! [collision] "Record a collision in the DB"))
 
 (spec/fdef cert-changed?
            :args (spec/cat :new-cert ::certification

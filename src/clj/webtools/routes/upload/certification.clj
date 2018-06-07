@@ -34,13 +34,13 @@
   If one is a renewal of the other, create a renewal record.  
   If not, but the name is the same, overwrite the old one.
   If the new certifcation is not a renewal, and has a difference name, create an error to be returned to user."
-  [new-cert orig-cert errors]
+  [new-cert orig-cert collisions]
   (let [[new-only orig-only joint] (diff new-cert orig-cert)
         same-name? (not-any? nil? (map joint [:first_name :last_name])) 
         same-cert-type? (some? (:cert_type joint))
         same-dates? (not-any? nil? (map joint [:start_date :expiry_date])) ]
     (if-not (and same-name? same-cert-type?)
-      (swap! errors conj (ex/single-cert-collision new-cert orig-cert))
+      (swap! collisions conj (cert/->CertificationCollision orig-cert new-cert))
       (if-not same-dates?
         (if (cert/is-renewal? new-cert orig-cert)
           (cert/renew-cert! new-cert)
@@ -58,17 +58,21 @@
         {:keys [tempfile size filename]} file
         data (->> tempfile slurp csv/read-csv (drop 1) (sort-by #(get % 7)))
         existing-certs (db/get-all-certs)]
-    (loop [current (first data) rem (next data) errors (atom [])]
+    (loop [current (first data) rem (next data) collisions (atom [])]
       (let [[_ last-name first-name mi _ _ type cert-no start expiry _] current
             fresh-cert (parse-new-cert current)]
         (if-let [cert (some (match-cert? cert-no) (db/get-all-certs))] ;existing-certs vs db/get-all-certs
           (if (cert/changed? fresh-cert cert)
-            (handle-collision fresh-cert cert errors)
+            (handle-collision fresh-cert cert collisions)
             :ignore-identical-existing-cert)
           (db/create-cert! fresh-cert)))
       (if (pos? (count rem))
-        (recur (first rem) (next rem) errors)
-        (if (pos? (count @errors))
-          (let [five-errors (take 5 @errors)]
+        (recur (first rem) (next rem) collisions)
+        (when (pos? (count @collisions))
+          (db/clear-collisions!)
+          (dorun
+           (for [collision @collisions]
+             (cert/save-collision-to-db! collision)))
+          (let [five-errors (map ex/single-cert-collision @collisions)]
             (throw (ex/list-cert-collisions five-errors))))))))
 

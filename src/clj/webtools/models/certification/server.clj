@@ -4,7 +4,8 @@
             [clj-time.core :as t]
             [clojure.tools.logging :as log]
             [webtools.db :as db])
-  (:import [webtools.models.certification.core CertificationRecord]))
+  (:import [webtools.models.certification.core CertificationRecord]
+           [webtools.models.certification.core CertificationCollision]))
 
 (extend-type CertificationRecord
   cert/handle-certs
@@ -41,3 +42,22 @@
 
   (change-in-db! [cert]
     (db/update-cert! cert)))
+
+(defn- full-name [{:keys [first_name mi last_name]}]
+  (str first_name " " mi " " last_name))
+
+(extend-type CertificationCollision
+  cert/handle-collision
+  (save-collision-to-db! [collision]
+    (let [{:keys [cert1 cert2]} collision
+          record {:id (java.util.UUID/randomUUID)
+                  :cert_no (:cert_no cert1)
+                  :name1 (full-name cert1)
+                  :start_date1 (:start_date cert1)
+                  :expiry_date1 (:expiry_date cert1)
+                  :cert_type1 (:cert_type cert1) 
+                  :name2 (full-name cert2)
+                  :start_date2 (:start_date cert2)
+                  :expiry_date2 (:expiry_date cert2)
+                  :cert_type2 (:cert_type cert2) }]
+      (db/save-collision! record))))

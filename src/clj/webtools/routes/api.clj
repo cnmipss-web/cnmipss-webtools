@@ -247,6 +247,8 @@
                        (db/delete-fns-nap! record)
                        (io/delete-file (sub-str (:fns_file_link record)))
                        (io/delete-file (sub-str (:nap_file_link record)))
-                       (io/delete-file (sub-str (:matched_file_link record)))))))
+                       (io/delete-file (sub-str (:matched_file_link record))))))
+
+  (GET "/api/recent-collision-list" request (query-route db/get-collision-list)))
 
 

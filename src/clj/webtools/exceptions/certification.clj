@@ -1,10 +1,10 @@
 (ns webtools.exceptions.certification)
 
-(defn single-cert-collision [new-cert orig-cert]
+(defn single-cert-collision [{:keys [cert1 cert2]}]
   (ex-info
-   (str "Certificate Collision: " (:cert_no orig-cert))
-   {:orig-cert orig-cert
-    :new-cert new-cert}))
+   (str "Certificate Collision: " (:cert_no cert1))
+   {:orig-cert cert1
+    :new-cert cert2}))
 
 (defn list-cert-collisions [collisions]
   (ex-info "Certification Collisions"

@@ -22,7 +22,7 @@
                (:cert_no orig-cert)
                " for " (:first_name orig-cert) " " (:last_name orig-cert)
                " and " (:cert_no new-cert) " for " (:first_name new-cert) " " (:last_name new-cert)
-               ".  Please correct the error.")))
+               ".  Please correct the error and re-upload the file.")))
       errors))))
 
 ;; Implementations for :wordpress-upload
