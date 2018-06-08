@@ -83,8 +83,6 @@
             [lein-doo "0.1.7"]
             [me.arrdem/lein-git-version "2.0.8"]]
 
-  :git-version {:version-file "resources/version.edn"}
-
   :sassc
   [{:src "resources/scss/screen.scss"
     :output-to "resources/public/css/screen.css"
