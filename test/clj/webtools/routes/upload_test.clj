@@ -35,9 +35,9 @@
       (let [csv-file (file "test/clj/webtools/test/certificates-clean.csv")
             {:keys [status body headers] :as response}
             (auth-req :post "/upload/certification-csv"
-              (assoc :params {:file {:tempfile csv-file
-                                     :file-name "certificates-clean.csv"
-                                     :size (.length csv-file)}}))
+                      (assoc :params {:file {:tempfile csv-file
+                                             :file-name "certificates-clean.csv"
+                                             :size (.length csv-file)}}))
             redirect-url (-> (get headers "Location") curl/url)
             cookies (get headers "Set-Cookie")
             success-cookie (cookie->map (first cookies))
@@ -52,9 +52,9 @@
       (let [csv-file (file "test/clj/webtools/test/certificates-collisions.csv")
             {:keys [status body headers] :as response}
             (auth-req :post "/upload/certification-csv"
-              (assoc :params {:file {:tempfile csv-file
-                                     :file-name "certificates-collisions.csv"
-                                     :size (.length csv-file)}}))
+                      (assoc :params {:file {:tempfile csv-file
+                                             :file-name "certificates-collisions.csv"
+                                             :size (.length csv-file)}}))
             redirect-url (-> headers (get "Location") curl/url)
             cookies (get headers "Set-Cookie")
             success (cookie->map (cemerick.url/url-decode (first cookies)))
@@ -63,7 +63,7 @@
         (is (= 302 status))
         (is (=  "/app" (:anchor redirect-url)))
         (is (= "" body))
-        (is (= "A database collision has occurred with certification BI-003-2006 for Victor Jones and BI-003-2006 for Terra Allen.  Please correct the error."
+        (is (= "A database collision has occurred with certification BI-003-2006 for Victor Jones and BI-003-2006 for Terra Allen.  Please correct the error and re-upload the file."
                (get  error "wt-error")))
         (is (= "false"
                (get  success "wt-success")))))
@@ -72,9 +72,9 @@
       (let [csv-file (file "test/clj/webtools/test/certificates-renewal.csv")
             {:keys [status body headers error] :as response}
             (auth-req :post "/upload/certification-csv"
-              (assoc :params {:file {:tempfile csv-file
-                                     :file-name "certificates-renewal.csv"
-                                     :size (.length csv-file)}}))
+                      (assoc :params {:file {:tempfile csv-file
+                                             :file-name "certificates-renewal.csv"
+                                             :size (.length csv-file)}}))
             redirect-url (-> (get headers "Location") curl/url)
             cookies (get headers "Set-Cookie")
             success (cookie->map (cemerick.url/url-decode (first cookies)))

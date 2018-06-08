@@ -4,14 +4,15 @@
             [webtools.test.fixtures :as fixtures]
             [webtools.exceptions.certification :as cex]
             [webtools.exceptions.procurement :as pex]
-            [webtools.error-handler.ex-info :as info-error]))
+            [webtools.error-handler.ex-info :as info-error]
+            [webtools.models.certification.core :refer [->CertificationCollision]]))
 
 (use-fixtures :once fixtures/instrument)
 
 (deftest test-cert-collision
   (let [error (cex/list-cert-collisions
-               [(cex/single-cert-collision {} {})
-                (cex/single-cert-collision {} {})])
+               [(cex/single-cert-collision (->CertificationCollision {} {}))
+                (cex/single-cert-collision (->CertificationCollision {} {}))])
         code  (info-error/code error)
         msg   (info-error/msg error)]
     (is (= "cert-collision" code))
