@@ -166,6 +166,9 @@ table {
 .record-table__th--center, .record-table__td--center {
   text-align: center; }
 
+.record-table__th--border {
+  border-left: 1px solid #ddd; }
+
 /**
  * Accessible button colors to replace Bootstrap defaults
  */
@@ -293,12 +296,15 @@ form#procurement-uploads.col-xs-12 {
 
 #edit-cert form {
   width: 100%; }
+
 #edit-cert div.form-group {
   display: flex;
   flex-direction: row;
   justify-content: space-between; }
+
 #edit-cert label {
   margin-top: 10px; }
+
 #edit-cert input {
   margin-right: 30%; }
 
@@ -424,26 +430,31 @@ form#procurement-uploads.col-xs-12 {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
+
 @-o-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
+
 @-ms-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
+
 @-webkit-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
+
 @-moz-keyframes f_fadeG {
   0% {
     background-color: rgba(223, 195, 83, 0.99); }
   100% {
     background-color: white; } }
+
 div.no-role {
   margin-top: 25%;
   font-size: 21px; }
@@ -633,6 +644,7 @@ th.custom-col-20 {
 #existing-addenda caption, #pns-subscriber-table caption {
   margin-left: 15px;
   caption-side: top; }
+
 #existing-addenda, #existing-addenda td, #existing-addenda th, #existing-addenda tr, #pns-subscriber-table, #pns-subscriber-table td, #pns-subscriber-table th, #pns-subscriber-table tr {
   box-shadow: none;
   border: none; }
@@ -740,5 +752,3 @@ th.custom-col-20 {
 
 .invite-user-form__submit-btn {
   width: 150px; }
-
-/*# sourceMappingURL=screen.css.map */

@@ -58,3 +58,9 @@
   (if ok
     (rf/dispatch [:store-fns-nap body])
     (erro! "Error fetching fns-nap: " status body)))
+
+(defn cert-collision-list
+  [[ok {:keys [body status headers] :as response}]]
+  (if ok
+    (rf/dispatch [:error-list (clojure.walk/keywordize-keys body)])
+    (erro! "Error fetching cert-collision-list: " status body)))

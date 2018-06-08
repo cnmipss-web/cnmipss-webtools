@@ -167,3 +167,10 @@
                           :params record
                           :response-format (util/full-response-format ajax/json-response-format)
                           :handler ajax-handlers/fns-nap}))))
+
+(defn get-collision-list []
+  (ajax/ajax-request {:uri "/webtools/api/recent-collision-list"
+                      :method :get
+                      :format (ajax/json-request-format)
+                      :response-format (util/full-response-format ajax/json-response-format)
+                      :handler ajax-handlers/cert-collision-list}))

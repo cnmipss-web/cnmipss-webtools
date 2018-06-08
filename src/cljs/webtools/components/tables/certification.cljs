@@ -6,6 +6,37 @@
             [webtools.handlers.events :as events]
             [webtools.handlers.search :refer [search-by]]))
 
+(defn- cert-headers []
+  (let [th-props {:scope "col" :col-span "1"}]
+    [:thead
+     [:tr.record-table__row
+      [:th.text.text--center th-props "Cert Number"]
+      [:th.text.text--center th-props "Last Name"]
+      [:th.text.text--center th-props "First Name"]
+      [:th.text.text--center th-props "Cert Type"]
+      [:th.text.text--center th-props "Effective Date"]
+      [:th.text.text--center th-props "Expiration Date"]
+      [:th.text.text--center th-props "Links"]]]))
+
+(defn- collision-headers []
+  (let [th-props {:scope "col"}]
+    [:thead
+     [:tr.record-table__row
+      [:th.text.text--center th-props] 
+      [:th.text.text--center.record-table__th--border {:scope "col" :col-span "4"} "Original"]
+      [:th.text.text--center.record-table__th--border {:scope "col" :col-span "4"} "Uploaded"]]
+     [:tr.record-table__row
+      [:th.text.text--center th-props "Cert Number"]
+      [:th.text.text--center.record-table__th--border th-props "Name"]
+      [:th.text.text--center th-props "Effective Date"]
+      [:th.text.text--center th-props "Expiration Date"]
+      [:th.text.text--center th-props "Cert Type"]
+      [:th.text.text--center.record-table__th--border th-props "Name"]
+      [:th.text.text--center th-props "Effective Date"]
+      [:th.text.text--center th-props "Expiration Date"]
+      [:th.text.text--center th-props "Cert Type"]
+      ]]))
+
 (defn- cert-row [row]
   (let [{:keys [last_name
                 first_name
@@ -16,25 +47,25 @@
                 mi]}   row
         delete-cert-fn (events/delete-cert row)]
     [:tr.record-table__row
-     [:th.custom-col-3.text.text--center {:scope "row"}
+     [:th.text.text--center {:scope "row"}
       (second (re-find #"(.*?)(\-renewal\-\d+)?$" cert_no))]
 
-     [:td.custom-col-3.text.text--center
+     [:td.text.text--center
       last_name]
 
-     [:td.custom-col-3.text.text--center
+     [:td.text.text--center
       (str first_name " " mi)]
 
-     [:td.custom-col-2.text.text--center
+     [:td.text.text--center
       cert_type]
 
-     [:td.custom-col-3.text.text--center
+     [:td.text.text--center
       start_date]
 
-     [:td.custom-col-3.text.text--center
+     [:td.text.text--center
       expiry_date]
 
-     [:td.custom-col-3.text.text--center
+     [:td.text.text--center
       [btn/edit-button {:title         "Edit"
                         :data-toggle   "modal"
                         :data-target   "#cert-modal"
@@ -44,6 +75,35 @@
       [btn/delete-button {:title    "Delete"
                           :on-click delete-cert-fn}]]]))
 
+(defn- collision-row [{:keys [cert_no] :as collision}] 
+  [:tr.record-table__row
+   [:th.text.text--center {:scope "row"}
+    (second (re-find #"(.*?)(\-renewal\-\d+)?$" cert_no))]
+
+   [:td.text.text--center
+    (:name1 collision)]
+
+   [:td.text.text--center
+    (:start_date1 collision)]
+
+   [:td.text.text--center
+    (:expiry_date1 collision)]
+
+   [:td.text.text--center
+    (:cert_type1 collision)]
+
+   [:td.text.text--center
+    (:name2 collision)]
+
+   [:td.text.text--center
+    (:start_date2 collision)]
+
+   [:td.text.text--center
+    (:expiry_date2 collision)]
+
+   [:td.text.text--center
+    (:cert_type2 collision)]   ])
+
 (defn- flatten-errors [list next-error]
   (let [certs (mapv read-string (cstr/split next-error #"\n"))]
     (concat list certs)))
@@ -52,21 +112,16 @@
   [certs]
   (sort-by :cert_no certs))
 
-(defn error-table [error-list]
-  (let [th-props {:scope "col"}]
+(defn error-table []
+  (when-let [collision-list @(rf/subscribe [:error-list])]
     [:table.record-table
-     [:caption "Duplicate Certs: These records caused an error and were not saved to the database."]
-     [:thead
-      [:tr.record-table__row
-       [:th.custom-col-3.text.text--center th-props "Cert Number"]
-       [:th.custom-col-3.text.text--center th-props "Last Name"]
-       [:th.custom-col-3.text.text--center th-props "First Name"]
-       [:th.custom-col-2.text.text--center th-props "Cert Type"]
-       [:th.custom-col-3.text.text--center th-props "Effective Date"]
-       [:th.custom-col-3.text.text--center th-props "Expiration Date"]]]
+     [:caption
+      "Duplicate Certs: These records caused an error and were not saved to the database."
+      ]
+     [collision-headers]
      [:tbody
-      (for [cert (reduce flatten-errors [] error-list)]
-        ^{:key (random-uuid)} (vec (drop-last (cert-row cert))))]]))
+      (for [collision collision-list]
+        ^{:key (random-uuid)} (collision-row collision))]]))
 
 (defn existing-certifications []
   (let [table            (-> @(rf/subscribe [:cert-list])
@@ -74,7 +129,6 @@
                              clojure.walk/keywordize-keys
                              (search-by :cert_no :first_name :last_name)
                              sort-certs)
-        th-props         {:scope "col"}
         n-results        (count table)
         results-str      (str n-results (if (> n-results 1) " results." " result."))]
     [:div
@@ -83,17 +137,7 @@
      [:table.record-table
       [:caption.sr-only
        "Certified Personnel Table"]
-
-      [:thead
-       [:tr.record-table__row
-        [:th.custom-col-3.text.text--center th-props "Cert Number"]
-        [:th.custom-col-3.text.text--center th-props "Last Name"]
-        [:th.custom-col-3.text.text--center th-props "First Name"]
-        [:th.custom-col-2.text.text--center th-props "Cert Type"]
-        [:th.custom-col-3.text.text--center th-props "Effective Date"]
-        [:th.custom-col-3.text.text--center th-props "Expiration Date"]
-        [:th.custom-col-3.text.text--center th-props "Tools"]]]
-
+      [cert-headers]
       [:tbody
        (for [cert table]
          ^{:key (random-uuid)} [cert-row cert])]]]))

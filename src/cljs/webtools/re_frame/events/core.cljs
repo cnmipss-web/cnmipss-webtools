@@ -107,12 +107,10 @@
          db))
      (assoc db :procurement-modal (assoc procurement-modal key val)))))
 
-(reg-event-db :error-list
-              (fn [db [_ errors]]
-                (println (type errors))
-                (assoc db :error-list (-> errors curl/url-decode
-                                          (cstr/replace "+" " ")
-                                          (cstr/split #"\n\n")))))
+(reg-event-db
+ :error-list
+ (fn [db [_ errors]]
+   (assoc db :error-list errors)))
 
 (reg-event-db :add-addendum
  (fn [db [_ setting]]

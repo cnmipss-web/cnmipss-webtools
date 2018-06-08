@@ -19,7 +19,8 @@
    [cemerick.url :refer [url-decode]] 
    [markdown.core :refer [md->html]]
    [reagent.core :as r]
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [klang.core :as klang]))
 
 (defn main-view [& children]
   [:main#main-container {:on-click #(if @(rf/subscribe [:show-roles?])

@@ -6,6 +6,8 @@
 (def role-list ["Certification" "HRO" "Mojo Help Desk" "Procurement" "FNS"
                 "Manage Users" "Manage DB" ])
 
+(def roles-with-long-errors #{"Certification"})
+
 (def wp-host (:wp-host env))
 
 (def wp-token-route "/wp-json/jwt-auth/v1/token")

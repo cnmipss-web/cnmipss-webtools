@@ -5,7 +5,8 @@
             [webtools.components.forms.certification :as cforms]
             [webtools.components.forms.generic :as gforms]
             [webtools.components.tables.certification :as tables]
-            [webtools.cookies :refer [get-cookie]]))
+            [webtools.cookies :refer [get-cookie]]
+            [webtools.handlers.events :as events]))
 
 (defn certification-view []
   [grid/row
@@ -17,22 +18,10 @@
                          :multiple false}]]
    [grid/full-width-column
     [error/reporter]]
-   [:div {:style {:margin-top "15px" :text-align "center"}}
-    (let [wt-success (get-cookie "wt-success")]
-      (when (string? wt-success)
-        (let [matches (re-find #"(true|false)_?(.*)?" wt-success)
-              success (second matches)
-              errors  (last matches)]
-          (cond
-            (= success "true")
-            [:p "Your upload was successful"]
-            (= success "false")
-            [:p.bad-login-text "Your upload was unsuccessful. Please try again or contact the Webmaster"])
-          (if errors
-            (rf/dispatch [:error-list errors])))))]
-   (if-let [errors @(rf/subscribe [:error-list])]
-     [:div.col-xs-12.col-sm-10.offset-sm-1
-      [tables/error-table errors]])
-   [:div.col-xs-12.col-sm-10.offset-sm-1
+   [grid/full-width-column
+    (when-let [error @(rf/subscribe [:error])]
+      (events/get-collision-list)
+      [tables/error-table])]
+   [grid/full-width-column
     [cforms/search-certification-records]
     [tables/existing-certifications]]])
