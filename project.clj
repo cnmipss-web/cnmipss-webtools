@@ -6,7 +6,7 @@
   :dependencies [[cheshire "5.8.0"]
                  [cider/cider-nrepl "0.16.0"]
                  [clj-fuzzy "0.4.1"]
-                 [clj-http "3.7.0"]
+                 [clj-http "3.9.0"]
                  [clj-time "0.14.2"]
                  [cljs-ajax "0.7.3"]
                  [cljsjs/jquery "3.2.1-0"]
@@ -64,7 +64,7 @@
 
   :min-lein-version "2.0.0"
 
-  :jvm-opts ["-server" "-Dconf=.lein-env" "-Duser.timezone=GMT"]
+  :jvm-opts ["-server" "-Dconf=.lein-env" "-Duser.timezone=GMT" "--add-modules" "java.xml.bind"]
   :source-paths ["src/clj" "src/cljc"]
   :test-paths ["test/clj"]
   :resource-paths ["resources" "target/cljsbuild"]
@@ -132,7 +132,7 @@
                                  [circleci/bond "0.3.1"]
                                  [com.cemerick/piggieback "0.2.2"]
                                  [doo "0.1.8"]
-                                 [figwheel-sidecar "0.5.15"]
+                                 [figwheel-sidecar "0.5.16"]
                                  [pjstadig/humane-test-output "0.8.3"]
                                  [prone "1.5.0"]
                                  [ring/ring-devel "1.6.3"]
@@ -140,7 +140,7 @@
 
                   :plugins      [[com.jakemccrary/lein-test-refresh "0.19.0"]
                                  [lein-doo "0.1.8"]
-                                 [lein-figwheel "0.5.15"]
+                                 [lein-figwheel "0.5.16"]
                                  [org.clojure/clojurescript "1.10.145"]]
                   
                   :cljsbuild
