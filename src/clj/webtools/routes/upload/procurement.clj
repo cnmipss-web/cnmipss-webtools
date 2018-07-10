@@ -46,8 +46,8 @@
       (into {} rec)
       (assoc rec :type (-> rec :type cstr/lower-case keyword))
       (assoc rec :description desc)
-      (assoc rec :open_date (-> rec :open_date util-dates/parse-date))
-      (assoc rec :close_date (-> rec :close_date util-dates/parse-date-at-time))
+      (assoc rec :open_date (-> rec :open_date cstr/trim util-dates/parse-date))
+      (assoc rec :close_date (-> rec :close_date cstr/trim util-dates/parse-date-at-time))
       (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
       (assoc rec :file_link
