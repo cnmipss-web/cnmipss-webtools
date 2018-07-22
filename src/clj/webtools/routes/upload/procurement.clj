@@ -16,13 +16,14 @@
 
 (def ^:private procurement-regexes
   {:type #"(RFP|IFB)"
-   :number #"(?i)PSS\s*(RFP|IFB)\s*\#\s*\:?\s*(\d+\-\d+)"
-   :open_date #"(?i)^(\.*OPEN\:\s*)(\w+\s\d{2},\s\d{4})"
-   :close_date #"(?i)^(\.*CLOSE\:\s*)(\w+\s\d{2},\s\d{4}\s+at\s+\d{1,2}\:\d{2}\s+am|pm)"
+   :number #"(?i)PSS\s*(RFP|IFB)\s*\#?\s*\:?\s*(\d+\-\d+)"
+   :open_date #"(?i)^(\s*OPEN\:\s*)(\w+\s\d{2},\s\d{4})"
+   :close_date #"(?i)^(\s*CLOSE\:\s*)(\w+\s\d{2},\s\d{4}\s+at\s+\d{1,2}\:\d{2}\s+am|pm)"
    :title #"(?i)Title\:\s*([\p{L}\p{Z}\p{M}\p{P}\p{N}]+)"})
 
 (defn- procurement-reducer [rfp next-line]
-  (let [this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re next-line)}) procurement-regexes))]
+  (let [trimmed-line (cstr/trim next-line)
+        this-line (reduce merge (map (fn [[k re]] {k (util/line-parser re trimmed-line)}) procurement-regexes))]
     (merge-with util/select-non-nil this-line rfp)))
 
 (defn- create-pns-from-file 
@@ -44,10 +45,10 @@
       (filter (comp some? val) rec)
       (map (fn [[k v]] [k (cstr/replace v #"\s+" " ")]) rec)
       (into {} rec)
-      (assoc rec :type (-> rec :type cstr/lower-case keyword))
       (assoc rec :description desc)
-      (assoc rec :open_date (-> rec :open_date cstr/trim util-dates/parse-date))
-      (assoc rec :close_date (-> rec :close_date cstr/trim util-dates/parse-date-at-time))
+      (update rec :type (fn [val] (keyword (cstr/lower-case val))))
+      (update rec :open_date util-dates/parse-date)
+      (update rec :close_date util-dates/parse-date-at-time)
       (util/make-status rec)
       (assoc rec :id (java.util.UUID/randomUUID))
       (assoc rec :file_link
